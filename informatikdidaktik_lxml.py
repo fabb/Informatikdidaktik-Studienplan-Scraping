@@ -20,6 +20,7 @@ import os.path
 # when finally Tiss is updated to allow searching for old semesters' LVAs of a certain study code, incorporate the according scraping
 # store in xml when an lva was added/updated to be able to only show the newest ones in the browser
 # pretty printing working strange when adding to existing xml?
+# Interdisziplinäres Praktikum: Interaktionsdesign is wrongly assigned in Tiss (not to all according modules), fix this
 
 #TODO CSS
 # nicer visual design
@@ -631,6 +632,8 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			#print("2i " + lva_modul + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
 			lva_modul = f.text
+			if "Infomatik" in lva_modul:
+				lva_modul = lva_modul.replace("Infomatik","Informatik")
 			getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes)
 			#print("2: " + lva_modul + "<")
 		elif "nodeTable-level-3" in f.attrib.get("class") and "item" in f.attrib.get("class"):
