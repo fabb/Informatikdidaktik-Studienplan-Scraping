@@ -1,0 +1,229 @@
+/* informatikdidaktik.css */
+/*
+Fabian Ehrentraud, 2011-02-15
+e0725639@mail.student.tuwien.ac.at
+*/
+
+body {
+	font-family: arial, helvetica, sans-serif;
+	font-size: 80%;
+	color: #4C4C4C;
+	background-color: #FFB;
+	margin: 1em;
+	padding: 0;
+}
+
+p {
+	line-height: 1.5em;
+	padding: 0.1em;
+	border: none;
+	margin: 0.2em;
+}
+
+h1 {
+	color: #ffc;
+	background-color: #ff6933;
+	font-size: 2em;
+	margin: 0;
+	margin-bottom: 0.5em;
+	padding: 0.25em;
+	font-style: italic;
+	text-align: center;
+	letter-spacing: 0.35em;
+	border-bottom-style: solid;
+	border-bottom-width: 0.5em;
+	border-bottom-color: #B05030;
+}
+
+h2 {
+	color: white;
+	background-color: #3B3;
+	font-size: 1.5em;
+	margin: 0;
+	margin-top: 0.7em;
+	padding: 0.1em;
+	padding-left: 1em;
+}
+
+h3 {
+	color: #EEE;
+	font-size: 1.25em;
+	background-color: #5D5;
+	margin: 0;
+	margin-top: 0.7em;
+	padding: 0.1em;
+	padding-left: 1.5em;
+}
+
+h4 {
+	color: #990;
+	font-size: 1.1em;
+	margin: 0.1em;
+	margin-top: 0.2em;
+	padding: 0.1em;
+	padding-left: 0.3em;
+	padding-bottom: 0.3em;
+}
+
+h4:before {
+	content: "* "
+}
+
+a {
+	text-decoration: none;
+	color: #70C;
+}
+
+strong {
+	font-style: italic;
+	text-transform: uppercase;
+}
+
+ul {
+	padding: 0;
+	margin: 0;
+	margin-top: 1em;
+}
+
+li {
+/*	color: #900;*/
+	font-style: italic;
+	/*padding-left: 1em;*/
+	margin-left: 2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+#meta {
+	background-color: #DDD;
+	padding: 1em
+}
+
+#meta p {
+	padding: 0em 0em;
+	margin: 0.5em 0em;
+}
+
+#meta .list-header {
+	display: inline; /*block*/
+	font-style: none;
+	list-style: none;
+	text-decoration: none;
+/*	width: 100%;*/
+	margin: 0.2em;
+/*	margin-top: 10em; will not work with inline*/
+	padding: 0.2em;
+	padding-left: 4px;
+	margin-bottom: 0.3em;
+/*	color: #ffffff;*/
+	font-weight: bold;
+/*	background-color: #DCA;*/
+/*	border: 1px #666666 outset;*/
+/*	font-size: 11px;*/
+}
+
+.info {
+	color: #45F;
+	font-weight: bold;
+}
+
+.info em {
+	font-weight: bolder;
+	font-size: 125%;
+}
+
+.version {
+	color: grey;
+	font-style: italic;
+}
+
+.author {
+	font-style: italic;
+}
+
+#meta .stpl-pdf {
+	margin-top: 1.2em;
+}
+
+
+.fach {
+	padding: 0.2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.1em;
+	margin-left: 0.5em;
+	background-color: #EEE;
+}
+
+.lvas {
+	margin: 0.2em;
+	padding: 0.2em;
+	margin-left: 1.5em;
+	background-color: #DDD;
+}
+
+.lvas table {
+/*	font-style: italic;*/
+	font-size: 120%;
+	width: 100%;
+	line-height: 1.1em;
+	border-collapse: collapse;
+}
+
+.lvas table tr {
+	border-bottom: 8px #AAA solid;
+}
+
+.lvas table td {
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+}
+
+.lvas table td a {
+	color: #00d;
+}
+
+.nolvas {
+	color: darkred;
+}
+
+.currentlva {
+	background-color: #c0e607
+}
+
+.probableLva {
+/*	text-decoration: underline;*/
+/*	border-bottom: 2px dotted black;*/
+	border-bottom-width: 2px;
+	border-bottom-style: dotted;
+/*	background: #888;*/
+}
+
+/*
+.lvas .lvauniversity {
+	width: 3%;
+}
+
+.lvas .lvasemester {
+	width: 15%;
+}
+
+.lvas .lvakey {
+	width: 8%;
+}
+
+.lvas .lvatype {
+	width: 3%;
+}
+
+.lvas .lvatitle {
+	width: 30%;
+}
+
+.lvas .lvacredits {
+	width: 15%;
+}
+
+.lvas .lvainfo {
+	width: 10%;
+}
+*/

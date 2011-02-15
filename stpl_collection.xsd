@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Fabian Ehrentraud, 2011-02-15
+e0725639@mail.student.tuwien.ac.at
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="stpl_collection">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="source" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="url" type="xs:anyURI"/>
+							<xs:element name="query_date" type="xs:dateTime"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="stpl" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="title" type="xs:string"/>
+							<xs:element name="version" type="xs:string" minOccurs="0"/>
+							<xs:element name="url" type="xs:anyURI" minOccurs="0"/>
+							<xs:element name="modulgruppe" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="title" type="xs:string"/>
+										<xs:element name="modul" minOccurs="0" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="title" type="xs:string"/>
+													<xs:element name="fach" minOccurs="0" maxOccurs="unbounded">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="title">
+																	<xs:simpleType>
+																		<xs:restriction base="xs:string">
+																			<xs:minLength value="1"/>
+																		</xs:restriction>
+																	</xs:simpleType>
+																</xs:element>
+																<xs:element name="type">
+																	<xs:simpleType>
+																		<xs:restriction base="xs:string">
+																			<xs:minLength value="2"/>
+																			<xs:maxLength value="2"/>
+																		</xs:restriction>
+																	</xs:simpleType>
+																</xs:element>
+																<xs:element name="sws">
+																	<xs:simpleType>
+																		<xs:restriction base="xs:string">
+																			<xs:pattern value="(\d([.]\d)?)?"/>
+																		</xs:restriction>
+																	</xs:simpleType>
+																</xs:element>
+																<xs:element name="ects">
+																	<xs:simpleType>
+																		<xs:restriction base="xs:string">
+																			<xs:pattern value="(\d([.]\d)?)?"/>
+																		</xs:restriction>
+																	</xs:simpleType>
+																</xs:element>
+																<xs:element name="lva" minOccurs="0" maxOccurs="unbounded">
+																	<xs:complexType>
+																		<xs:all>
+																			<xs:element name="university">
+																				<xs:simpleType>
+																					<xs:restriction base="xs:string">
+																						<xs:minLength value="1"/>
+																					</xs:restriction>
+																				</xs:simpleType>
+																			</xs:element>
+																			<xs:element name="semester">
+																				<xs:simpleType>
+																					<xs:restriction base="xs:string">
+																						<xs:pattern value="\d\d\d\d[W,S]"/>
+																					</xs:restriction>
+																				</xs:simpleType>
+																			</xs:element>
+																			<xs:element name="title">
+																				<xs:simpleType>
+																					<xs:restriction base="xs:string">
+																						<xs:minLength value="1"/>
+																					</xs:restriction>
+																				</xs:simpleType>
+																			</xs:element>
+																			<xs:element name="key">
+																				<xs:simpleType>
+																					<xs:restriction base="xs:string">
+																						<xs:pattern value="\d?\d?\d[.]?\d\d\d|"/>
+																					</xs:restriction>
+																				</xs:simpleType>
+																			</xs:element>
+																			<xs:element name="type">
+																				<xs:simpleType>
+																					<xs:restriction base="xs:string">
+																						<xs:minLength value="2"/>
+																						<xs:maxLength value="2"/>
+																					</xs:restriction>
+																				</xs:simpleType>
+																			</xs:element>
+																			<xs:element name="sws">
+																				<xs:simpleType>
+																					<xs:restriction base="xs:double">
+																						<xs:pattern value="\d([.]\d)?"/>
+																					</xs:restriction>
+																				</xs:simpleType>
+																			</xs:element>
+																			<xs:element name="ects">
+																				<xs:simpleType>
+																					<xs:restriction base="xs:double">
+																						<xs:pattern value="\d([.]\d)?"/>
+																					</xs:restriction>
+																				</xs:simpleType>
+																			</xs:element>
+																			<xs:element name="info" type="xs:string"/>
+																			<xs:element name="url" type="xs:anyURI"/>
+																			<xs:element name="professor" type="xs:string"/>
+																		</xs:all>
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

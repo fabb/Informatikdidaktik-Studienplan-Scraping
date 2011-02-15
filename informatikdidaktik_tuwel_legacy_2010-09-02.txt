@@ -1,0 +1,84 @@
+015.087 - VU -  - E-Tutoring, Moderation von E-Learning - 2009W - 2.0 - HERBST
+015.087 - VU -  - E-Tutoring, Moderation von E-Learning - 2010W - 2.0 - HERBST
+015.118 - VU -  - Erwachsenenbildung und Lebenslanges Lernen - 2010S - 2.0 - REICHL
+104.189 - SE -  - Theorie und Praxis des Lehrens und Lernens - 2009W - 2.0 - ADLER
+118.778 - VO -  - Analyse von Algorithmen - 2009W - 3.0 - WIESENBAUER
+118.778 - VO -  - Analyse von Algorithmen - 2010W - 3.0 - PANHOLZER
+183.188 - VU -  - Spezielle Kapitel der Schulinformatik - 2009W - 2.0 - GANSTERER
+183.188 - VU -  - Spezielle Kapitel der Schulinformatik - 2010W - 2.0 - GANSTERER
+183.197 - PR -  - Praktikum zu Fachdidaktik - 2009W - 2.0 - GANSTERER
+183.197 - PR -  - Praktikum zu Fachdidaktik - 2010W - 2.0 - GANSTERER
+183.222 - VU -  - Advanced Internet Security - 2009W - 2.0 - KOLBITSCH
+183.222 - VU -  - Advanced Internet Security - 2010W - 2.0 - PLATZER
+183.237 - VU -  - Advanced Internet Security - 2010S - 2.0 - BREM
+183.243 - LU -  - Advanced Software Engineering - 2009W - 4.0 - BERNHART
+183.243 - LU -  - Advanced Software Engineering - 2010S - 4.0 - BERNHART
+183.243 - LU -  - Advanced Software Engineering - 2010W - 4.0 - BERNHART
+183.267 - PR -  - Interdisziplinäres Praktikum: Interaktionsdesign - 2010S - 1.0 - GRECHENIG
+184.131 - VO -  - Mobile and Pervasive Computing - 2010S - 2.0 - SIEGL
+184.153 - VL -  - Entwurfsmethoden für verteilte Systeme - 2010S - 2.0 - ZDUN
+184.260 - VL -  - Distributed Systems Technologies - 2010S - 4.0 - FROIHOFER
+184.267 - VL -  - Advanced Distributed Systems - 2010S - 4.0 - GÖSCHKA
+185.208 - VL -  - Programmiersprachen - 2010S - 2.0 - PUNTIGAM
+185.208 - VL -  - Programmiersprachen - 2011S - 2.0 - PUNTIGAM
+185.209 - VL -  - Fortgeschrittene logikorientierte Programmierung - 2009W - 2.0 - NEUMERKEL
+185.209 - VL -  - Fortgeschrittene logikorientierte Programmierung - 2010S - 2.0 - NEUMERKEL
+185.209 - VL -  - Fortgeschrittene logikorientierte Programmierung - 2010W - 2.0 - NEUMERKEL
+185.209 - VL -  - Fortgeschrittene logikorientierte Programmierung - 2011S - 2.0 - NEUMERKEL
+185.210 - VL -  - Fortgeschrittene funktionale Programmierung - 2010S - 2.0 - KNOOP
+185.211 - VL -  - Fortgeschrittene objektorientierte Programmierung - 2010S - 2.0 - PUNTIGAM
+185.211 - VL -  - Fortgeschrittene objektorientierte Programmierung - 2011S - 2.0 - PUNTIGAM
+186.046 - SE -  - Seminar aus Visualisierung - 2009W - 2.0 - GRÖLLER
+186.046 - SE -  - Seminar aus Visualisierung - 2010W - 2.0 - GRÖLLER
+186.101 - VO -  - Rendering - 2010S - 2.0 - WEIDLICH
+186.117 - SE -  - Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung - 2009W - 2.0 - PURGATHOFER
+186.117 - SE -  - Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung - 2010S - 2.0 - PURGATHOFER
+186.117 - SE -  - Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung - 2010W - 2.0 - PURGATHOFER
+186.122 - VU -  - Algorithmische Geometrie - 2009W - 2.0 - LJUBIC
+186.122 - VU -  - Algorithmische Geometrie - 2010W - 2.0 - LJUBIC
+186.141 - VO -  - Informationsvisualisierung - 2010S - 2.0 - GRÖLLER
+186.144 - VU -  - Effiziente Algorithmen - 2009W - 2.0 - RAIDL
+186.144 - VU -  - Effiziente Algorithmen - 2010W - 2.0 - RAIDL
+186.145 - VU -  - Algorithmen auf Graphen - 2009W - 2.0 - RAIDL
+186.145 - VU -  - Algorithmen auf Graphen - 2010W - 2.0 - RAIDL
+186.175 - SE -  - Seminar aus Computergraphik - 2009W - 2.0 - PURGATHOFER
+186.175 - SE -  - Seminar aus Computergraphik - 2010S - 2.0 - PURGATHOFER
+186.175 - SE -  - Seminar aus Computergraphik - 2010W - 2.0 - PURGATHOFER
+186.197 - VO -  - Computergraphik 2 - 2010S - 2.0 - GRÖLLER
+187.111 - VO -  - Grundlagen der Kommunikations- und Medientheorie - 2010S - 2.0 - STEINHARDT
+187.131 - VO -  - Vernetztes Lernen - 2009W - 2.0 - POHL
+187.131 - VO -  - Vernetztes Lernen - 2010W - 2.0 - POHL
+187.146 - VO -  - Multimedia Produktion 2: Interaktionsdesign - 2010S - 2.0 - PURGATHOFER
+187.147 - UE -  - Multimedia Produktion 2: Interaktionsdesign - 2010S - 1.0 - PURGATHOFER
+187.195 - VO -  - Informationsvisualisierung - 2010S - 2.0 - POHL
+187.236 - VU -  - Kommunikation und Moderation - 2010S - 2.0 - POHL
+187.266 - VU -  - Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1 - 2009W - 1.0 - WAGNER
+187.266 - VU -  - Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1 - 2010W - 1.0 - WAGNER
+187.276 - LU -  - Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 2 - 2010S - 2.0 - TELLIOGLU
+187.291 - PR -  - Interdisziplinäres Praktikum: Interaktionsdesign - 2009W - 1.0 - TELLIOGLU
+187.291 - PR -  - Interdisziplinäres Praktikum: Interaktionsdesign - 2010S - 1.0 - TELLIOGLU
+187.291 - PR -  - Interdisziplinäres Praktikum: Interaktionsdesign - 2010W - 1.0 - TELLIOGLU
+187.291 - PR -  - Interdisziplinäres Praktikum: Interaktionsdesign - 2011S - 1.0 - TELLIOGLU
+187.304 - VU -  - Computerunterstütztes Lernen - 2010S - 2.0 - POHL
+187.309 - VO -  - Multimedia Produktion 2: Interaktionsdesign - 2010S - 2.0 - EHRENSTRASSER
+187.310 - UE -  - Multimedia Produktion 2: Interaktionsdesign - 2010S - 1.0 - EHRENSTRASSER
+187.326 - VU -  - Kommunikation und Moderation - 2009W - 2.0 - POHL
+188.305 - VO -  - Informationsvisualisierung - 2009W - 2.0 - MIKSCH
+188.405 - LU -  - Advanced Software Engineering - 2009W - 4.0 - BIFFL
+188.405 - LU -  - Advanced Software Engineering - 2010S - 4.0 - BIFFL
+188.427 - VU -  - E-Commerce - 2009W - 2.0 - WERTHNER
+188.447 - SE -  - Seminar aus Knowledge Management - 2009W - 2.0 - MAKKONEN
+188.449 - VU -  - Advanced Internet Security - 2010S - 2.0 - WEIPPL
+188.450 - VU -  - Online Communities und E-Commerce - 2009W - 2.0 - MERKL
+188.460 - VO -  - Multimedia Interfaces - 2010S - 2.0 - LEDERMANN
+188.461 - LU -  - Multimedia Interfaces - 2010S - 1.0 - MEHLING
+188.483 - VO -  - Knowledge Management - 2009W - 2.0 - DORN
+188.483 - VO -  - Knowledge Management - 2010W - 2.0 - DORN
+188.486 - UE -  - Knowledge Management - 2009W - 2.0 - DORN
+188.504 - VU -  - Einführung in die Fachdidaktik Informatik - 2009W - 2.0 - FUTSCHEK
+188.504 - VU -  - Einführung in die Fachdidaktik Informatik - 2010W - 2.0 - FUTSCHEK
+188.511 - VU -  - Kernthemen der Fachdidaktik Informatik - 2010S - 2.0 - SCHAUER
+366.011 - UE -  - Kommunikation und Präsentation - 2009W - 2.0 - SCHAWARZ
+366.011 - UE -  - Kommunikation und Präsentation - 2010S - 2.0 - SCHAWARZ
+366.011 - UE -  - Kommunikation und Präsentation - 2010W - 2.0 - SCHAWARZ
+366.011 - UE -  - Kommunikation und Präsentation - 2011S - 2.0 - SCHAWARZ
