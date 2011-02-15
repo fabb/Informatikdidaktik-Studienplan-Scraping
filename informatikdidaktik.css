@@ -227,3 +227,37 @@ li {
 	width: 10%;
 }
 */
+
+@media print {
+	body {
+		font-size: 6.3pt;
+		/*font-family: times new roman, times, serif;*/
+	}
+	h4 {
+		color: #000;
+	}
+	a {
+		text-decoration: none;
+		color: #000;
+	}
+	.lvas table td a {
+		color: #000;
+	}
+	.lvas table tr {
+		border-bottom: 2px #AAA solid;
+	}
+	.currentlva {
+		font-weight: bolder;
+		/*background-color: #c0e607 cannot override printing settings in browser which prohibit printing backgrounds by default*/
+	}
+	.probableLva {
+		font-weight: bolder;
+	}
+
+	/*
+		page-break-after:always;
+		page-break-before:always;
+		page-break-after:avoid;
+		page-break-before:avoid;
+	*/
+}
