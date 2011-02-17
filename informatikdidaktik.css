@@ -268,6 +268,9 @@ li {
 		font-size: 6.3pt;
 		/*font-family: times new roman, times, serif;*/
 	}
+	.info {
+		color: black;
+	}
 	h4 {
 		color: #000;
 		/*page-break-before: avoid;*/
@@ -295,12 +298,14 @@ li {
 	.modulgruppe-body {
 		display: block;
 		border-left: none;
+		border-top: none;
 		padding-left: 0em;
 	}
 
 	.modul-body {
 		display: block;
 		border-left: none;
+		border-top: none;
 		padding-left: 0em;
 	}
 	

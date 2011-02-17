@@ -11,7 +11,6 @@ TODO
 	interactive javascript selector for semester to highlight
 	save collapse state to cookie
 	checkboxes for done lvas, store to cookie / loadable file
-	reduce buttons (show/hide = 1 button with changing text => global var neded for collapse state)
 	remove div hiding state when printing (css is overridden)
 -->
 	
@@ -141,35 +140,25 @@ TODO
 					<p class="buttons">
 						<form action="">
 						  <div>
-							<button name="" type="button" value="" onclick="hideAllDiv('modulgruppe');">
+							<button name="" type="button" value="" onclick="hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
 							  <p>
 								<!--<img src="selfhtml.gif" width="106" height="109" alt="SELFHTML Logo"><br>-->
-								<b>Alle Modulgruppen<br/>einklappen</b>
+								<b>Zeige Modulgruppen</b>
 							  </p>
 							</button>
-							<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');">
+							<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');hideAllDiv('modul');showAllDiv('fach');">
 							  <p>
-								<b>Alle Modulgruppen<br/>ausklappen</b>
+								<b>Zeige Module</b>
 							  </p>
 							</button>
-							<button name="" type="button" value="" onclick="hideAllDiv('modul');">
+							<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('fach');">
 							  <p>
-								<b>Alle Module<br/>einklappen</b>
+								<b>Zeige Fächer</b>
 							  </p>
 							</button>
-							<button name="" type="button" value="" onclick="showAllDiv('modul');">
+							<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
 							  <p>
-								<b>Alle Module<br/>ausklappen</b>
-							  </p>
-							</button>
-							<button name="" type="button" value="" onclick="hideAllDiv('fach');">
-							  <p>
-								<b>Alle Fächer<br/>einklappen</b>
-							  </p>
-							</button>
-							<button name="" type="button" value="" onclick="showAllDiv('fach');">
-							  <p>
-								<b>Alle Fächer<br/>ausklappen</b>
+								<b>Zeige alles</b>
 							  </p>
 							</button>
 						  </div>
