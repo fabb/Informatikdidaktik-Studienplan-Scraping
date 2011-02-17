@@ -9,9 +9,9 @@ e0725639@mail.student.tuwien.ac.at
 <!--
 TODO
 	interactive javascript selector for semester to highlight
+	interactive javascript selector for date of added lvas to display
 	save collapse state to cookie
 	checkboxes for done lvas, store to cookie / loadable file
-	remove div hiding state when printing (css is overridden)
 -->
 	
 	<xsl:output method="html" media-type="text/html" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="DTD/xhtml1-strict.dtd" cdata-section-elements="script style" indent="yes" encoding="UTF-8"/>

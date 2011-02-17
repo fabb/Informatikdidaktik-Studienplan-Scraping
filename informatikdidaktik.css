@@ -7,9 +7,7 @@ e0725639@mail.student.tuwien.ac.at
 /*
 TODO
 	nicer visual design
-	maybe simple black&white for printing
 	avoid page-break within fach
-	make sws/ects right-aligned
 */
 
 body {
@@ -296,21 +294,21 @@ li {
 	}
 	
 	.modulgruppe-body {
-		display: block;
+		display: block !important;
 		border-left: none;
 		border-top: none;
 		padding-left: 0em;
 	}
 
 	.modul-body {
-		display: block;
+		display: block !important;
 		border-left: none;
 		border-top: none;
 		padding-left: 0em;
 	}
 	
 	.lvas {
-		display: block;
+		display: block !important;
 		page-break-before: avoid;
 		page-break-inside: avoid;
 	}
