@@ -164,17 +164,23 @@ li {
 	font-size: 80%;
 }
 
-div .modulgruppe-body {
+.modulgruppe-body {
 	display: block;
 	/*display: none;*/
+	border-left: 0.8em solid #3B3;
+	border-top: 1px solid #3B3;
+	padding-left: 0.5em;
 }
 
-div .modul-body {
+.modul-body {
 	display: block;
 	/*display: none;*/
+	border-left: 0.6em solid #5D5;
+	border-top: 1px solid #5D5;
+	padding-left: 0.5em;
 }
 
-div .lvas { /*fach-body*/
+.lvas { /*fach-body*/
 	display: block;
 	/*display: none;*/
 }
@@ -286,15 +292,19 @@ div .lvas { /*fach-body*/
 		font-weight: bolder;
 	}
 	
-	div .modulgruppe-body {
+	.modulgruppe-body {
 		display: block;
+		border-left: none;
+		padding-left: 0em;
 	}
 
-	div .modul-body {
+	.modul-body {
 		display: block;
+		border-left: none;
+		padding-left: 0em;
 	}
 	
-	div .lvas {
+	.lvas {
 		display: block;
 		page-break-before: avoid;
 		page-break-inside: avoid;
