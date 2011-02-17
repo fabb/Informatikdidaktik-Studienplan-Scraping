@@ -21,19 +21,7 @@ import os.path
 # store in xml when an lva was added/updated to be able to only show the newest ones in the browser
 # pretty printing working strange when adding to existing xml?
 # Interdisziplinäres Praktikum: Interaktionsdesign is wrongly assigned in Tiss (not to all according modules), fix this
-
-#TODO CSS
-# nicer visual design
-# maybe simple black&white for printing
-
-#TODO XSLT
-# interactive javascript selector for semester to highlight
-# make all headers tree-collapsable
-# save collapse state to cookie
-# checkboxes for done lvas, store to cookie / loadable file
-
-#TODO XSD
-# single lva scrape date
+# XSD: single lva scrape date, only update date in an existing lva when any content has changed
 
 
 studyname = "Informatikdidaktik"

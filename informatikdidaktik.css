@@ -4,9 +4,17 @@ Fabian Ehrentraud, 2011-02-15
 e0725639@mail.student.tuwien.ac.at
 */
 
+/*
+TODO
+	nicer visual design
+	maybe simple black&white for printing
+	avoid page-break within fach
+	make sws/ects right-aligned
+*/
+
 body {
 	font-family: arial, helvetica, sans-serif;
-	font-size: 80%;
+	font-size: 70%;
 	color: #4C4C4C;
 	background-color: #FFB;
 	margin: 1em;
@@ -43,6 +51,7 @@ h2 {
 	margin-top: 0.7em;
 	padding: 0.1em;
 	padding-left: 1em;
+	cursor: pointer;
 }
 
 h3 {
@@ -53,6 +62,7 @@ h3 {
 	margin-top: 0.7em;
 	padding: 0.1em;
 	padding-left: 1.5em;
+	cursor: pointer;
 }
 
 h4 {
@@ -63,6 +73,7 @@ h4 {
 	padding: 0.1em;
 	padding-left: 0.3em;
 	padding-bottom: 0.3em;
+	cursor: pointer;
 }
 
 h4:before {
@@ -106,7 +117,7 @@ li {
 
 #meta .list-header {
 	display: inline; /*block*/
-	font-style: none;
+	font-style: inherit;
 	list-style: none;
 	text-decoration: none;
 /*	width: 100%;*/
@@ -143,6 +154,29 @@ li {
 
 #meta .stpl-pdf {
 	margin-top: 1.2em;
+}
+
+#meta .buttons {
+	margin-top: 1.2em;
+}
+
+#meta .buttons p {
+	font-size: 80%;
+}
+
+div .modulgruppe-body {
+	display: block;
+	/*display: none;*/
+}
+
+div .modul-body {
+	display: block;
+	/*display: none;*/
+}
+
+div .lvas { /*fach-body*/
+	display: block;
+	/*display: none;*/
 }
 
 
@@ -198,35 +232,30 @@ li {
 /*	background: #888;*/
 }
 
-/*
-.lvas .lvauniversity {
-	width: 3%;
-}
 
-.lvas .lvasemester {
-	width: 15%;
+.lvas table .lvauniversity {
+	width: 1.5em;
 }
-
-.lvas .lvakey {
-	width: 8%;
+.lvas table .lvasemester {
+	width: 7em;
 }
-
-.lvas .lvatype {
-	width: 3%;
+.lvas table .lvakey {
+	width: 4em;
 }
-
-.lvas .lvatitle {
-	width: 30%;
+.lvas table .lvatype {
+	width: 1.5em;
 }
-
-.lvas .lvacredits {
-	width: 15%;
+.lvas table .lvatitle {
+	
 }
-
-.lvas .lvainfo {
-	width: 10%;
+.lvas table .lvacredits {
+	text-align: right;
+	width: 10em;
 }
-*/
+.lvas table .lvainfo {
+	min-width: 0px;
+	/*width: 10px;*/
+}
 
 @media print {
 	body {
@@ -235,6 +264,9 @@ li {
 	}
 	h4 {
 		color: #000;
+		/*page-break-before: avoid;*/
+		page-break-inside: avoid;
+		page-break-after: avoid;
 	}
 	a {
 		text-decoration: none;
@@ -253,11 +285,22 @@ li {
 	.probableLva {
 		font-weight: bolder;
 	}
+	
+	div .modulgruppe-body {
+		display: block;
+	}
 
-	/*
-		page-break-after:always;
-		page-break-before:always;
-		page-break-after:avoid;
-		page-break-before:avoid;
-	*/
+	div .modul-body {
+		display: block;
+	}
+	
+	div .lvas {
+		display: block;
+		page-break-before: avoid;
+		page-break-inside: avoid;
+	}
+	
+	#meta .buttons {
+		display: none;
+	}
 }

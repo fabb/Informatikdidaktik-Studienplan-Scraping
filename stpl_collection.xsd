@@ -117,6 +117,7 @@ e0725639@mail.student.tuwien.ac.at
 																			<xs:element name="info" type="xs:string"/>
 																			<xs:element name="url" type="xs:anyURI"/>
 																			<xs:element name="professor" type="xs:string"/>
+																			<xs:element name="query_date" type="xs:dateTime" minOccurs="0"/>
 																		</xs:all>
 																	</xs:complexType>
 																</xs:element>
