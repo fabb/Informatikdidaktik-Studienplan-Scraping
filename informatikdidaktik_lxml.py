@@ -177,8 +177,12 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 		fach_type_.text = (lva_fach_type or "").strip()
 		fach_sws_ = etree.SubElement(fach, "sws")
 		fach_sws_.text = (lva_fach_sws or "").strip().replace(",",".")
+		if len(fach_sws_.text) == 1:
+			fach_sws_.text += ".0"
 		fach_ects_ = etree.SubElement(fach, "ects")
 		fach_ects_.text = (lva_fach_ects or "").strip().replace(",",".")
+		if len(fach_ects_.text) == 1:
+			fach_ects_.text += ".0"
 		
 		print("New Fach: %s"%(fach_title_.text + " " + fach_type_.text + " " + fach_sws_.text + " " + fach_ects_.text))
 
@@ -250,8 +254,12 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 	lva_type_.text = (lva_type or "").strip()
 	lva_sws_ = lva.find("sws") if lva.find("sws") is not None else etree.SubElement(lva, "sws")
 	lva_sws_.text = (lva_sws or "").strip().replace(",",".")
+	if len(lva_sws_.text) == 1:
+		lva_sws_.text += ".0"
 	lva_ects_ = lva.find("ects") if lva.find("ects") is not None else etree.SubElement(lva, "ects")
 	lva_ects_.text = (lva_ects or "").strip().replace(",",".")
+	if len(lva_ects_.text) == 1:
+		lva_ects_.text += ".0"
 	lva_info_ = lva.find("info") if lva.find("info") is not None else etree.SubElement(lva, "info")
 	lva_info_.text = (lva_info or "").strip()
 	lva_url_ = lva.find("url") if lva.find("url") is not None else etree.SubElement(lva, "url")
