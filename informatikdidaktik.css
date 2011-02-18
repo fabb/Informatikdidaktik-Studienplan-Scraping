@@ -294,21 +294,21 @@ li {
 	}
 	
 	.modulgruppe-body {
-		display: block !important;
+		/*display: block !important; this and the two occurrences below would display the whole expanded structure in printing, regardless of the collapse state*/
 		border-left: none;
 		border-top: none;
 		padding-left: 0em;
 	}
 
 	.modul-body {
-		display: block !important;
+		/*display: block !important;*/
 		border-left: none;
 		border-top: none;
 		padding-left: 0em;
 	}
 	
 	.lvas {
-		display: block !important;
+		/*display: block !important;*/
 		page-break-before: avoid;
 		page-break-inside: avoid;
 	}
