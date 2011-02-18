@@ -2,8 +2,9 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions">
 
 <!--
-Fabian Ehrentraud, 2011-02-15
+Fabian Ehrentraud, 2011-02-18
 e0725639@mail.student.tuwien.ac.at
+Licensed under the Open Software License (OSL 3.0)
 -->
 
 <!--

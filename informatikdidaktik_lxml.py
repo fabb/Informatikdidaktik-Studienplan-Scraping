@@ -1,8 +1,9 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-02-15
+# Fabian Ehrentraud, 2011-02-18
 # e0725639@mail.student.tuwien.ac.at
+# Licensed under the Open Software License (OSL 3.0)
 # Scrapes Uni and TU websites for LVAs from Informatikdidaktik and stores them in an XML
 
 import datetime
