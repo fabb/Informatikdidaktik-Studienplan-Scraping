@@ -9,6 +9,7 @@ Licensed under the Open Software License (OSL 3.0)
 TODO
 	nicer visual design
 	avoid page-break within fach
+	make shown down-arrow next to headers dynamic according to collapse state
 */
 
 body {
@@ -53,6 +54,10 @@ h2 {
 	cursor: pointer;
 }
 
+h2:after {
+	content: " ⇩";
+}
+
 h3 {
 	color: #EEE;
 	font-size: 1.25em;
@@ -64,6 +69,10 @@ h3 {
 	cursor: pointer;
 }
 
+h3:after {
+	content: " ⇩";
+}
+
 h4 {
 	color: #990;
 	font-size: 1.1em;
@@ -73,6 +82,10 @@ h4 {
 	padding-left: 0.3em;
 	padding-bottom: 0.3em;
 	cursor: pointer;
+}
+
+h4:after {
+	content: " ⇩";
 }
 
 h4:before {
@@ -270,11 +283,32 @@ li {
 	.info {
 		color: black;
 	}
+	h2 {
+		color: #000;
+		/*page-break-before: avoid;*/
+		page-break-inside: avoid;
+		page-break-after: avoid;
+	}
+	h3 {
+		color: #000;
+		/*page-break-before: avoid;*/
+		page-break-inside: avoid;
+		page-break-after: avoid;
+	}
 	h4 {
 		color: #000;
 		/*page-break-before: avoid;*/
 		page-break-inside: avoid;
 		page-break-after: avoid;
+	}
+	h2:after {
+		content: "";
+	}
+	h3:after {
+		content: "";
+	}
+	h4:after {
+		content: "";
 	}
 	a {
 		text-decoration: none;
