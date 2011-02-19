@@ -1,6 +1,6 @@
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-02-18
+Fabian Ehrentraud, 2011-02-19
 e0725639@mail.student.tuwien.ac.at
 Licensed under the Open Software License (OSL 3.0)
 */
@@ -8,7 +8,6 @@ Licensed under the Open Software License (OSL 3.0)
 /*
 TODO
 	nicer visual design
-	avoid page-break within fach
 	make shown down-arrow next to headers dynamic according to collapse state
 */
 
@@ -168,12 +167,18 @@ li {
 	margin-top: 1.2em;
 }
 
-#meta .buttons {
+#meta .controls {
 	margin-top: 1.2em;
+	padding: 0.5em;
+	border: 0.2em solid #CCC;
 }
 
-#meta .buttons p {
+#meta .controls p {
 	font-size: 80%;
+}
+
+#meta form div {
+	margin-top: 1em;
 }
 
 .modulgruppe-body {
@@ -345,10 +350,10 @@ li {
 	.lvas {
 		/*display: block !important;*/
 		page-break-before: avoid;
-		page-break-inside: avoid;
+		page-break-inside: avoid; /*avoid unfortunately only supported by Opera, not by Firefox*/
 	}
 	
-	#meta .buttons {
+	#meta .controls {
 		display: none;
 	}
 }

@@ -2,14 +2,13 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions">
 
 <!--
-Fabian Ehrentraud, 2011-02-18
+Fabian Ehrentraud, 2011-02-19
 e0725639@mail.student.tuwien.ac.at
 Licensed under the Open Software License (OSL 3.0)
 -->
 
 <!--
 TODO
-	interactive javascript selector for semester to highlight
 	interactive javascript selector for date of added lvas to display
 	save collapse state to cookie
 	checkboxes for done lvas, store to cookie / loadable file
@@ -29,7 +28,7 @@ TODO
 			</xsl:for-each>
 		</xsl:variable>
 	
-		<!--TODO interactive javascript selector instead? or query current date?-->
+		<!--this is additional to the interactive javascript selector - correct display of the page works without javascript-->
 		<xsl:variable name="highlightSemester">
 			<xsl:variable name="year">
 				<xsl:value-of select="substring-before($latestQuerydate,'-')"/>
@@ -55,32 +54,11 @@ TODO
 			<head>
 				<title>Studienplan <xsl:value-of select="stpl_collection/stpl/title"></xsl:value-of></title>
 				<link rel="stylesheet" type="text/css" href="informatikdidaktik.css" />
+				<script src="informatikdidaktik.js" type="text/javascript"></script>
 				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 				<meta name="description" content="Zusammenfassung aller Lehrveranstaltungen des Studienplans Informatikdidaktik, welche an der TU WIen und Uni Wien abgehalten wurden und werden." />
-				<!--script src="informatikdidaktik.js" type="text/javascript"></script-->
-				<script type="text/javascript">
-					function hideshowDiv(id){
-						if(document.getElementById(id).style.display == "none"){
-							document.getElementById(id).style.display = "block";
-						}else{
-							document.getElementById(id).style.display = "none";
-						}
-					}
-					function hideAllDiv(name){ /*name can be modulgruppe, modul or fach*/
-						var elements = document.getElementsByName(name);
-						for (var i=0; i &lt; elements.length; i++) {
-							elements[i].style.display = "none";
-						}
-					}
-					function showAllDiv(name){
-						var elements = document.getElementsByName(name);
-						for (var i=0; i &lt; elements.length; i++) {
-							elements[i].style.display = "block";
-						}
-					}
-				</script>
 			</head>
-			<body>
+			<body onload="document.controls.reset()">
 				<div id="header">
 					<h1>
 						Studienplan <xsl:value-of select="stpl_collection/stpl/title"></xsl:value-of>
@@ -138,31 +116,45 @@ TODO
 							</a>
 						</xsl:if>
 					</p>
-					<p class="buttons">
-						<form action="">
-						  <div>
-							<button name="" type="button" value="" onclick="hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
-							  <p>
-								<!--<img src="selfhtml.gif" width="106" height="109" alt="SELFHTML Logo"><br>-->
-								<b>Zeige Modulgruppen</b>
-							  </p>
-							</button>
-							<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');hideAllDiv('modul');showAllDiv('fach');">
-							  <p>
-								<b>Zeige Module</b>
-							  </p>
-							</button>
-							<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('fach');">
-							  <p>
-								<b>Zeige Fächer</b>
-							  </p>
-							</button>
-							<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
-							  <p>
-								<b>Zeige alles</b>
-							  </p>
-							</button>
-						  </div>
+					<p class="controls">
+						<form action="" name="controls">
+							<div>
+								Semester hervorheben:
+								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value)">
+									<xsl:for-each select="stpl_collection/stpl/modulgruppe/modul/fach/lva/semester[not (. = preceding::*)]">
+										<xsl:sort select="." order="descending"/>
+										<option>
+											<xsl:if test=".=$highlightSemester">
+												<xsl:attribute name="selected">selected</xsl:attribute>
+											</xsl:if>
+											<xsl:value-of select="."/>
+										</option>
+									</xsl:for-each>
+								</select>
+							</div>
+							<div>
+								<button name="" type="button" value="" onclick="hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
+									<p>
+										<!--<img src="selfhtml.gif" width="106" height="109" alt="SELFHTML Logo"><br>-->
+										<b>Zeige Modulgruppen</b>
+									</p>
+								</button>
+								<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');hideAllDiv('modul');showAllDiv('fach');">
+									<p>
+										<b>Zeige Module</b>
+									</p>
+								</button>
+								<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('fach');">
+									<p>
+										<b>Zeige Fächer</b>
+									</p>
+								</button>
+								<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
+									<p>
+										<b>Zeige alles</b>
+									</p>
+								</button>
+							</div>
 						</form>
 					</p>
 				</div>
@@ -232,12 +224,12 @@ TODO
 																		</xsl:if>
 																		<td class="lvauniversity"><xsl:value-of select="university"/></td>
 																		<!--<td><xsl:value-of select="semester"/></td>-->
-																		<td class="lvasemester">
+																		<td class="lvasemester" name="semesters">
 																			<xsl:variable name="newestSemester"><xsl:value-of select="semester"/></xsl:variable>
 																			<xsl:for-each select="../lva[./title=current()/title and ./university=current()/university and ./type=current()/type and (./university='Uni' or ./key=current()/key)]">
 																				<xsl:sort select="semester" order="descending"/>
 																				<xsl:if test="not(position() = 1)">, </xsl:if>
-																				<span>
+																				<span name="semester">
 																					<!-- problematic when $newestSemester is greater than $highlightSemester -->
 																					<xsl:if test="$newestSemester != $highlightSemester and ./semester = $yearBeforeHighlightSemester">
 																						<xsl:attribute name="class">probableLva</xsl:attribute>
