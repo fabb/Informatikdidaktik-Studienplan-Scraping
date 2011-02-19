@@ -83,25 +83,27 @@ TODO
 							</xsl:otherwise>
 						</xsl:choose>
 					</p>
-					<p>
+					<p id="quellen">
 						<ul>
-						<li class="list-header">
-							Quellen:
+						<li class="list-header" onClick="hideshowDivNoprint('quellen-body','quellen');">
+							Quellen
 						</li>
-							<!--xsl:for-each select="stpl_collection/source"-->
-							<!-- each source with same url only ONCE -->
-							<xsl:for-each select="stpl_collection/source[not (./url = preceding::*/url)]">
-								<xsl:sort select="query_date" order="descending"/>
-								<li>
-									<a>
-										<xsl:attribute name="href">
+							<div id="quellen-body">
+								<!--xsl:for-each select="stpl_collection/source"-->
+								<!-- each source with same url only ONCE -->
+								<xsl:for-each select="stpl_collection/source[not (./url = preceding::*/url)]">
+									<xsl:sort select="query_date" order="descending"/>
+									<li>
+										<a>
+											<xsl:attribute name="href">
+												<xsl:value-of select="url"/>
+											</xsl:attribute>
+											<xsl:attribute name="target">new</xsl:attribute>
 											<xsl:value-of select="url"/>
-										</xsl:attribute>
-										<xsl:attribute name="target">new</xsl:attribute>
-										<xsl:value-of select="url"/>
-									</a>
-								</li>
-							</xsl:for-each>
+										</a>
+									</li>
+								</xsl:for-each>
+							</div>
 						</ul>
 					</p>
 					<p class="stpl-pdf">

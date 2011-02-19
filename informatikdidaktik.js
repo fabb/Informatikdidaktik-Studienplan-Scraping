@@ -12,6 +12,16 @@ function hideshowDiv(id){
 	}
 }
 
+function hideshowDivNoprint(id,idPrint){
+	if(document.getElementById(id).style.display == "none"){
+		document.getElementById(id).style.display = "block";
+		document.getElementById(idPrint).setAttribute("class","");
+	}else{
+		document.getElementById(id).style.display = "none";
+		document.getElementById(idPrint).setAttribute("class","noPrint");
+	}
+}
+
 function hideAllDiv(name){ /*name can be modulgruppe, modul or fach*/
 	var elements = document.getElementsByName(name);
 	for (var i=0; i < elements.length; i++) {

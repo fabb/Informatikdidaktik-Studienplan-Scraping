@@ -142,6 +142,11 @@ li {
 /*	background-color: #DCA;*/
 /*	border: 1px #666666 outset;*/
 /*	font-size: 11px;*/
+	cursor: pointer;
+}
+
+#meta .list-header:after {
+	content: " ⇩";
 }
 
 .info {
@@ -290,18 +295,24 @@ li {
 	}
 	h2 {
 		color: #000;
+		padding-left: 0em;
+		margin-left: 0em;
 		/*page-break-before: avoid;*/
 		page-break-inside: avoid;
 		page-break-after: avoid;
 	}
 	h3 {
 		color: #000;
+		padding-left: 0.3em;
+		margin-left: 0em;
 		/*page-break-before: avoid;*/
 		page-break-inside: avoid;
 		page-break-after: avoid;
 	}
 	h4 {
 		color: #000;
+		padding-left: 0em;
+		margin-left: 0em;
 		/*page-break-before: avoid;*/
 		page-break-inside: avoid;
 		page-break-after: avoid;
@@ -318,6 +329,14 @@ li {
 	a {
 		text-decoration: none;
 		color: #000;
+	}
+	.lvas {
+		padding-left: 0.5em;
+		margin-left: 0em;
+	}
+	.lvas table {
+		padding-left: 0em;
+		margin-left: 0em;
 	}
 	.lvas table td a {
 		color: #000;
@@ -354,6 +373,14 @@ li {
 	}
 	
 	#meta .controls {
+		display: none;
+	}
+	
+	#meta .list-header:after {
+		content: "";
+	}
+	
+	.noPrint {
 		display: none;
 	}
 }
