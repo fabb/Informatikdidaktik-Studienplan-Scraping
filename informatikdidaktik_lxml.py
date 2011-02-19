@@ -1,10 +1,11 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-02-18
+# Fabian Ehrentraud, 2011-02-19
 # e0725639@mail.student.tuwien.ac.at
 # Licensed under the Open Software License (OSL 3.0)
 # Scrapes Uni and TU websites for LVAs from Informatikdidaktik and stores them in an XML
+# needs Python 2.7 and library lxml
 
 import datetime
 from collections import OrderedDict
@@ -20,7 +21,6 @@ import os.path
 # cache old semesters which will not change anymore and don't read them in
 # when finally Tiss is updated to allow searching for old semesters' LVAs of a certain study code, incorporate the according scraping
 # store in xml when an lva was added/updated to be able to only show the newest ones in the browser
-# pretty printing working strange when adding to existing xml?
 # Interdisziplinäres Praktikum: Interaktionsdesign is wrongly assigned in Tiss (not to all according modules), fix this
 # XSD: single lva scrape date, only update date in an existing lva when any content has changed
 
@@ -314,7 +314,8 @@ def readXml(filename, checkXmlSchema=False):
 	
 	print("Reading in existing XML file")
 	
-	xml_root = etree.parse(filename).getroot()
+	parser = etree.XMLParser(remove_blank_text=True) #read in a pretty printed xml and don't interpret whitespaces as meaningful data => this allows correct output pretty printing
+	xml_root = etree.parse(filename, parser).getroot()
 
 	#print(etree.tostring(xml_root))
 	
