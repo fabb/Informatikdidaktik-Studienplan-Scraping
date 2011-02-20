@@ -1,6 +1,6 @@
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-02-19
+Fabian Ehrentraud, 2011-02-20
 e0725639@mail.student.tuwien.ac.at
 Licensed under the Open Software License (OSL 3.0)
 */
@@ -50,11 +50,6 @@ h2 {
 	margin-top: 0.7em;
 	padding: 0.1em;
 	padding-left: 1em;
-	cursor: pointer;
-}
-
-h2:after {
-	content: " ⇩";
 }
 
 h3 {
@@ -65,11 +60,6 @@ h3 {
 	margin-top: 0.7em;
 	padding: 0.1em;
 	padding-left: 1.5em;
-	cursor: pointer;
-}
-
-h3:after {
-	content: " ⇩";
 }
 
 h4 {
@@ -80,11 +70,6 @@ h4 {
 	padding: 0.1em;
 	padding-left: 0.3em;
 	padding-bottom: 0.3em;
-	cursor: pointer;
-}
-
-h4:after {
-	content: " ⇩";
 }
 
 h4:before {
@@ -108,7 +93,7 @@ ul {
 }
 
 li {
-/*	color: #900;*/
+	/*color: #900;*/
 	font-style: italic;
 	/*padding-left: 1em;*/
 	margin-left: 2em;
@@ -127,7 +112,7 @@ li {
 }
 
 #meta .list-header {
-	display: inline; /*block*/
+	display: inline;
 	font-style: inherit;
 	list-style: none;
 	text-decoration: none;
@@ -142,11 +127,17 @@ li {
 /*	background-color: #DCA;*/
 /*	border: 1px #666666 outset;*/
 /*	font-size: 11px;*/
-	cursor: pointer;
 }
 
-#meta .list-header:after {
+/*visual clue for collapseableness*/
+h2:after, h3:after, h4:after, #meta .list-header:after {
 	content: " ⇩";
+}
+h2:hover:after, h3:hover:after, h4:hover:after, #meta .list-header:hover:after {
+	content: " ⇧";
+}
+h2, h3, h4, #meta .list-header {
+	cursor: pointer;
 }
 
 .info {
@@ -174,7 +165,7 @@ li {
 
 #meta .controls {
 	margin-top: 1.2em;
-	padding: 0.5em;
+	padding: 0.8em;
 	border: 0.2em solid #CCC;
 }
 
@@ -182,8 +173,13 @@ li {
 	font-size: 80%;
 }
 
+#meta .sidebyside {
+	display: inline;
+	padding-right: 1em;
+}
+
 #meta form div {
-	margin-top: 1em;
+	margin-top: 0.8em;
 }
 
 .modulgruppe-body {
@@ -285,102 +281,71 @@ li {
 	/*width: 10px;*/
 }
 
+.noPrint {
+	opacity: 0.5;
+}
+
 @media print {
 	body {
 		font-size: 6.3pt;
 		/*font-family: times new roman, times, serif;*/
 	}
-	.info {
+
+	.info, a, .lvas table td a, h1, h2, h3, h4 {
 		color: black;
 	}
-	h2 {
-		color: #000;
+
+	h2, h3, h4, .lvas, .lvas table {
 		padding-left: 0em;
 		margin-left: 0em;
-		/*page-break-before: avoid;*/
-		page-break-inside: avoid;
-		page-break-after: avoid;
 	}
 	h3 {
-		color: #000;
 		padding-left: 0.3em;
-		margin-left: 0em;
-		/*page-break-before: avoid;*/
-		page-break-inside: avoid;
-		page-break-after: avoid;
 	}
-	h4 {
-		color: #000;
-		padding-left: 0em;
-		margin-left: 0em;
-		/*page-break-before: avoid;*/
-		page-break-inside: avoid;
-		page-break-after: avoid;
-	}
-	h2:after {
-		content: "";
-	}
-	h3:after {
-		content: "";
-	}
-	h4:after {
-		content: "";
-	}
+	
 	a {
 		text-decoration: none;
-		color: #000;
 	}
+
 	.lvas {
 		padding-left: 0.5em;
-		margin-left: 0em;
-	}
-	.lvas table {
-		padding-left: 0em;
-		margin-left: 0em;
-	}
-	.lvas table td a {
-		color: #000;
 	}
 	.lvas table tr {
 		border-bottom: 2px #AAA solid;
 	}
 	.currentlva {
 		font-weight: bolder;
-		/*background-color: #c0e607 cannot override printing settings in browser which prohibit printing backgrounds by default*/
 	}
 	.probableLva {
 		font-weight: bolder;
 	}
 	
-	.modulgruppe-body {
-		/*display: block !important; this and the two occurrences below would display the whole expanded structure in printing, regardless of the collapse state*/
-		border-left: none;
-		border-top: none;
-		padding-left: 0em;
-	}
-
-	.modul-body {
-		/*display: block !important;*/
-		border-left: none;
-		border-top: none;
+	.modulgruppe-body, .modul-body {
+		border: none;
 		padding-left: 0em;
 	}
 	
-	.lvas {
-		/*display: block !important;*/
-		page-break-before: avoid;
-		page-break-inside: avoid; /*avoid unfortunately only supported by Opera, not by Firefox*/
+	.modulgruppe-body, .modul-body, .lvas {
+		/*display: block !important; this would display the whole expanded structure in printing, regardless of the collapse state*/
 	}
 	
-	#meta .controls {
-		display: none;
-	}
-	
-	#meta .list-header:after {
+	/*don't display visual collapse clue*/
+	h2:after, h3:after, h4:after, #meta .list-header:after {
 		content: "";
 	}
 	
-	.noPrint {
+	.noPrint, #meta .controls {
 		display: none;
+	}
+	
+	/*avoid unfortunately only supported by Opera, not by Firefox*/
+	h2, h3, h4 {
+		/*page-break-before: avoid;*/
+		page-break-inside: avoid;
+		page-break-after: avoid;
+	}
+	.lvas {
+		page-break-before: avoid;
+		page-break-inside: avoid;
 	}
 }
