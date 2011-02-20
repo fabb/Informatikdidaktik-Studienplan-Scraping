@@ -15,7 +15,7 @@ function hideshowDiv(id){
 function hideshowDivNoprint(id,idPrint){
 	if(document.getElementById(id).getAttribute("hide") == "true"){
 		document.getElementById(id).setAttribute("hide","false");
-		document.getElementById(idPrint).setAttribute("noPrint","true");
+		document.getElementById(idPrint).setAttribute("noPrint","false");
 	}else{
 		document.getElementById(id).setAttribute("hide","true"); /*custom attribute which hides in css*/
 		document.getElementById(idPrint).setAttribute("noPrint","true");
@@ -74,20 +74,51 @@ function showOldestDate(showeverything, date){
 		}
 	}
 	
+	/*at first hide everything*/
+	var fachs = document.getElementsByName("fach");
+	for (var i=0; i < fachs.length; i++) {
+		fachs[i].setAttribute("nocontent","true");
+	}
+	var wholefachs = document.getElementsByName("wholefach");
+	for (var i=0; i < wholefachs.length; i++) {
+		wholefachs[i].setAttribute("nolvas","true");
+	}
+	var wholemoduls = document.getElementsByName("wholemodul");
+	for (var i=0; i < wholemoduls.length; i++) {
+		wholemoduls[i].setAttribute("nolvas","true");
+	}
+	var wholemodulgruppes = document.getElementsByName("wholemodulgruppe");
+	for (var i=0; i < wholemodulgruppes.length; i++) {
+		wholemodulgruppes[i].setAttribute("nolvas","true");
+	}
+
 	var tables = document.getElementsByName("lvatable");
 	for (var i=0; i < tables.length; i++) {
 		if(showeverything) {
 			/*custom attribute which hides in css*/
-			tables[i].parentNode.setAttribute("nocontent","false");
+			tables[i].parentNode.setAttribute("nocontent","false"); /*fach TODO check if there is actual content?*/
+			tables[i].parentNode.parentNode.setAttribute("nolvas","false"); /*wholefach*/
+			tables[i].parentNode.parentNode.parentNode.parentNode.setAttribute("nolvas","false"); /*wholemodul*/
+			tables[i].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.setAttribute("nolvas","false"); /*wholemodulgruppe*/
 		} else {
-			tables[i].parentNode.setAttribute("nocontent","true"); /*hide parent div*/
 			var subrows = tables[i].firstChild.childNodes; //firstChild is tbody
 			for (var j=0; j < subrows.length; j++) {
-				if(subrows[j].hasChildNodes()  &&  subrows[j].getAttribute("hiderow") == "false") {
-					tables[i].parentNode.setAttribute("nocontent","false");
+				if(subrows[j].hasChildNodes()  &&  subrows[j].getAttribute("hiderow") == "false") { /*TODO check if there is actual content instead of hiderow?*/
+					tables[i].parentNode.setAttribute("nocontent","false"); /*fach*/
+					tables[i].parentNode.parentNode.setAttribute("nolvas","false"); /*wholefach*/
+					tables[i].parentNode.parentNode.parentNode.parentNode.setAttribute("nolvas","false"); /*wholemodul*/
+					tables[i].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.setAttribute("nolvas","false"); /*wholemodulgruppe*/
 					break;
 				}
 			}
 		}
+	}
+}
+
+function hideempty(hide) {
+	if(hide){
+		document.getElementById("content").setAttribute("hideempty","true"); /*custom attribute which hides in css*/
+	}else{
+		document.getElementById("content").setAttribute("hideempty","false");
 	}
 }

@@ -166,6 +166,7 @@ h2, h3, h4, #meta .list-header {
 #meta .controls {
 	margin-top: 1.2em;
 	padding: 0.8em;
+	padding-top: 0em;
 	border: 0.2em solid #CCC;
 }
 
@@ -174,7 +175,9 @@ h2, h3, h4, #meta .list-header {
 }
 
 #meta .sidebyside {
-	display: inline;
+	/*display: inline; messy as it does not allow vertical margin or padding*/
+	/*float: left; messy with smaller window widths*/
+	display: inline-block;
 	padding-right: 1em;
 }
 
@@ -195,8 +198,12 @@ h2, h3, h4, #meta .list-header {
 }
 
 /*hidden elements (element bodies)*/
-[hide="true"] {
+*[hide~="true"] {
 	display: none !important;
+}
+
+#content[hideempty~="true"] [nolvas~="true"], #content[hideempty="true"][nolvas~="true"] {
+	display: none;
 }
 
 
@@ -215,7 +222,7 @@ h2, h3, h4, #meta .list-header {
 	background-color: #DDD;
 }
 
-.lvas[nocontent="true"] {
+.lvas[nocontent~="true"] {
 	display: none !important;
 }
 
@@ -231,7 +238,7 @@ h2, h3, h4, #meta .list-header {
 	border-bottom: 8px #AAA solid;
 }
 
-.lvas table [hiderow="true"] {
+.lvas table [hiderow~="true"] {
 	display: none !important;
 }
 
@@ -285,7 +292,7 @@ h2, h3, h4, #meta .list-header {
 	/*width: 10px;*/
 }
 
-[noPrint="true"] {
+*[noPrint~="true"] {
 	opacity: 0.5;
 }
 
@@ -329,7 +336,7 @@ h2, h3, h4, #meta .list-header {
 		padding-left: 0em;
 	}
 	
-	[hide="true"] {
+	*[hide~="true"] {
 		/*display: inherit !important; this would display the whole expanded structure in printing, regardless of the collapse state*/
 	}
 	
@@ -338,7 +345,7 @@ h2, h3, h4, #meta .list-header {
 		content: "";
 	}
 	
-	[noPrint=true], #meta .controls {
+	*[noPrint~="true"], #meta .controls {
 		display: none;
 	}
 	
