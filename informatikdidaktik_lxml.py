@@ -20,9 +20,8 @@ import os.path
 # make replacement rules more transparent and encapsulated
 # cache old semesters which will not change anymore and don't read them in
 # when finally Tiss is updated to allow searching for old semesters' LVAs of a certain study code, incorporate the according scraping
-# store in xml when an lva was added/updated to be able to only show the newest ones in the browser
 # Interdisziplinäres Praktikum: Interaktionsdesign is wrongly assigned in Tiss (not to all according modules), fix this
-# XSD: single lva scrape date, only update date in an existing lva when any content has changed
+# update date in an existing lva when any content has changed?
 
 
 studyname = "Informatikdidaktik"
@@ -152,8 +151,8 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 		#print(etree.tostring(f))
 		fachB = fuzzyEq(lva_fach, f.find("title").text)
 		fach_typeB = fuzzyEq(lva_fach_type, f.find("type").text)
-		fach_swsB = fuzzyEq(lva_fach_sws, f.find("sws").text)
-		fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
+		#fach_swsB = fuzzyEq(lva_fach_sws, f.find("sws").text)
+		#fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
 
 		if(fachB and fach_typeB): #ignore sws and ects
 			return(f) #return first matching
@@ -189,8 +188,8 @@ def getMatchingFach(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
 		#print(etree.tostring(f))
 		fachB = fuzzyEq(lva_fach, f.find("title").text)
 		fach_typeB = fuzzyEq(lva_fach_type, f.find("type").text, threshold=1.0)
-		fach_swsB = fuzzyEq(lva_fach_sws, f.find("sws").text)
-		fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
+		#fach_swsB = fuzzyEq(lva_fach_sws, f.find("sws").text)
+		#fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
 
 		if(fachB and fach_typeB): #ignore sws and ects
 			return(f) #return first matching
@@ -218,12 +217,12 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 		titleB = fuzzyEq(lva_title, l.find("title").text)
 		keyB = fuzzyEq(lva_key, l.find("key").text)
 		typeB = fuzzyEq(lva_type, l.find("type").text, threshold=1.0)
-		swsB = fuzzyEq(lva_sws, l.find("sws").text, threshold=0.0)
-		ectsB = fuzzyEq(lva_ects, l.find("ects").text, threshold=0.0) # ignore sws, ects, info, url and prof
-		infoB = fuzzyEq(lva_info, l.find("info").text, threshold=0.0)
-		urlB = fuzzyEq(lva_url, l.find("url").text, threshold=0.0)
-		professorB = fuzzyEq(lva_professor, l.find("professor").text, threshold=0.0)
-		if(universityB and semesterB and titleB and keyB and typeB and swsB and ectsB and infoB and urlB and professorB):
+		#swsB = fuzzyEq(lva_sws, l.find("sws").text, threshold=0.0)
+		#ectsB = fuzzyEq(lva_ects, l.find("ects").text, threshold=0.0)
+		#infoB = fuzzyEq(lva_info, l.find("info").text, threshold=0.0)
+		#urlB = fuzzyEq(lva_url, l.find("url").text, threshold=0.0)
+		#professorB = fuzzyEq(lva_professor, l.find("professor").text, threshold=0.0)
+		if(universityB and semesterB and titleB and keyB and typeB and swsB and ectsB and infoB and urlB and professorB): # ignore sws, ects, info, url and prof
 			found_lva = l
 			break #return first matching
 			#return(l)
@@ -255,6 +254,11 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 	lva_url_.text = (lva_url or "").strip()
 	lva_professor_ = lva.find("professor") if lva.find("professor") is not None else etree.SubElement(lva, "professor")
 	lva_professor_.text = (lva_professor or "").strip()
+	
+	#TODO this does not update the query date if some fields of an existing lva are updated. but would that be wanted?
+	if lva.find("query_date") is None:
+		lva_query_date_ = etree.SubElement(lva, "query_date")
+		lva_query_date_.text = datetime.datetime.now().isoformat()
 	
 	if found_lva is None:
 		print("New LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))

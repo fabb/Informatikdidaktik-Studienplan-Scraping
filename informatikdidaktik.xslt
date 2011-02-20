@@ -2,15 +2,15 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions">
 
 <!--
-Fabian Ehrentraud, 2011-02-19
+Fabian Ehrentraud, 2011-02-20
 e0725639@mail.student.tuwien.ac.at
 Licensed under the Open Software License (OSL 3.0)
 -->
 
 <!--
 TODO
-	interactive javascript selector for date of added lvas to display
 	save collapse state to cookie
+	save and display last visit date
 	checkboxes for done lvas, store to cookie / loadable file
 -->
 	
@@ -22,7 +22,7 @@ TODO
 			<xsl:for-each select="/stpl_collection/source">
 				<!--more complex version: <xsl:if test="count(../source[translate(./query_date, 'TZ:-', '') &gt; translate(current()/query_date, 'TZ:-', '')])=0">-->
 				<xsl:sort select="query_date" order="descending"/>
-				<xsl:if test="position() = 1">
+				<xsl:if test="position() = 1"><!--XSLT1 hack for getting string-maximum-->
 					<xsl:value-of select="query_date"/>
 				</xsl:if>
 			</xsl:for-each>
@@ -37,6 +37,7 @@ TODO
 				<xsl:value-of select="substring-before(substring-after($latestQuerydate,'-'),'-')"/>
 			</xsl:variable>
 			<xsl:choose>
+				<!-- in first half of year, the summer semester will be selected, otherwise the winter semester -->
 				<xsl:when test="$month &lt; 7">
 					<xsl:value-of select="concat($year,'S')"/>
 				</xsl:when>
@@ -77,7 +78,7 @@ TODO
 								<xsl:value-of select="fn:format-dateTime(xs:dateTime($latestQuerydate),'[D01].[M01].[Y0001], [H01]:[m01]:[s01]')"/>
 							</xsl:when>
 							<xsl:otherwise>
-								<!--FF3.6 does not support XSLT 2.0 functions-->
+								<!--many browsers like FF3.6 or FF4 don't support XSLT 2.0 functions-->
 								<!--<xsl:value-of select="concat(substring-before($latestQuerydate, 'T'),', ',substring-before(substring-after($latestQuerydate, 'T'), 'Z'))"/>-->
 								<xsl:value-of select="concat(substring-before($latestQuerydate, 'T'),', ',substring-after($latestQuerydate, 'T'))"/>
 							</xsl:otherwise>
@@ -91,6 +92,7 @@ TODO
 							<div id="quellen-body">
 								<!--xsl:for-each select="stpl_collection/source"-->
 								<!-- each source with same url only ONCE -->
+								<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
 								<xsl:for-each select="stpl_collection/source[not (./url = preceding::*/url)]">
 									<xsl:sort select="query_date" order="descending"/>
 									<li>
@@ -120,10 +122,11 @@ TODO
 					</p>
 					<p class="controls">
 						<form action="" name="controls">
-							<div>
+							<div class="sidebyside">
 								Semester hervorheben:
 								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value)">
-									<xsl:for-each select="stpl_collection/stpl/modulgruppe/modul/fach/lva/semester[not (. = preceding::*)]">
+									<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
+									<xsl:for-each select="stpl_collection/stpl/modulgruppe/modul/fach/lva/semester[not (. = preceding::semester)]">
 										<xsl:sort select="." order="descending"/>
 										<option>
 											<xsl:if test=".=$highlightSemester">
@@ -135,6 +138,24 @@ TODO
 									<option>
 										keines
 									</option>
+								</select>
+							</div>
+							<div class="sidebyside">
+								Anzeigen hinzugefügter LVAs seit:
+								<select name="dateSelect" size="1" onchange="showOldestDate(this.form.dateSelect.selectedIndex==0, this.form.dateSelect.options[this.form.dateSelect.selectedIndex].value)">
+									<option selected="selected">
+										Alle zeigen
+									</option>
+									<xsl:for-each select="stpl_collection/stpl/modulgruppe/modul/fach/lva/query_date">
+										<xsl:sort select="." order="descending"/>
+										<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
+										<xsl:if test="count(./preceding::query_date[name(..)='lva' and substring-before(current(), 'T') = substring-before(., 'T')])=0">
+											<option>
+												<!--xsl:value-of select="."/-->
+												<xsl:value-of select="substring-before(., 'T')"/>
+											</option>
+										</xsl:if>
+									</xsl:for-each>
 								</select>
 							</div>
 							<div>
@@ -166,6 +187,7 @@ TODO
 				<div id="content">
 					<xsl:for-each select="stpl_collection/stpl/modulgruppe">
 						<xsl:variable name="modulgruppeID">
+							<!-- remove " from variable name -->
 							<xsl:value-of select="translate(./title,'&quot;','_')"/>
 						</xsl:variable>
 						<h2>
@@ -181,6 +203,7 @@ TODO
 							</xsl:attribute>
 							<xsl:for-each select="modul">
 								<xsl:variable name="modulID">
+									<!-- remove " from variable name -->
 									<xsl:value-of select="translate(./title,'&quot;','_')"/>
 								</xsl:variable>
 								<h3>
@@ -197,6 +220,7 @@ TODO
 									<xsl:for-each select="fach">
 										<div class="fach">
 											<xsl:variable name="fachID">
+												<!-- remove " from variable name -->
 												<xsl:value-of select="translate(./title,'&quot;','_')"/>, <xsl:value-of select="type"/>
 											</xsl:variable>
 											<h4>
@@ -215,23 +239,32 @@ TODO
 														<p class="nolvas">Keine LVAs zu diesem Fach</p>
 													</xsl:when>
 													<xsl:otherwise>
-														<table>
+														<table name="lvatable">
 															<xsl:for-each select="lva">
 																<xsl:sort select="semester" order="descending"/>
+																<xsl:variable name="similarLvaSet" select="../lva[./title=current()/title and ./university=current()/university and ./type=current()/type and (./university='Uni' or ./key=current()/key)]"/>
 																<!--only display LVA when it has the highest semester; it is assumed that there is only one such LVA -->
 																<!-- at TU there is always the same key, not on the Uni -->
-																<xsl:if test="count(../lva[./title=current()/title and ./university=current()/university and ./type=current()/type and (./university='Uni' or ./key=current()/key) and translate(./semester,'SW','05') &gt; translate(current()/semester,'SW','05')])=0">
-																	<tr>
+																<xsl:if test="count($similarLvaSet[translate(./semester,'SW','05') &gt; translate(current()/semester,'SW','05')])=0">
+																	<tr name="lvarow">
 																		<xsl:if test="semester=$highlightSemester">
 																			<xsl:attribute name="class">
 																				currentlva
 																			</xsl:attribute>
 																		</xsl:if>
+																		<xsl:attribute name="query_date"><!--custom attribute-->
+																			<xsl:for-each select="$similarLvaSet/query_date">
+																				<xsl:sort select="." order="descending"/>
+																				<xsl:if test="position() = 1"><!--XSLT1 hack for getting string-maximum-->
+																					<xsl:value-of select="substring-before(., 'T')"/>
+																				</xsl:if>
+																			</xsl:for-each>
+																		</xsl:attribute>
 																		<td class="lvauniversity"><xsl:value-of select="university"/></td>
 																		<!--<td><xsl:value-of select="semester"/></td>-->
 																		<td class="lvasemester" name="semesters">
 																			<xsl:variable name="newestSemester"><xsl:value-of select="semester"/></xsl:variable>
-																			<xsl:for-each select="../lva[./title=current()/title and ./university=current()/university and ./type=current()/type and (./university='Uni' or ./key=current()/key)]">
+																			<xsl:for-each select="$similarLvaSet">
 																				<xsl:sort select="semester" order="descending"/>
 																				<xsl:if test="not(position() = 1)">, </xsl:if>
 																				<span name="semester">

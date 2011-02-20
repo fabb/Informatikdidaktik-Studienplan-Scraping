@@ -183,24 +183,20 @@ h2, h3, h4, #meta .list-header {
 }
 
 .modulgruppe-body {
-	display: block;
-	/*display: none;*/
 	border-left: 0.8em solid #3B3;
 	border-top: 1px solid #3B3;
 	padding-left: 0.5em;
 }
 
 .modul-body {
-	display: block;
-	/*display: none;*/
 	border-left: 0.6em solid #5D5;
 	border-top: 1px solid #5D5;
 	padding-left: 0.5em;
 }
 
-.lvas { /*fach-body*/
-	display: block;
-	/*display: none;*/
+/*hidden elements (element bodies)*/
+[hide="true"] {
+	display: none !important;
 }
 
 
@@ -219,6 +215,10 @@ h2, h3, h4, #meta .list-header {
 	background-color: #DDD;
 }
 
+.lvas[nocontent="true"] {
+	display: none !important;
+}
+
 .lvas table {
 /*	font-style: italic;*/
 	font-size: 120%;
@@ -229,6 +229,10 @@ h2, h3, h4, #meta .list-header {
 
 .lvas table tr {
 	border-bottom: 8px #AAA solid;
+}
+
+.lvas table [hiderow="true"] {
+	display: none !important;
 }
 
 .lvas table td {
@@ -281,7 +285,7 @@ h2, h3, h4, #meta .list-header {
 	/*width: 10px;*/
 }
 
-.noPrint {
+[noPrint="true"] {
 	opacity: 0.5;
 }
 
@@ -325,8 +329,8 @@ h2, h3, h4, #meta .list-header {
 		padding-left: 0em;
 	}
 	
-	.modulgruppe-body, .modul-body, .lvas {
-		/*display: block !important; this would display the whole expanded structure in printing, regardless of the collapse state*/
+	[hide="true"] {
+		/*display: inherit !important; this would display the whole expanded structure in printing, regardless of the collapse state*/
 	}
 	
 	/*don't display visual collapse clue*/
@@ -334,7 +338,7 @@ h2, h3, h4, #meta .list-header {
 		content: "";
 	}
 	
-	.noPrint, #meta .controls {
+	[noPrint=true], #meta .controls {
 		display: none;
 	}
 	
