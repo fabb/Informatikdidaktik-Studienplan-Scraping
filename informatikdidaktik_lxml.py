@@ -222,7 +222,7 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 		#infoB = fuzzyEq(lva_info, l.find("info").text, threshold=0.0)
 		#urlB = fuzzyEq(lva_url, l.find("url").text, threshold=0.0)
 		#professorB = fuzzyEq(lva_professor, l.find("professor").text, threshold=0.0)
-		if(universityB and semesterB and titleB and keyB and typeB and swsB and ectsB and infoB and urlB and professorB): # ignore sws, ects, info, url and prof
+		if(universityB and semesterB and titleB and keyB and typeB): # ignore sws, ects, info, url and prof
 			found_lva = l
 			break #return first matching
 			#return(l)
