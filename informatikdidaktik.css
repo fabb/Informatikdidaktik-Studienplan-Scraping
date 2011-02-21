@@ -106,7 +106,7 @@ li {
 	padding: 1em
 }
 
-#meta p {
+#meta p, #meta div {
 	padding: 0em 0em;
 	margin: 0.5em 0em;
 }
@@ -297,9 +297,14 @@ h2, h3, h4, #meta .list-header {
 }
 
 @media print {
+	body, #meta, .info, h1, h2, h3, h4, .fach, .lvas, .currentlva {
+		background-color: white;
+	}
+
 	body {
 		font-size: 6.3pt;
 		/*font-family: times new roman, times, serif;*/
+		margin: 0;
 	}
 
 	.info, a, .lvas table td a, h1, h2, h3, h4 {
@@ -317,7 +322,7 @@ h2, h3, h4, #meta .list-header {
 	a {
 		text-decoration: none;
 	}
-
+	
 	.lvas {
 		padding-left: 0.5em;
 	}

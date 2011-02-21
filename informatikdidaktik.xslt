@@ -14,7 +14,7 @@ TODO
 	checkboxes for done lvas, store to cookie / loadable file
 -->
 	
-	<xsl:output method="html" media-type="text/html" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="DTD/xhtml1-strict.dtd" cdata-section-elements="script style" indent="yes" encoding="UTF-8"/>
+	<xsl:output method="html" media-type="text/html" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" cdata-section-elements="script style" indent="yes" encoding="UTF-8"/>
 	
 	<xsl:template match="/">
 	
@@ -84,7 +84,7 @@ TODO
 							</xsl:otherwise>
 						</xsl:choose>
 					</p>
-					<p id="quellen">
+					<div id="quellen">
 						<ul>
 						<li class="list-header" onClick="hideshowDivNoprint('quellen-body','quellen');">
 							Quellen
@@ -107,7 +107,7 @@ TODO
 								</xsl:for-each>
 							</div>
 						</ul>
-					</p>
+					</div>
 					<p class="stpl-pdf">
 						<xsl:if test="count(stpl_collection/stpl/url) &gt; 0 and string(stpl_collection/stpl/url)">
 							Studienplan PDF: 
@@ -120,7 +120,7 @@ TODO
 							</a>
 						</xsl:if>
 					</p>
-					<p class="controls">
+					<div class="controls">
 						<form action="" name="controls">
 							<div>
 								Semester hervorheben:
@@ -187,7 +187,7 @@ TODO
 								</button>
 							</div>
 						</form>
-					</p>
+					</div>
 				</div>
 				<div id="content">
 					<xsl:for-each select="stpl_collection/stpl/modulgruppe">
