@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions">
 
 <!--
-Fabian Ehrentraud, 2011-02-20
+Fabian Ehrentraud, 2011-02-21
 e0725639@mail.student.tuwien.ac.at
 Licensed under the Open Software License (OSL 3.0)
 -->
@@ -12,7 +12,6 @@ TODO
 	save collapse state to cookie
 	save and display last visit date
 	checkboxes for done lvas, store to cookie / loadable file
-	make hiding of empty categories possible with fach containing no lvas (low priority as there exist none in the current xml)
 -->
 	
 	<xsl:output method="html" media-type="text/html" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="DTD/xhtml1-strict.dtd" cdata-section-elements="script style" indent="yes" encoding="UTF-8"/>
@@ -193,6 +192,9 @@ TODO
 				<div id="content">
 					<xsl:for-each select="stpl_collection/stpl/modulgruppe">
 						<div name="wholemodulgruppe">
+							<xsl:attribute name="nolvas_static">
+								<xsl:value-of select="count(.//lva)=0"/>
+							</xsl:attribute>
 							<xsl:variable name="modulgruppeID">
 								<!-- remove " from variable name -->
 								<xsl:value-of select="translate(./title,'&quot;','_')"/>
@@ -210,6 +212,9 @@ TODO
 								</xsl:attribute>
 								<xsl:for-each select="modul">
 									<div name="wholemodul">
+										<xsl:attribute name="nolvas_static">
+											<xsl:value-of select="count(.//lva)=0"/>
+										</xsl:attribute>
 										<xsl:variable name="modulID">
 											<!-- remove " from variable name -->
 											<xsl:value-of select="translate(./title,'&quot;','_')"/>
@@ -227,6 +232,9 @@ TODO
 											</xsl:attribute>
 											<xsl:for-each select="fach">
 												<div class="fach" name="wholefach">
+													<xsl:attribute name="nolvas_static">
+														<xsl:value-of select="count(.//lva)=0"/>
+													</xsl:attribute>
 													<xsl:variable name="fachID">
 														<!-- remove " from variable name -->
 														<xsl:value-of select="translate(./title,'&quot;','_')"/>, <xsl:value-of select="type"/>

@@ -1,27 +1,51 @@
 /*
-Fabian Ehrentraud, 2011-02-20
+Fabian Ehrentraud, 2011-02-21
 e0725639@mail.student.tuwien.ac.at
 Licensed under the Open Software License (OSL 3.0)
 */
 
+/*
+TODO
+	instead of unsafe .parentNode use something more robust
+*/
+
+/*
+hides or shows the element with the given ID
+by assigning a custom attribute which is hidden by css
+inverts the current visibility
+element does not necessarily have to be a DIV
+*/
 function hideshowDiv(id){
 	if(document.getElementById(id).getAttribute("hide") == "true"){
 		document.getElementById(id).setAttribute("hide","false");
 	}else{
-		document.getElementById(id).setAttribute("hide","true"); /*custom attribute which hides in css*/
+		document.getElementById(id).setAttribute("hide","true");
 	}
 }
 
+/*
+hides or shows the element with the first given ID
+by assigning a custom attribute which is hidden by css
+inverts the current visibility
+element does not necessarily have to be a DIV
+also assigns an attribute to the second given ID
+which will then not be printed if the first element is hidden
+*/
 function hideshowDivNoprint(id,idPrint){
 	if(document.getElementById(id).getAttribute("hide") == "true"){
 		document.getElementById(id).setAttribute("hide","false");
 		document.getElementById(idPrint).setAttribute("noPrint","false");
 	}else{
-		document.getElementById(id).setAttribute("hide","true"); /*custom attribute which hides in css*/
+		document.getElementById(id).setAttribute("hide","true");
 		document.getElementById(idPrint).setAttribute("noPrint","true");
 	}
 }
 
+/*
+hides all elements with the given NAME
+by assigning a custom attribute which is hidden by css
+element does not necessarily have to be a DIV
+*/
 function hideAllDiv(name){ /*name can be modulgruppe, modul or fach*/
 	var elements = document.getElementsByName(name);
 	for (var i=0; i < elements.length; i++) {
@@ -29,6 +53,11 @@ function hideAllDiv(name){ /*name can be modulgruppe, modul or fach*/
 	}
 }
 
+/*
+shows all elements with the given NAME
+by assigning a custom attribute which is (not) hidden by css
+element does not necessarily have to be a DIV
+*/
 function showAllDiv(name){
 	var elements = document.getElementsByName(name);
 	for (var i=0; i < elements.length; i++) {
@@ -36,6 +65,12 @@ function showAllDiv(name){
 	}
 }
 
+/*
+highlights all rows which enclose the given semester
+by assigning a class attribute which is hidden by css
+element does not necessarily have to be a DIV
+also directly underlines all semester strings one year before the given one
+*/
 function highlightDiv(semester){
 	var yearBeforeSemester = String((parseInt(semester.substring(0,4)) - 1)).concat(semester.substring(4,5));
 
@@ -64,6 +99,11 @@ function highlightDiv(semester){
 	}
 }
 
+/*
+assigns a custom attribute to elements in the DOM hierarchy
+to indicate that the do/don't contain lvas
+used for hiding empty categories
+*/
 function showOldestDate(showeverything, date){
 	var rows = document.getElementsByName("lvarow");
 	for (var i=0; i < rows.length; i++) {
@@ -95,15 +135,16 @@ function showOldestDate(showeverything, date){
 	var tables = document.getElementsByName("lvatable");
 	for (var i=0; i < tables.length; i++) {
 		if(showeverything) {
-			/*custom attribute which hides in css*/
-			tables[i].parentNode.setAttribute("nocontent","false"); /*fach TODO check if there is actual content?*/
+			//TODO parentNode method not very change-proof (XPath?)
+			tables[i].parentNode.setAttribute("nocontent","false"); /*fach*/
 			tables[i].parentNode.parentNode.setAttribute("nolvas","false"); /*wholefach*/
 			tables[i].parentNode.parentNode.parentNode.parentNode.setAttribute("nolvas","false"); /*wholemodul*/
 			tables[i].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.setAttribute("nolvas","false"); /*wholemodulgruppe*/
 		} else {
 			var subrows = tables[i].firstChild.childNodes; //firstChild is tbody
 			for (var j=0; j < subrows.length; j++) {
-				if(subrows[j].hasChildNodes()  &&  subrows[j].getAttribute("hiderow") == "false") { /*TODO check if there is actual content instead of hiderow?*/
+				if(subrows[j].hasChildNodes()  &&  subrows[j].getAttribute("hiderow") == "false") {
+					//TODO parentNode method not very change-proof (XPath?)
 					tables[i].parentNode.setAttribute("nocontent","false"); /*fach*/
 					tables[i].parentNode.parentNode.setAttribute("nolvas","false"); /*wholefach*/
 					tables[i].parentNode.parentNode.parentNode.parentNode.setAttribute("nolvas","false"); /*wholemodul*/
@@ -115,9 +156,13 @@ function showOldestDate(showeverything, date){
 	}
 }
 
+/*
+assigngs a custom attribute to the ID "content"
+which hides/shows (according to the given parameter hide) by css all child elements which have got certain other attributes
+*/
 function hideempty(hide) {
 	if(hide){
-		document.getElementById("content").setAttribute("hideempty","true"); /*custom attribute which hides in css*/
+		document.getElementById("content").setAttribute("hideempty","true");
 	}else{
 		document.getElementById("content").setAttribute("hideempty","false");
 	}
