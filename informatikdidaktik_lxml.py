@@ -3,6 +3,7 @@
 
 # Fabian Ehrentraud, 2011-02-19
 # e0725639@mail.student.tuwien.ac.at
+# https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
 # Scrapes Uni and TU websites for LVAs from Informatikdidaktik and stores them in an XML
 # needs Python 2.7 and library lxml
@@ -27,7 +28,7 @@ import os.path
 studyname = "Informatikdidaktik"
 
 xmlfilename = "informatikdidaktik.xml"
-xmlcomment = "\nFabian Ehrentraud, 2011\ne0725639@mail.student.tuwien.ac.at\n"
+xmlcomment = "\nFabian Ehrentraud, 2011\ne0725639@mail.student.tuwien.ac.at\nhttps://github.com/fabb/Informatikdidaktik-Studienplan-Scraping\n"
 xsd = "stpl_collection.xsd"
 xslt = "informatikdidaktik.xslt"
 xmlRootname = "stpl_collection"
@@ -300,7 +301,7 @@ def writeXml(xml_root, filename=xmlfilename):
 	
 	print("Writing XML file + backup")
 	
-	xml = etree.tostring(xml_root.getroottree(), pretty_print=True, xml_declaration=True, encoding="UTF-8")
+	xml = etree.tostring(xml_root.getroottree(), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
 	#print(xml) #unicode problem
 
@@ -694,14 +695,14 @@ def getFile(xml_root, filename=legacyFile, universityName=tu):
 		
 		lva_university = universityName
 		lva_semester = cells[4].strip()
-		lva_title = unicode(cells[3].strip(), "UTF-8")
+		lva_title = unicode(cells[3].strip(), "utf-8")
 		lva_key = cells[0].strip()
 		lva_type = cells[1].strip()
 		lva_sws = cells[5].strip()
 		lva_ects=""
 		lva_info=""
 		lva_url = ""
-		lva_professor = unicode(cells[6].strip().capitalize(), "UTF-8")
+		lva_professor = unicode(cells[6].strip().capitalize(), "utf-8")
 		
 		lva_fach = lva_title
 		lva_fach_type = lva_type

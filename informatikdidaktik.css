@@ -1,7 +1,8 @@
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-02-21
+Fabian Ehrentraud, 2011-02-22
 e0725639@mail.student.tuwien.ac.at
+https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
 */
 
@@ -10,6 +11,8 @@ TODO
 	nicer visual design
 	make shown down-arrow next to headers dynamic according to collapse state
 */
+
+@charset "utf-8";
 
 body {
 	font-family: arial, helvetica, sans-serif;
@@ -130,11 +133,12 @@ li {
 }
 
 /*visual clue for collapseableness*/
+/*Firefox, Opera, Chrome and Safari display this fine, Internet Explorer 8 does not on XP SP2 but on Vista; test for unicode arrow display in browsers: http://www.alanwood.net/unicode/arrows.html*/
 h2:after, h3:after, h4:after, #meta .list-header:after {
-	content: " ⇩";
+	content: " ⇩"; /*unicode arrow down*/
 }
 h2:hover:after, h3:hover:after, h4:hover:after, #meta .list-header:hover:after {
-	content: " ⇧";
+	content: " ⇧"; /*unicode arrow up*/
 }
 h2, h3, h4, #meta .list-header {
 	cursor: pointer;
@@ -354,7 +358,7 @@ h2, h3, h4, #meta .list-header {
 		display: none;
 	}
 	
-	/*avoid unfortunately only supported by Opera, not by Firefox*/
+	/*avoid unfortunately only supported by Opera and Internet Explorer 8, not by Firefox, Chrome or Safari*/
 	h2, h3, h4 {
 		/*page-break-before: avoid;*/
 		page-break-inside: avoid;

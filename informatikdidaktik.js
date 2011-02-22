@@ -1,7 +1,12 @@
 /*
-Fabian Ehrentraud, 2011-02-21
+Fabian Ehrentraud, 2011-02-22
 e0725639@mail.student.tuwien.ac.at
+https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
+*/
+
+/*
+could use utf-8
 */
 
 /*
