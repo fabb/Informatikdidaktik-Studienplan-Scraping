@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions">
 
 <!--
-Fabian Ehrentraud, 2011-02-22
+Fabian Ehrentraud, 2011-02-24
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -10,10 +10,13 @@ Licensed under the Open Software License (OSL 3.0)
 
 <!--
 TODO
+	checkbox to only display courses of current semester
+	dropdown to show only courses of one university
 	save collapse state to cookie
 	save and display last visit date
 	checkboxes for done lvas, store to cookie / loadable file
 -->
+
 	<!-- use method html to avoid self closing tags; xslt 2.0 would support method xhtml -->
 	<!-- media-type text/xml or application/xml does not allow to use the HTML DOM and breaks the used Javascript -->
 	<xsl:output method="html" media-type="text/html" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" cdata-section-elements="script style" indent="yes" encoding="utf-8"/>
@@ -57,6 +60,7 @@ TODO
 			<head>
 				<title>Studienplan <xsl:value-of select="stpl_collection/stpl/title"></xsl:value-of></title>
 				<link rel="stylesheet" type="text/css" href="informatikdidaktik.css" />
+				<link rel="alternate" type="application/rss+xml" title="LVA Feed" href="informatikdidaktik_rss.xml" />
 				<script src="informatikdidaktik.js" type="text/javascript" charset="utf-8"></script>
 				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 				<meta name="description" content="Zusammenfassung aller Lehrveranstaltungen des Studienplans Informatikdidaktik, welche an der TU WIen und Uni Wien abgehalten wurden und werden." />

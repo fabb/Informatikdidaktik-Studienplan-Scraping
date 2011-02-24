@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-02-19
+# Fabian Ehrentraud, 2011-02-24
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -32,6 +32,9 @@ xmlcomment = "\nFabian Ehrentraud, 2011\ne0725639@mail.student.tuwien.ac.at\nhtt
 xsd = "stpl_collection.xsd"
 xslt = "informatikdidaktik.xslt"
 xmlRootname = "stpl_collection"
+
+rss_xslt = "informatikdidaktik_rss.xslt"
+rss_xml = "informatikdidaktik_rss.xml"
 
 tiss = "https://tiss.tuwien.ac.at/curriculum/curriculumVersion.xhtml?locale=de&studyCode=066950&version=2009U.0"
 
@@ -339,6 +342,20 @@ def loadXml(xmlfilename, xmlRootname=xmlRootname, xsd=xsd, loadExisting=True, ch
 	else:
 		#create xml
 		return(makeRoot(xmlRootname, xsd))
+
+		
+""" generate rss """
+
+
+def transformXslt(xml_root, xsltfilename=rss_xslt):
+	xslt_root = readXml(xsltfilename)
+	transform = etree.XSLT(xslt_root)
+	return(transform(xml_root).getroot())
+
+def generateRss(xml_root, rssfilename=rss_xml):
+	result_tree = transformXslt(xml_root)
+	writeXml(result_tree, rssfilename)
+
 
 """ fuzzy matching """
 
@@ -764,3 +781,6 @@ else:
 
 #write xml to file + backupfile
 writeXml(xml_root, filename=xmlfilename)
+
+#generate and write rss to file + backupfile
+generateRss(xml_root)

@@ -9,7 +9,9 @@ Prerequisites
 
 For running the Python script, *Python 2.7* is necessary (maybe a lower version works too) and the Python library *lxml*.
 
-The generated xml file can be viewed in IE, Firefox or Chrome, but due to a bug in Chrome, it only works if the xml is located on a web url. The javascript uses standard conform DOM, so IE7 or lower are *not* supported for the interactive parts.
+The generated xml file can be viewed in IE, Firefox, Opera, Safari or Chrome. Due to a bug in Chrome, it only works if the xml is located on a web url. The javascript uses standard conform DOM, so IE7 or lower are *not* supported for the interactive parts.
+
+Printing the page in the webbrowser will be done in an inksaving manner with custom CSS code. Printing is *not* recommended with Chrome or Safari.
 
 
 Used Technologies
@@ -24,4 +26,6 @@ Used Technologies
 + XHTML
 + CSS
 + JavaScript and DOM
++ RSS
++ (PHP)
 + (soon) Cookies
