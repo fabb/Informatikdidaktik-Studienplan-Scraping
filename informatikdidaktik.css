@@ -247,8 +247,8 @@ h2, h3, h4, #meta .list-header {
 	border-bottom: 8px #AAA solid;
 }
 
-/*it's enough if one of the two is true*/
-.lvas table [hiderow_date~="true"], .lvas table [hiderow_semester~="true"] {
+/*it's enough if one of the three is true*/
+.lvas table [hiderow_date~="true"], .lvas table [hiderow_semester~="true"], .lvas table [hiderow_university~="true"] {
 	display: none !important;
 }
 

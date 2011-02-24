@@ -120,7 +120,25 @@ function showOldestDate(showeverything, date){
 		}
 	}
 	
-	propagateVisibility(showeverything);
+	propagateVisibility(false);
+}
+
+/*
+hides lvas from other universities than the given one
+assigns a custom attribute to elements in the DOM hierarchy
+to indicate that they do/don't contain lvas
+*/
+function showUniversity(showeverything, university){
+	var elements = document.getElementsByName("university");
+	for (var i=0; i < elements.length; i++) {
+		if(showeverything || (elements[i].hasChildNodes() && elements[i].firstChild.nodeValue == university)) {
+			elements[i].parentNode.setAttribute("hiderow_university","false");
+		} else {
+			elements[i].parentNode.setAttribute("hiderow_university","true");
+		}
+	}
+	
+	propagateVisibility(false);
 }
 
 /*
@@ -147,6 +165,7 @@ assigns a custom attribute to elements in the DOM hierarchy
 to indicate that they do/don't contain lvas
 used for hiding empty categories
 hides all categories containing hidden lvas either by hiderow_date or hiderow_semester
+showeverything should not be used with true unless it can safely be said that all occurrences of hiderow_* are false
 */
 function propagateVisibility(showeverything) {	
 	/*at first hide everything*/
@@ -178,7 +197,7 @@ function propagateVisibility(showeverything) {
 		} else {
 			var subrows = tables[i].firstChild.childNodes; //firstChild is tbody
 			for (var j=0; j < subrows.length; j++) {
-				if(subrows[j].hasChildNodes()  &&  subrows[j].getAttribute("hiderow_date") != "true" && subrows[j].getAttribute("hiderow_semester") != "true") {
+				if(subrows[j].hasChildNodes()  &&  subrows[j].getAttribute("hiderow_date") != "true" && subrows[j].getAttribute("hiderow_semester") != "true" && subrows[j].getAttribute("hiderow_university") != "true") {
 					//TODO parentNode method not very change-proof (XPath?)
 					tables[i].parentNode.setAttribute("nocontent","false"); /*fach*/
 					tables[i].parentNode.parentNode.setAttribute("nolvas","false"); /*wholefach*/

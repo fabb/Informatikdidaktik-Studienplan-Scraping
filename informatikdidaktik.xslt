@@ -10,7 +10,6 @@ Licensed under the Open Software License (OSL 3.0)
 
 <!--
 TODO
-	dropdown to show only courses of one university
 	save collapse state to cookie
 	save and display last visit date
 	checkboxes for done lvas, store to cookie / loadable file
@@ -126,7 +125,25 @@ TODO
 						</xsl:if>
 					</p>
 					<div class="controls">
-						<form action="" name="controls">
+						<form action="" name="controls">							<div>
+								Nur LVAs der Uni anzeigen:
+								<!--onchange does not fire in FF when changed with keyboard keys-->
+								<select name="universitySelect" size="1" onchange="showUniversity(this.form.universitySelect.selectedIndex==0, this.form.universitySelect.options[this.form.universitySelect.selectedIndex].value)">
+									<option selected="selected">
+										Alle zeigen
+									</option>
+									<xsl:for-each select="stpl_collection/stpl/modulgruppe/modul/fach/lva/university">
+										<xsl:sort select="." order="descending"/>
+										<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
+										<xsl:if test="count(./preceding::university[current() = .])=0">
+											<option>
+												<!--xsl:value-of select="."/-->
+												<xsl:value-of select="."/>
+											</option>
+										</xsl:if>
+									</xsl:for-each>
+								</select>
+							</div>
 							<div class="sidebyside">
 								Semester hervorheben:
 								<!--onchange does not fire in FF when changed with keyboard keys-->
@@ -286,7 +303,7 @@ TODO
 																							</xsl:if>
 																						</xsl:for-each>
 																					</xsl:attribute>
-																					<td class="lvauniversity"><xsl:value-of select="university"/></td>
+																					<td class="lvauniversity" name="university"><xsl:value-of select="university"/></td>
 																					<!--<td><xsl:value-of select="semester"/></td>-->
 																					<td class="lvasemester" name="semesters">
 																						<xsl:variable name="newestSemester"><xsl:value-of select="semester"/></xsl:variable>
