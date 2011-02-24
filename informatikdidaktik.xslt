@@ -149,7 +149,7 @@ TODO
 							<div class="sidebyside">
 								<input name="hideolderCheck" type="checkbox" onclick="hideold(this.form.hideolderCheck.checked)"/> Verstecke ältere LVAs
 							</div>
-							<div class="sidebyside_linebreakdummy"/>
+							<div class="sidebyside_linebreakdummy"></div>
 							<div class="sidebyside">
 								Anzeigen hinzugefügter LVAs seit:
 								<!--onchange does not fire in FF when changed with keyboard keys-->
