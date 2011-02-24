@@ -10,7 +10,6 @@ Licensed under the Open Software License (OSL 3.0)
 
 <!--
 TODO
-	checkbox to only display courses of current semester
 	dropdown to show only courses of one university
 	save collapse state to cookie
 	save and display last visit date
@@ -128,10 +127,10 @@ TODO
 					</p>
 					<div class="controls">
 						<form action="" name="controls">
-							<div>
+							<div class="sidebyside">
 								Semester hervorheben:
 								<!--onchange does not fire in FF when changed with keyboard keys-->
-								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value)">
+								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value);hideold(this.form.hideolderCheck.checked);">
 									<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
 									<xsl:for-each select="stpl_collection/stpl/modulgruppe/modul/fach/lva/semester[not (. = preceding::semester)]">
 										<xsl:sort select="." order="descending"/>
@@ -147,6 +146,10 @@ TODO
 									</option>
 								</select>
 							</div>
+							<div class="sidebyside">
+								<input name="hideolderCheck" type="checkbox" onclick="hideold(this.form.hideolderCheck.checked)"/> Verstecke ältere LVAs
+							</div>
+							<div class="sidebyside_linebreakdummy"/>
 							<div class="sidebyside">
 								Anzeigen hinzugefügter LVAs seit:
 								<!--onchange does not fire in FF when changed with keyboard keys-->
@@ -167,7 +170,7 @@ TODO
 								</select>
 							</div>
 							<div class="sidebyside">
-								<input name="hideemptyCheck" type="checkbox" onchange="hideempty(this.form.hideemptyCheck.checked)"/> Verstecke leere Kategorien
+								<input name="hideemptyCheck" type="checkbox" onclick="hideempty(this.form.hideemptyCheck.checked)"/> Verstecke leere Kategorien
 							</div>
 							<div>
 								<button name="" type="button" value="" onclick="hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">

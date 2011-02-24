@@ -1,5 +1,5 @@
 /*
-Fabian Ehrentraud, 2011-02-22
+Fabian Ehrentraud, 2011-02-24
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -105,20 +105,50 @@ function highlightDiv(semester){
 }
 
 /*
+hides older lvas than given date
 assigns a custom attribute to elements in the DOM hierarchy
-to indicate that the do/don't contain lvas
+to indicate that they do/don't contain lvas
 used for hiding empty categories
 */
 function showOldestDate(showeverything, date){
 	var rows = document.getElementsByName("lvarow");
 	for (var i=0; i < rows.length; i++) {
 		if(showeverything || rows[i].getAttribute("query_date") >= date) {
-			rows[i].setAttribute("hiderow","false");
+			rows[i].setAttribute("hiderow_date","false");
 		} else {
-			rows[i].setAttribute("hiderow","true");
+			rows[i].setAttribute("hiderow_date","true");
 		}
 	}
 	
+	propagateVisibility(showeverything);
+}
+
+/*
+hides non-highlighted lvas
+assigns a custom attribute to elements in the DOM hierarchy
+to indicate that they do/don't contain lvas
+used for hiding empty categories
+*/
+function hideold(hide) {
+	var rows = document.getElementsByName("lvarow");
+	for (var i=0; i < rows.length; i++) {
+		if(hide && String(rows[i].getAttribute("class")).indexOf("currentlva") == -1) {
+			rows[i].setAttribute("hiderow_semester","true");
+		} else {
+			rows[i].setAttribute("hiderow_semester","false");
+		}
+	}	
+	
+	propagateVisibility(false);
+}
+
+/*
+assigns a custom attribute to elements in the DOM hierarchy
+to indicate that they do/don't contain lvas
+used for hiding empty categories
+hides all categories containing hidden lvas either by hiderow_date or hiderow_semester
+*/
+function propagateVisibility(showeverything) {	
 	/*at first hide everything*/
 	var fachs = document.getElementsByName("fach");
 	for (var i=0; i < fachs.length; i++) {
@@ -148,7 +178,7 @@ function showOldestDate(showeverything, date){
 		} else {
 			var subrows = tables[i].firstChild.childNodes; //firstChild is tbody
 			for (var j=0; j < subrows.length; j++) {
-				if(subrows[j].hasChildNodes()  &&  subrows[j].getAttribute("hiderow") == "false") {
+				if(subrows[j].hasChildNodes()  &&  subrows[j].getAttribute("hiderow_date") != "true" && subrows[j].getAttribute("hiderow_semester") != "true") {
 					//TODO parentNode method not very change-proof (XPath?)
 					tables[i].parentNode.setAttribute("nocontent","false"); /*fach*/
 					tables[i].parentNode.parentNode.setAttribute("nolvas","false"); /*wholefach*/

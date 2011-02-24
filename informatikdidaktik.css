@@ -1,6 +1,6 @@
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-02-22
+Fabian Ehrentraud, 2011-02-24
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -184,6 +184,11 @@ h2, h3, h4, #meta .list-header {
 	display: inline-block;
 	padding-right: 1em;
 }
+#meta .sidebyside_linebreakdummy {
+	height: 0;
+	padding: 0;
+	margin: 0;
+}
 
 #meta form div {
 	margin-top: 0.8em;
@@ -242,7 +247,8 @@ h2, h3, h4, #meta .list-header {
 	border-bottom: 8px #AAA solid;
 }
 
-.lvas table [hiderow~="true"] {
+/*it's enough if one of the two is true*/
+.lvas table [hiderow_date~="true"], .lvas table [hiderow_semester~="true"] {
 	display: none !important;
 }
 
