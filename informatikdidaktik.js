@@ -3,6 +3,7 @@ Fabian Ehrentraud, 2011-02-25
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
+Utilizes html5 localStorage
 */
 
 /*
@@ -12,16 +13,36 @@ could use utf-8
 /*
 TODO
 	instead of unsafe .parentNode use something more robust
-
-	document.querySelectorAll('.mygroup') //returns all elements with class="mygroup"
-	document.querySelectorAll('option[selected="selected"]') //returns the default selected option within each SELECT menu
-	document.querySelectorAll('#mytable tr>td:nth-of-type(1)') //returns the first cell within each table row of "mytable"
-	document.querySelectorAll('#biography, #gallery') //returns both elements "#biography" and "#gallery" (inclusive)
-	
-	getElementsByName
-	querySelectorAll("*[name~="XXX"]")
-	querySelectorAll('*[name~="' + name + '"]')
 */
+
+/*
+code that should be executed when the document is loaded/refreshed
+stores the current date in localStorage
+*/
+function onLoad() {
+	writeDate();
+	
+	var today = new Date();
+	var year = String(today.getFullYear());
+	var month = String("0").concat(String(today.getMonth()+1));
+	month = month.substr(month.length-2);
+	var day = String("0").concat(String(today.getDate()));
+	day = day.substr(day.length-2);
+	
+	var date = year.concat("-").concat(month).concat("-").concat(day)
+	
+	localStorage.visitdate = date;
+}
+
+/*
+writes the last visit date from localStorage to a div in the document
+*/
+function writeDate() {
+	if(localStorage.visitdate){
+		document.querySelector('*[data-name~="lastvisitdate_div"]').removeAttribute("hidden");
+		document.querySelector('*[data-name~="lastvisitdate"]').appendChild(document.createTextNode(localStorage.visitdate));
+	}
+}
 
 /*
 hides or shows the element with the given ID

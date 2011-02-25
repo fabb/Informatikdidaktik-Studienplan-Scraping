@@ -178,6 +178,10 @@ h2, h3, h4, #meta .list-header {
 	font-size: 80%;
 }
 
+#meta .controls .lastvisit {
+	font-style: italic;
+}
+
 #meta .sidebyside {
 	/*display: inline; messy as it does not allow vertical margin or padding*/
 	/*float: left; messy with smaller window widths*/
@@ -206,8 +210,9 @@ h2, h3, h4, #meta .list-header {
 	padding-left: 0.5em;
 }
 
-/*hidden elements (element bodies)*/
-*[data-hide~="true"] {
+/*hidden elements (element bodies)
+hidden is an html5 attribute that should not need css hiding, but it does not work yet in all browsers*/
+*[data-hide~="true"], *[hidden="hidden"] {
 	display: none !important;
 }
 

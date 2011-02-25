@@ -10,9 +10,8 @@ Licensed under the Open Software License (OSL 3.0)
 
 <!--
 TODO
-	save collapse state to cookie
-	save and display last visit date
-	checkboxes for done lvas, store to cookie / loadable file
+	save collapse state to localStorage
+	checkboxes for done lvas, store to localStorage / loadable file
 -->
 
 	<!-- use method html to avoid self closing tags; xslt 2.0 would support method xhtml -->
@@ -63,10 +62,12 @@ TODO
 				<link rel="stylesheet" type="text/css" href="informatikdidaktik.css" />
 				<link rel="alternate" type="application/rss+xml" title="LVA Feed" href="informatikdidaktik_rss.xml" />
 				<script src="informatikdidaktik.js" type="text/javascript" charset="utf-8"></script>
-				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-				<meta name="description" content="Zusammenfassung aller Lehrveranstaltungen des Studienplans Informatikdidaktik, welche an der TU WIen und Uni Wien abgehalten wurden und werden." />
+				<meta charset="utf-8"/>
+				<meta name="description" content="Zusammenfassung aller Lehrveranstaltungen des Studienplans Informatikdidaktik, welche an der TU WIen und Uni Wien abgehalten wurden und werden."/>
+				<meta name="keywords" content="TU Wien, Uni Wien, LVAs, Lehrveranstaltungen, Studienplan, Informatikdidaktik, 950, Zusammenfassung, XSLT, XML" />
+				<meta name="author" content="Fabian Ehrentraud" />
 			</head>
-			<body onload="document.controls.reset()">
+			<body onload="document.controls.reset();onLoad();">
 				<div id="header">
 					<h1>
 						Studienplan <xsl:value-of select="stpl_collection/stpl/title"></xsl:value-of>
@@ -124,6 +125,10 @@ TODO
 						</xsl:if>
 					</p>
 					<div class="controls">
+						<div class="lastvisit" data-name="lastvisitdate_div" hidden="hidden">
+							Diese Seite wurde zuletzt besucht: 
+							<span data-name="lastvisitdate"></span>
+						</div>
 						<form name="controls">
 							<div>
 								Nur LVAs der Uni anzeigen:

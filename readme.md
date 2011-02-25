@@ -24,8 +24,8 @@ Used Technologies
 + XPath
 + XSLT 1.0 - unfortunately the current browsers do not support XSLT 2.0 which would provide relieving functions for string comparison and the like
 + (X)HTML5
++ HTML5 localStorage
 + CSS
 + JavaScript and DOM
 + RSS
 + (PHP)
-+ (soon) Cookies
