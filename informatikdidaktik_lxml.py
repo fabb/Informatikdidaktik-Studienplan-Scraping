@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-02-24
+# Fabian Ehrentraud, 2011-02-25
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -369,6 +369,18 @@ def fuzzyEq(wantedStr, compStr, threshold=0.89): #FIXME
 	wantedStr = (wantedStr or "").strip().lower()
 	compStr = (compStr or "").strip().lower()
 	
+	#warning: lvas "Unterrichtspraktikum Informatikdidaktik 1" and "Unterrichtspraktikum Informatikdidaktik 2" are both for fach "Unterrichtspraktikum Informatikdidaktik"
+	fixes_wanted = ["(1)","(2)","(3)","(4)","seminar 1","seminar 2","logik","systeme 1","systeme 2"] #(1)-(4) could lead to problems if those lvas were provided by Uni which does not categorize into fach
+	for f in fixes_wanted:
+		if f in wantedStr and f not in compStr: #but NOT the other way around
+			return(False)
+
+	#warning: "Knowledge Management" does not fit to "Knowledge Management im Bildungsbereich"
+	fixes_comp = ["bildungsbereich"]
+	for f in fixes_comp:
+		if f in compStr and f not in wantedStr: #but NOT the other way around
+			return(False)
+	
 	if wantedStr in compStr or compStr in wantedStr: #FIXME does not take account for spelling errors
 		return(True)
 	
@@ -377,12 +389,6 @@ def fuzzyEq(wantedStr, compStr, threshold=0.89): #FIXME
 		subfach1 = subfach[1]
 		subfach2 = subfach[3]
 		return(difflib.SequenceMatcher(None, subfach1, wantedStr).ratio() >= threshold or difflib.SequenceMatcher(None, subfach2, wantedStr).ratio() >= threshold)
-	
-	#warning: lvas "Unterrichtspraktikum Informatikdidaktik 1" and "Unterrichtspraktikum Informatikdidaktik 2" are both for fach "Unterrichtspraktikum Informatikdidaktik"
-	fixes = ["(1)","(2)","(3)","(4)","seminar 1","seminar 2","logik","systeme 1","systeme 2"] #(1)-(4) could lead to problems if those lvas were provided by Uni which does not categorize into fach
-	for f in fixes:
-		if f in wantedStr and f not in compStr: #but NOT the other way around
-			return(False)
 	
 	#return(wantedStr.strip() == compStr.strip())
 	return(difflib.SequenceMatcher(None, wantedStr, compStr).ratio() >= threshold)
