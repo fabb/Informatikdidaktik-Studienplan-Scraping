@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <!--
-Fabian Ehrentraud, 2011-02-24
+Fabian Ehrentraud, 2011-02-25
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -15,6 +15,7 @@ TODO
 	make direct link to xml and set selector to only display newest LVAs
 FIXME
 	pubDate has wrong format, should follow RFC 822
+		http://symphony-cms.com/download/xslt-utilities/view/50791/
 -->
 
 	<xsl:output method="xml" media-type="application/rss+xml" indent="yes" encoding="utf-8"/>
@@ -139,7 +140,7 @@ FIXME
 									<xsl:value-of select="substring-before(., 'T')"/>
 									<!--TODO Tue, 03 Jun 2003 09:39:21 GMT-->
 								</pubDate>
-								<guid>
+								<guid isPermaLink="false">
 									<xsl:value-of select="substring-before(., 'T')"/>
 								</guid>
 							</item>

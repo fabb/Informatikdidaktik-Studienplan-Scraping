@@ -1,5 +1,5 @@
 <!--
-Fabian Ehrentraud, 2011-02-24
+Fabian Ehrentraud, 2011-02-25
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -17,11 +17,11 @@ $xh = xslt_create();
 //process the document, returning the result into the $result variable 
 $result = xslt_process($xh, 'informatikdidaktik.xml', 'informatikdidaktik_rss.xslt'); 
 if ($result) { 
-    print $result; 
+	print $result; 
 } 
 else { 
-    print "Transformation error: " . xslt_error($xh) .  
-    print ", error code: " . xslt_errno($xh); 
+	print "Transformation error: " . xslt_error($xh) . 
+	print ", error code: " . xslt_errno($xh); 
 } 
 
 xslt_free($xh); 

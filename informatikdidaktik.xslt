@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions">
 
 <!--
-Fabian Ehrentraud, 2011-02-24
+Fabian Ehrentraud, 2011-02-25
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -16,8 +16,11 @@ TODO
 -->
 
 	<!-- use method html to avoid self closing tags; xslt 2.0 would support method xhtml -->
-	<!-- media-type text/xml or application/xml does not allow to use the HTML DOM and breaks the used Javascript -->
-	<xsl:output method="html" media-type="text/html" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" cdata-section-elements="script style" indent="yes" encoding="utf-8"/>
+	<!-- media-type text/xml or application/xml or application/xhtml+xml does not allow to use the HTML DOM and breaks the used Javascript -->
+	<!--xsl:output method="html" media-type="text/html" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" cdata-section-elements="script style" indent="yes" encoding="utf-8"/-->
+	<!-- html5 has short doctype, not even doctype-system="about:legacy-compat" should be necessary, but is here as some XSLT processors hide the doctype as a whole if it is missing -->
+	<!-- XHTML version of html5 should not need a doctype at all, but that leads to problems -->
+	<xsl:output method="html" media-type="text/html" doctype-system="about:legacy-compat" cdata-section-elements="script style" indent="yes" encoding="utf-8"/>
 	
 	<xsl:template match="/">
 	
@@ -90,26 +93,23 @@ TODO
 					</p>
 					<div id="quellen">
 						<ul>
-						<li class="list-header" onClick="hideshowDivNoprint('quellen-body','quellen');">
+						<li class="list-header" onclick="hideshowLiNoprint('quelle','quellen');">
 							Quellen
 						</li>
-							<div id="quellen-body">
-								<!--xsl:for-each select="stpl_collection/source"-->
-								<!-- each source with same url only ONCE -->
-								<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
-								<xsl:for-each select="stpl_collection/source[not (./url = preceding::*/url)]">
-									<xsl:sort select="query_date" order="descending"/>
-									<li>
-										<a>
-											<xsl:attribute name="href">
-												<xsl:value-of select="url"/>
-											</xsl:attribute>
-											<xsl:attribute name="target">new</xsl:attribute>
-											<xsl:value-of select="url"/>
-										</a>
-									</li>
-								</xsl:for-each>
-							</div>
+						<!--xsl:for-each select="stpl_collection/source"-->
+						<!-- each source with same url only ONCE -->
+						<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
+						<xsl:for-each select="stpl_collection/source[not (./url = preceding::*/url)]">
+							<xsl:sort select="query_date" order="descending"/>
+							<li data-name="quelle">
+								<a>
+									<xsl:attribute name="href">
+										<xsl:value-of select="url"/>
+									</xsl:attribute>
+									<xsl:value-of select="url"/>
+								</a>
+							</li>
+						</xsl:for-each>
 						</ul>
 					</div>
 					<p class="stpl-pdf">
@@ -119,13 +119,13 @@ TODO
 								<xsl:attribute name="href">
 									<xsl:value-of select="stpl_collection/stpl/url"/>
 								</xsl:attribute>
-								<xsl:attribute name="target">new</xsl:attribute>
 								<xsl:value-of select="stpl_collection/stpl/url"/>
 							</a>
 						</xsl:if>
 					</p>
 					<div class="controls">
-						<form action="" name="controls">							<div>
+						<form name="controls">
+							<div>
 								Nur LVAs der Uni anzeigen:
 								<!--onchange does not fire in FF when changed with keyboard keys-->
 								<select name="universitySelect" size="1" onchange="showUniversity(this.form.universitySelect.selectedIndex==0, this.form.universitySelect.options[this.form.universitySelect.selectedIndex].value)">
@@ -190,26 +190,17 @@ TODO
 								<input name="hideemptyCheck" type="checkbox" onclick="hideempty(this.form.hideemptyCheck.checked)"/> Verstecke leere Kategorien
 							</div>
 							<div>
-								<button name="" type="button" value="" onclick="hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
-									<p>
-										<!--<img src="selfhtml.gif" width="106" height="109" alt="SELFHTML Logo"><br>-->
+								<button type="button" value="" onclick="hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
 										<b>Zeige Modulgruppen</b>
-									</p>
 								</button>
-								<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');hideAllDiv('modul');showAllDiv('fach');">
-									<p>
+								<button type="button" value="" onclick="showAllDiv('modulgruppe');hideAllDiv('modul');showAllDiv('fach');">
 										<b>Zeige Module</b>
-									</p>
 								</button>
-								<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('fach');">
-									<p>
+								<button type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('fach');">
 										<b>Zeige Fächer</b>
-									</p>
 								</button>
-								<button name="" type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
-									<p>
+								<button type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
 										<b>Zeige alles</b>
-									</p>
 								</button>
 							</div>
 						</form>
@@ -217,62 +208,63 @@ TODO
 				</div>
 				<div id="content">
 					<xsl:for-each select="stpl_collection/stpl/modulgruppe">
-						<div name="wholemodulgruppe">
-							<xsl:attribute name="nolvas_static">
+						<div data-name="wholemodulgruppe">
+							<xsl:attribute name="data-nolvas_static">
 								<xsl:value-of select="count(.//lva)=0"/>
 							</xsl:attribute>
 							<xsl:variable name="modulgruppeID">
-								<!-- remove " from variable name -->
-								<xsl:value-of select="translate(./title,'&quot;','_')"/>
+								<!-- remove ", spaces, comma, braces and + from variable name -->
+								<xsl:value-of select="translate(./title,'&quot; ,()+','______')"/>
 							</xsl:variable>
 							<h2>
 								<!-- warning: this way, no " is allowed in the variable name -->
-								<xsl:attribute name="onClick">
+								<xsl:attribute name="onclick">
 									hideshowDiv("<xsl:value-of select="$modulgruppeID"/>")
 								</xsl:attribute>
 								<xsl:value-of select="title"/>
 							</h2>
-							<div class="modulgruppe-body" name="modulgruppe">
+							<div class="modulgruppe-body" data-name="modulgruppe">
 								<xsl:attribute name="id">
 									<xsl:value-of select="$modulgruppeID"/>
 								</xsl:attribute>
 								<xsl:for-each select="modul">
-									<div name="wholemodul">
-										<xsl:attribute name="nolvas_static">
+									<div data-name="wholemodul">
+										<xsl:attribute name="data-nolvas_static">
 											<xsl:value-of select="count(.//lva)=0"/>
 										</xsl:attribute>
 										<xsl:variable name="modulID">
-											<!-- remove " from variable name -->
-											<xsl:value-of select="translate(./title,'&quot;','_')"/>
+											<!-- remove ", spaces, comma, braces and + from variable name -->
+											<xsl:value-of select="translate(./title,'&quot; ,()+','______')"/>
 										</xsl:variable>
 										<h3>
 											<!-- warning: this way, no " is allowed in the variable name -->
-											<xsl:attribute name="onClick">
+											<xsl:attribute name="onclick">
 												hideshowDiv("<xsl:value-of select="$modulID"/>")
 											</xsl:attribute>
 											<xsl:value-of select="title"/>
 										</h3>
-										<div class="modul-body" name="modul">
+										<div class="modul-body" data-name="modul">
 											<xsl:attribute name="id">
 												<xsl:value-of select="$modulID"/>
 											</xsl:attribute>
 											<xsl:for-each select="fach">
-												<div class="fach" name="wholefach">
-													<xsl:attribute name="nolvas_static">
+												<div class="fach" data-name="wholefach">
+													<xsl:attribute name="data-nolvas_static">
 														<xsl:value-of select="count(.//lva)=0"/>
 													</xsl:attribute>
 													<xsl:variable name="fachID">
-														<!-- remove " from variable name -->
-														<xsl:value-of select="translate(./title,'&quot;','_')"/>, <xsl:value-of select="type"/>
+														<!-- remove ", spaces, comma, braces and + from variable name -->
+														<!-- add modulID to the fachID as a fach can appear in several wahlmoduls -->
+														<xsl:value-of select="concat($modulID,translate(./title,'&quot; ,()+','______'))"/>_<xsl:value-of select="type"/>
 													</xsl:variable>
 													<h4>
 														<!-- warning: this way, no " is allowed in the variable name -->
-														<xsl:attribute name="onClick">
+														<xsl:attribute name="onclick">
 															hideshowDiv("<xsl:value-of select="$fachID"/>")
 														</xsl:attribute>
 														<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
 													</h4>
-													<div class="lvas" name="fach">
+													<div class="lvas" data-name="fach">
 														<xsl:attribute name="id">
 															<xsl:value-of select="$fachID"/>
 														</xsl:attribute>
@@ -281,7 +273,7 @@ TODO
 																<p class="nolvas">Keine LVAs zu diesem Fach</p>
 															</xsl:when>
 															<xsl:otherwise>
-																<table name="lvatable">
+																<table data-name="lvatable">
 																	<tbody>
 																		<xsl:for-each select="lva">
 																			<xsl:sort select="semester" order="descending"/>
@@ -289,13 +281,13 @@ TODO
 																			<!--only display LVA when it has the highest semester; it is assumed that there is only one such LVA -->
 																			<!-- at TU there is always the same key, not on the Uni -->
 																			<xsl:if test="count($similarLvaSet[translate(./semester,'SW','05') &gt; translate(current()/semester,'SW','05')])=0">
-																				<tr name="lvarow">
+																				<tr data-name="lvarow">
 																					<xsl:if test="semester=$highlightSemester">
 																						<xsl:attribute name="class">
 																							currentlva
 																						</xsl:attribute>
 																					</xsl:if>
-																					<xsl:attribute name="query_date"><!--custom attribute-->
+																					<xsl:attribute name="data-query_date"><!--custom attribute-->
 																						<xsl:for-each select="$similarLvaSet/query_date">
 																							<xsl:sort select="." order="descending"/>
 																							<xsl:if test="position() = 1"><!--XSLT1 hack for getting string-maximum-->
@@ -303,14 +295,14 @@ TODO
 																							</xsl:if>
 																						</xsl:for-each>
 																					</xsl:attribute>
-																					<td class="lvauniversity" name="university"><xsl:value-of select="university"/></td>
+																					<td class="lvauniversity" data-name="university"><xsl:value-of select="university"/></td>
 																					<!--<td><xsl:value-of select="semester"/></td>-->
-																					<td class="lvasemester" name="semesters">
+																					<td class="lvasemester" data-name="semesters">
 																						<xsl:variable name="newestSemester"><xsl:value-of select="semester"/></xsl:variable>
 																						<xsl:for-each select="$similarLvaSet">
 																							<xsl:sort select="semester" order="descending"/>
 																							<xsl:if test="not(position() = 1)">, </xsl:if>
-																							<span name="semester">
+																							<span data-name="semester">
 																								<!-- problematic when $newestSemester is greater than $highlightSemester -->
 																								<xsl:if test="$newestSemester != $highlightSemester and ./semester = $yearBeforeHighlightSemester">
 																									<xsl:attribute name="class">probableLva</xsl:attribute>
@@ -331,7 +323,6 @@ TODO
 																									<xsl:attribute name="href">
 																										<xsl:value-of select="url"/>
 																									</xsl:attribute>
-																									<xsl:attribute name="target">new</xsl:attribute>
 																									<xsl:value-of select="title"/>
 																								</a>
 																							</xsl:otherwise>

@@ -1,6 +1,6 @@
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-02-24
+Fabian Ehrentraud, 2011-02-25
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -207,11 +207,11 @@ h2, h3, h4, #meta .list-header {
 }
 
 /*hidden elements (element bodies)*/
-*[hide~="true"] {
+*[data-hide~="true"] {
 	display: none !important;
 }
 
-#content[hideempty~="true"] [nolvas~="true"], #content[hideempty="true"][nolvas~="true"], #content[hideempty~="true"] [nolvas_static~="true"], #content[hideempty="true"][nolvas_static~="true"] {
+#content[data-hideempty~="true"] [data-nolvas~="true"], #content[data-hideempty="true"][data-nolvas~="true"], #content[data-hideempty~="true"] [data-nolvas_static~="true"], #content[data-hideempty="true"][data-nolvas_static~="true"] {
 	display: none;
 }
 
@@ -231,7 +231,7 @@ h2, h3, h4, #meta .list-header {
 	background-color: #DDD;
 }
 
-.lvas[nocontent~="true"] {
+.lvas[data-nocontent~="true"] {
 	display: none !important;
 }
 
@@ -248,7 +248,7 @@ h2, h3, h4, #meta .list-header {
 }
 
 /*it's enough if one of the three is true*/
-.lvas table [hiderow_date~="true"], .lvas table [hiderow_semester~="true"], .lvas table [hiderow_university~="true"] {
+.lvas table [data-hiderow_date~="true"], .lvas table [data-hiderow_semester~="true"], .lvas table [data-hiderow_university~="true"] {
 	display: none !important;
 }
 
@@ -302,7 +302,7 @@ h2, h3, h4, #meta .list-header {
 	/*width: 10px;*/
 }
 
-*[noPrint~="true"] {
+*[data-noPrint~="true"] {
 	opacity: 0.5;
 }
 
@@ -351,7 +351,7 @@ h2, h3, h4, #meta .list-header {
 		padding-left: 0em;
 	}
 	
-	*[hide~="true"] {
+	*[data-hide~="true"] {
 		/*display: inherit !important; this would display the whole expanded structure in printing, regardless of the collapse state*/
 	}
 	
@@ -360,7 +360,7 @@ h2, h3, h4, #meta .list-header {
 		content: "";
 	}
 	
-	*[noPrint~="true"], #meta .controls {
+	*[data-noPrint~="true"], #meta .controls {
 		display: none;
 	}
 	

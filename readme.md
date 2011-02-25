@@ -23,7 +23,7 @@ Used Technologies
 + XML Schema
 + XPath
 + XSLT 1.0 - unfortunately the current browsers do not support XSLT 2.0 which would provide relieving functions for string comparison and the like
-+ XHTML
++ (X)HTML5
 + CSS
 + JavaScript and DOM
 + RSS
