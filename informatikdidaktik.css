@@ -1,6 +1,6 @@
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-02-25
+Fabian Ehrentraud, 2011-02-26
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -102,6 +102,18 @@ li {
 	margin-left: 2em;
 	margin-top: 0.5em;
 	margin-bottom: 0.5em;
+}
+
+#meta .meta-nonprint {
+	float: right;
+	color: #877;
+	font-size: 50%;
+	font-style: italic;
+	cursor: pointer;
+}
+
+*[data-noPrint~="true"] .hideWhenNonprint {
+	display: none;
 }
 
 #meta {
@@ -217,7 +229,18 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 }
 
 #content[data-hideempty~="true"] [data-nolvas~="true"], #content[data-hideempty="true"][data-nolvas~="true"], #content[data-hideempty~="true"] [data-nolvas_static~="true"], #content[data-hideempty="true"][data-nolvas_static~="true"] {
-	display: none;
+	display: none !important;
+}
+
+#content[data-hideheaders~="true"] h2, #content[data-hideheaders~="true"] h3, #content[data-hideheaders~="true"] h4, #content[data-hideheaders~="true"] [data-nolvas~="true"], #content[data-hideheaders~="true"] [data-nolvas_static~="true"] {
+	display: none !important;
+}
+#content[data-hideheaders~="true"] .modulgruppe-body, #content[data-hideheaders~="true"] .modul-body {
+	border: none;
+	padding-left: 0;
+}
+#content[data-hideheaders~="true"] .fach, #content[data-hideheaders~="true"] .lvas {
+	margin-left: 0;
 }
 
 
@@ -308,7 +331,7 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 }
 
 *[data-noPrint~="true"] {
-	opacity: 0.5;
+	opacity: 0.6;
 }
 
 @media print {
@@ -319,10 +342,11 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 	body {
 		font-size: 6.3pt;
 		/*font-family: times new roman, times, serif;*/
+		color: black;
 		margin: 0;
 	}
 
-	.info, a, .lvas table td a, h1, h2, h3, h4 {
+	.info, a, .lvas table td, .lvas table td a, h1, h2, h3, h4 {
 		color: black;
 	}
 

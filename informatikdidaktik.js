@@ -1,5 +1,5 @@
 /*
-Fabian Ehrentraud, 2011-02-25
+Fabian Ehrentraud, 2011-02-26
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -7,7 +7,7 @@ Utilizes html5 localStorage
 */
 
 /*
-could use utf-8
+could use utf-8 as it is inluded with charset="utf-8"
 */
 
 /*
@@ -18,6 +18,7 @@ TODO
 /*
 code that should be executed when the document is loaded/refreshed
 stores the current date in localStorage
+note that localStorage is only meant to work when the document is loaded from a domain and not a file - but only IE8 is strict enough to follow this
 */
 function onLoad() {
 	writeDate();
@@ -35,6 +36,14 @@ function onLoad() {
 }
 
 /*
+this is an expensive workaround for correctly redrawing in IE and Safari
+*/
+function redrawFix() {
+	var element = document.getElementsByTagName("body")[0];
+	element.className = element.className
+}
+
+/*
 writes the last visit date from localStorage to a div in the document
 */
 function writeDate() {
@@ -42,6 +51,8 @@ function writeDate() {
 		document.querySelector('*[data-name~="lastvisitdate_div"]').removeAttribute("hidden");
 		document.querySelector('*[data-name~="lastvisitdate"]').appendChild(document.createTextNode(localStorage.visitdate));
 	}
+
+	redrawFix();
 }
 
 /*
@@ -56,6 +67,8 @@ function hideshowDiv(id){
 	}else{
 		document.getElementById(id).setAttribute("data-hide","true");
 	}
+
+	redrawFix();
 }
 
 /*
@@ -67,18 +80,24 @@ which will then not be printed if the first element is hidden
 */
 function hideshowLiNoprint(name,idPrint){
 	if(document.getElementById(idPrint).getAttribute("data-noPrint") == "true"){
-		var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
-		for (var i=0; i < elements.length; i++) {
-			elements[i].setAttribute("data-hide","false");
+		if(name){
+			var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
+			for (var i=0; i < elements.length; i++) {
+				elements[i].setAttribute("data-hide","false");
+			}
 		}
 		document.getElementById(idPrint).setAttribute("data-noPrint","false");
 	}else{
-		var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
-		for (var i=0; i < elements.length; i++) {
-			elements[i].setAttribute("data-hide","true");
+		if(name){
+			var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
+			for (var i=0; i < elements.length; i++) {
+				elements[i].setAttribute("data-hide","true");
+			}
 		}
 		document.getElementById(idPrint).setAttribute("data-noPrint","true");
 	}
+
+	redrawFix();
 }
 
 /*
@@ -91,6 +110,8 @@ function hideAllDiv(name){ /*name can be modulgruppe, modul or fach*/
 	for (var i=0; i < elements.length; i++) {
 		elements[i].setAttribute("data-hide","true");
 	}
+
+	redrawFix();
 }
 
 /*
@@ -103,6 +124,8 @@ function showAllDiv(name){
 	for (var i=0; i < elements.length; i++) {
 		elements[i].setAttribute("data-hide","false");
 	}
+
+	redrawFix();
 }
 
 /*
@@ -137,6 +160,8 @@ function highlightDiv(semester){
 			elements[i].parentNode.setAttribute("class","");
 		}
 	}
+
+	redrawFix();
 }
 
 /*
@@ -243,6 +268,8 @@ function propagateVisibility(showeverything) {
 			}
 		}
 	}
+
+	redrawFix();
 }
 
 /*
@@ -255,4 +282,23 @@ function hideempty(hide) {
 	}else{
 		document.getElementById("content").setAttribute("data-hideempty","false");
 	}
+
+	redrawFix();
+}
+
+/*
+assigngs a custom attribute to the ID "content"
+which hides/shows (according to the given parameter hide) by css all child elements which are headers
+*/
+function hideheaders(hide) {
+	if(hide){
+		showAllDiv('modulgruppe');
+		showAllDiv('modul');
+		showAllDiv('fach');
+		document.getElementById("content").setAttribute("data-hideheaders","true");
+	}else{
+		document.getElementById("content").setAttribute("data-hideheaders","false");
+	}
+	
+	redrawFix();
 }

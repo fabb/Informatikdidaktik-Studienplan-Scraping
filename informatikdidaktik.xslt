@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions">
 
 <!--
-Fabian Ehrentraud, 2011-02-25
+Fabian Ehrentraud, 2011-02-26
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -22,6 +22,9 @@ TODO
 	<xsl:output method="html" media-type="text/html" doctype-system="about:legacy-compat" cdata-section-elements="script style" indent="yes" encoding="utf-8"/>
 	
 	<xsl:template match="/">
+	
+		<!-- workaround for XSLT 1.0 where handling both apostrophes and quotes in one string is a bit complicated -->
+		<xsl:variable name="apos">'</xsl:variable>
 	
 		<xsl:variable name="latestQuerydate">
 			<xsl:for-each select="/stpl_collection/source">
@@ -77,6 +80,9 @@ TODO
 					</h1>
 				</div>
 				<div id="meta">
+					<p class="meta-nonprint" data-name="data-meta-nonprint" onclick="hideshowLiNoprint(null,'meta');">
+						Diesen Abschnitt <span class="hideWhenNonprint">nicht </span>drucken
+					</p>
 					<p class="info">Kombination der abgehaltenen LVAs der <em>Uni Wien</em> und der <em>TU Wien</em> der vergangenen und kommenden Semester</p>
 					<p class="info">Zusammengestellt von <span class="author">Fabian Ehrentraud (fabb)</span></p>
 					<p class="version">
@@ -125,10 +131,6 @@ TODO
 						</xsl:if>
 					</p>
 					<div class="controls">
-						<div class="lastvisit" data-name="lastvisitdate_div" hidden="hidden">
-							Diese Seite wurde zuletzt besucht: 
-							<span data-name="lastvisitdate"></span>
-						</div>
 						<form name="controls">
 							<div>
 								Nur LVAs der Uni anzeigen:
@@ -191,17 +193,25 @@ TODO
 									</xsl:for-each>
 								</select>
 							</div>
+							<div class="sidebyside lastvisit" data-name="lastvisitdate_div" hidden="hidden">
+								Diese Seite wurde zuletzt besucht: 
+								<span data-name="lastvisitdate"></span>
+							</div>
+							<div class="sidebyside_linebreakdummy"></div>
+							<div class="sidebyside">
+								<input name="hideheadersCheck" type="checkbox" onclick="hideheaders(this.form.hideheadersCheck.checked)"/> Verstecke Überschriften
+							</div>
 							<div class="sidebyside">
 								<input name="hideemptyCheck" type="checkbox" onclick="hideempty(this.form.hideemptyCheck.checked)"/> Verstecke leere Kategorien
 							</div>
 							<div>
-								<button type="button" value="" onclick="hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
+								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');}}">
 										<b>Zeige Modulgruppen</b>
 								</button>
-								<button type="button" value="" onclick="showAllDiv('modulgruppe');hideAllDiv('modul');showAllDiv('fach');">
+								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modulgruppe');hideAllDiv('modul');showAllDiv('fach');}}">
 										<b>Zeige Module</b>
 								</button>
-								<button type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('fach');">
+								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('fach');}}">
 										<b>Zeige Fächer</b>
 								</button>
 								<button type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
@@ -218,14 +228,11 @@ TODO
 								<xsl:value-of select="count(.//lva)=0"/>
 							</xsl:attribute>
 							<xsl:variable name="modulgruppeID">
-								<!-- remove ", spaces, comma, braces and + from variable name -->
-								<xsl:value-of select="translate(./title,'&quot; ,()+','______')"/>
+								<!-- remove ", ', spaces, comma, braces and + from variable name -->
+								<xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>
 							</xsl:variable>
-							<h2>
-								<!-- warning: this way, no " is allowed in the variable name -->
-								<xsl:attribute name="onclick">
-									hideshowDiv("<xsl:value-of select="$modulgruppeID"/>")
-								</xsl:attribute>
+							<!-- warning: this way, no " and ' is allowed in the variable name -->
+							<h2 onclick="hideshowDiv('{$modulgruppeID}')">
 								<xsl:value-of select="title"/>
 							</h2>
 							<div class="modulgruppe-body" data-name="modulgruppe">
@@ -238,14 +245,11 @@ TODO
 											<xsl:value-of select="count(.//lva)=0"/>
 										</xsl:attribute>
 										<xsl:variable name="modulID">
-											<!-- remove ", spaces, comma, braces and + from variable name -->
-											<xsl:value-of select="translate(./title,'&quot; ,()+','______')"/>
+											<!-- remove ", ', spaces, comma, braces and + from variable name -->
+											<xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>
 										</xsl:variable>
-										<h3>
-											<!-- warning: this way, no " is allowed in the variable name -->
-											<xsl:attribute name="onclick">
-												hideshowDiv("<xsl:value-of select="$modulID"/>")
-											</xsl:attribute>
+										<!-- warning: this way, no "and ' is allowed in the variable name -->
+										<h3 onclick="hideshowDiv('{$modulID}')">
 											<xsl:value-of select="title"/>
 										</h3>
 										<div class="modul-body" data-name="modul">
@@ -258,15 +262,12 @@ TODO
 														<xsl:value-of select="count(.//lva)=0"/>
 													</xsl:attribute>
 													<xsl:variable name="fachID">
-														<!-- remove ", spaces, comma, braces and + from variable name -->
+														<!-- remove ", ', spaces, comma, braces and + from variable name -->
 														<!-- add modulID to the fachID as a fach can appear in several wahlmoduls -->
-														<xsl:value-of select="concat($modulID,translate(./title,'&quot; ,()+','______'))"/>_<xsl:value-of select="type"/>
+														<xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>_<xsl:value-of select="type"/>
 													</xsl:variable>
-													<h4>
-														<!-- warning: this way, no " is allowed in the variable name -->
-														<xsl:attribute name="onclick">
-															hideshowDiv("<xsl:value-of select="$fachID"/>")
-														</xsl:attribute>
+													<!-- warning: this way, no " and ' is allowed in the variable name -->
+													<h4 onclick="hideshowDiv('{$fachID}')">
 														<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
 													</h4>
 													<div class="lvas" data-name="fach">
@@ -289,7 +290,7 @@ TODO
 																				<tr data-name="lvarow">
 																					<xsl:if test="semester=$highlightSemester">
 																						<xsl:attribute name="class">
-																							currentlva
+																							<xsl:text>currentlva</xsl:text>
 																						</xsl:attribute>
 																					</xsl:if>
 																					<xsl:attribute name="data-query_date"><!--custom attribute-->
