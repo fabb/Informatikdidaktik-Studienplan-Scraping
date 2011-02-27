@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-02-26
+Fabian Ehrentraud, 2011-02-27
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -27,11 +27,11 @@ TODO
 		<xsl:variable name="apos">'</xsl:variable>
 	
 		<xsl:variable name="latestQuerydate">
-			<xsl:for-each select="/stpl_collection/source">
+			<xsl:for-each select="/stpl_collection/source/query_date">
 				<!--more complex version: <xsl:if test="count(../source[translate(./query_date, 'TZ:-', '') &gt; translate(current()/query_date, 'TZ:-', '')])=0">-->
-				<xsl:sort select="query_date" order="descending"/>
+				<xsl:sort select="." order="descending"/>
 				<xsl:if test="position() = 1"><!--XSLT1 hack for getting string-maximum-->
-					<xsl:value-of select="query_date"/>
+					<xsl:value-of select="."/>
 				</xsl:if>
 			</xsl:for-each>
 		</xsl:variable>
@@ -283,6 +283,8 @@ TODO
 																	<tbody>
 																		<xsl:for-each select="lva">
 																			<xsl:sort select="semester" order="descending"/>
+																			<xsl:sort select="university" order="ascending"/>
+																			<xsl:sort select="key" order="ascending"/>
 																			<xsl:variable name="similarLvaSet" select="../lva[./title=current()/title and ./university=current()/university and ./type=current()/type and (./university='Uni' or ./key=current()/key)]"/>
 																			<!--only display LVA when it has the highest semester; it is assumed that there is only one such LVA -->
 																			<!-- at TU there is always the same key, not on the Uni -->
@@ -337,11 +339,16 @@ TODO
 																					<td class="lvacredits">
 																						(<xsl:value-of select="sws"/> SWS / <xsl:value-of select="ects"/> ECTS)
 																					</td>
-																					<xsl:if test="string(info)">
-																						<td class="lvainfo">
+																					<td class="lvainfo">
+																						<xsl:if test="info = ''">
+																							<xsl:attribute name="class">
+																								<xsl:text>lvainfo_empty</xsl:text>
+																							</xsl:attribute>
+																						</xsl:if>
+																						<xsl:if test="string(info)">
 																							Infos: <xsl:value-of select="info"/>
-																						</td>
-																					</xsl:if>
+																						</xsl:if>
+																					</td>
 																				</tr>
 																			</xsl:if>
 																		</xsl:for-each>
@@ -358,6 +365,15 @@ TODO
 							</div>
 						</div>
 					</xsl:for-each>
+				</div>
+				<div id="footer">
+					<p>
+						<span>Valid HTML5. Tested with Opera, Firefox, Internet Explorer 8, Chrome and Safari.</span>
+					</p>
+					<p>
+						<span>Project Homepage: <a href="https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping">https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping</a></span>
+						<span>Fabian Ehrentraud 2011</span>
+					</p>
 				</div>
 			</body>
 		</html>

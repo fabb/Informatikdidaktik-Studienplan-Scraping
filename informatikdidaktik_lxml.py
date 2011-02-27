@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-02-25
+# Fabian Ehrentraud, 2011-02-27
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -234,7 +234,7 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 	#lva = found_lva or etree.SubElement(fach, "lva") #or: update existing lva #__nonzero__ will be changed in ElementTree
 	lva = found_lva if found_lva is not None else etree.SubElement(fach, "lva") #or: update existing lva #__nonzero__ will be changed in ElementTree
 	#lva_university_ = lva.find("university") or etree.SubElement(lva, "university") #or: update existing subelement #__nonzero__ will be changed in ElementTree
-	lva_university_ = lva.find("university") if lva.find("university") is not None else etree.SubElement(lva, "university") #or: update existing subelement
+	lva_university_ = lva.find("university") if lva.find("university") is not None else etree.SubElement(lva, "university")
 	lva_university_.text = (lva_university or "").strip()
 	lva_semester_ = lva.find("semester") if lva.find("semester") is not None else etree.SubElement(lva, "semester")
 	lva_semester_.text = (lva_semester or "").strip()
@@ -253,6 +253,9 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 	if len(lva_ects_.text) == 1:
 		lva_ects_.text += ".0"
 	lva_info_ = lva.find("info") if lva.find("info") is not None else etree.SubElement(lva, "info")
+	if "manuell" in lva_info_.text:
+		print("Manually registered LVA overwritten")
+		found_lva = None #to print out LVA details in the end of the function
 	lva_info_.text = (lva_info or "").strip()
 	lva_url_ = lva.find("url") if lva.find("url") is not None else etree.SubElement(lva, "url")
 	lva_url_.text = (lva_url or "").strip()
@@ -275,11 +278,24 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 
 def addSource(xml_root, url, query_date):
 	#adds an url source entry in the given xml
-	#source = etree.SubElement(xml_root, "source")
-	source = etree.Element("source")
-	xml_root.insert(0, source)
-	url_ = etree.SubElement(source, "url")
-	url_.text = (url or "")
+	
+	found_source = None
+	source_s = xml_root.findall("source")
+	for s in source_s:
+		if(s.find("url").text == url):
+			found_source = s
+			#print("found source: " + s.find("url").text)
+			break #return first matching
+		#print("source " + url + " not matching to " + s.find("url").text)
+
+	if found_source is not None: #__nonzero__ will be changed in ElementTree
+		source = found_source
+	else:
+		source = etree.Element("source")
+		xml_root.insert(0, source)
+		url_ = source.find("url") if source.find("url") is not None else etree.SubElement(source, "url")
+		url_.text = (url or "")
+	
 	query_date_ = etree.SubElement(source, "query_date")
 	query_date_.text = (query_date or "")
 
@@ -302,7 +318,7 @@ def checkSchema(xml_root, xsd=xsd):
 def writeXml(xml_root, filename=xmlfilename):
 	#writes xml to the given filename
 	
-	print("Writing XML file + backup")
+	print("Writing XML file " + filename + " + backup")
 	
 	xml = etree.tostring(xml_root.getroottree(), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
@@ -320,7 +336,7 @@ def writeXml(xml_root, filename=xmlfilename):
 
 def readXml(filename, checkXmlSchema=False):
 	
-	print("Reading in existing XML file")
+	print("Reading in existing XML file " + filename)
 	
 	parser = etree.XMLParser(remove_blank_text=True) #read in a pretty printed xml and don't interpret whitespaces as meaningful data => this allows correct output pretty printing
 	xml_root = etree.parse(filename, parser).getroot()

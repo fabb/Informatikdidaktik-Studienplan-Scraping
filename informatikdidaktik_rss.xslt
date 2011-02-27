@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <!--
-Fabian Ehrentraud, 2011-02-25
+Fabian Ehrentraud, 2011-02-27
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -12,36 +12,107 @@ Licensed under the Open Software License (OSL 3.0)
 TODO
 	could use stylesheet parameters to limit number of entries
 	content nicer styled
+	table is not recognized by all rss readers
 	make direct link to xml and set selector to only display newest LVAs
-FIXME
-	pubDate has wrong format, should follow RFC 822
-		http://symphony-cms.com/download/xslt-utilities/view/50791/
 -->
 
 	<xsl:output method="xml" media-type="application/rss+xml" indent="yes" encoding="utf-8"/>
 	
+	
+	<!-- iso date must not contain 'Z' and be in format YYYY-MM-DD"T"HH:MM:SS[.(number)*] -->
+	<xsl:template name="dateConversion_ISO8601_to_RFC822">
+		<xsl:param name="isodate"/>
+		
+		<xsl:variable name="year">
+			<xsl:value-of select="substring-before($isodate,'-')"/>
+		</xsl:variable>
+		<xsl:variable name="month">
+			<xsl:value-of select="substring-before(substring-after($isodate,'-'),'-')"/>
+		</xsl:variable>
+		<xsl:variable name="stringmonth">
+			<xsl:choose>
+				<xsl:when test="number($month) = 1">
+					<xsl:text>Jan</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 2">
+					<xsl:text>Feb</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 3">
+					<xsl:text>Mar</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 4">
+					<xsl:text>Apr</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 5">
+					<xsl:text>May</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 6">
+					<xsl:text>Jun</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 7">
+					<xsl:text>Jul</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 8">
+					<xsl:text>Aug</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 9">
+					<xsl:text>Sep</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 10">
+					<xsl:text>Oct</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 11">
+					<xsl:text>Nov</xsl:text>
+				</xsl:when>
+				<xsl:when test="number($month) = 12">
+					<xsl:text>Dec</xsl:text>
+				</xsl:when>
+				
+				<xsl:otherwise>
+					<!-- should not happen... -->
+					<xsl:value-of select="$month"/>
+					<xsl:message terminate="no">
+						<xsl:text>Month out of range: {$month}, input date was: {$isodate}</xsl:text>
+					</xsl:message>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		
+		<xsl:variable name="day">
+			<xsl:value-of select="substring-before(substring-after(substring-after($isodate,'-'),'-'),'T')"/>
+		</xsl:variable>
+		<xsl:variable name="fulltime">
+			<xsl:value-of select="substring-after($isodate,'T')"/>
+		</xsl:variable>
+		<xsl:variable name="rfctime">
+			<xsl:value-of select="substring($fulltime,0,9)"/>
+		</xsl:variable>
+		
+		<xsl:value-of select=" concat($day , ' ' , $stringmonth , ' ' , $year , ' ' , $rfctime , ' GMT')"/>
+	</xsl:template>
+	
+	
 	<xsl:template match="/">
 	
 		<xsl:variable name="latestQuerydate">
-			<xsl:for-each select="/stpl_collection/source">
-				<!--more complex version: <xsl:if test="count(../source[translate(./query_date, 'TZ:-', '') &gt; translate(current()/query_date, 'TZ:-', '')])=0">-->
-				<xsl:sort select="query_date" order="descending"/>
+			<xsl:for-each select="/stpl_collection/source/query_date">
+				<xsl:sort select="." order="descending"/>
 				<xsl:if test="position() = 1"><!--XSLT1 hack for getting string-maximum-->
-					<xsl:value-of select="query_date"/>
+					<xsl:value-of select="."/>
 				</xsl:if>
 			</xsl:for-each>
 		</xsl:variable>
 		
 		<xsl:variable name="latestLVA">
-			<xsl:for-each select="/stpl_collection/stpl/modulgruppe/modul/fach/lva">
+			<xsl:for-each select="/stpl_collection/stpl/modulgruppe/modul/fach/lva/query_date">
 				<!--more complex version: <xsl:if test="count(../source[translate(./query_date, 'TZ:-', '') &gt; translate(current()/query_date, 'TZ:-', '')])=0">-->
-				<xsl:sort select="query_date" order="descending"/>
+				<xsl:sort select="." order="descending"/>
 				<xsl:if test="position() = 1"><!--XSLT1 hack for getting string-maximum-->
-					<xsl:value-of select="query_date"/>
+					<xsl:value-of select="."/>
 				</xsl:if>
 			</xsl:for-each>
 		</xsl:variable>
-	
+
 		<rss version="2.0" xml:lang="de">
 			<channel>
 				<title>Studienplan Informatik LVA News</title>
@@ -49,12 +120,14 @@ FIXME
 				<description>Shows scraped courses.</description>
 				<language>de</language>
 				<pubDate>
-					<xsl:value-of select="$latestLVA"/>
-					<!--TODO Tue, 10 Jun 2003 04:00:00 GMT-->
+					<xsl:call-template name="dateConversion_ISO8601_to_RFC822">
+						<xsl:with-param name="isodate" select="$latestLVA"/>
+					</xsl:call-template>
 				</pubDate>
 				<lastBuildDate>
-					<xsl:value-of select="$latestQuerydate"/>
-					<!--TODO Tue, 10 Jun 2003 09:41:01 GMT-->
+					<xsl:call-template name="dateConversion_ISO8601_to_RFC822">
+						<xsl:with-param name="isodate" select="$latestQuerydate"/>
+					</xsl:call-template>
 				</lastBuildDate>
 				<!--docs>http://blogs.law.harvard.edu/tech/rss</docs-->
 				<!--generator>Weblog Editor 2.0</generator-->
@@ -137,8 +210,9 @@ FIXME
 								</description>
 								
 								<pubDate>
-									<xsl:value-of select="substring-before(., 'T')"/>
-									<!--TODO Tue, 03 Jun 2003 09:39:21 GMT-->
+									<xsl:call-template name="dateConversion_ISO8601_to_RFC822">
+										<xsl:with-param name="isodate" select="."/>
+									</xsl:call-template>
 								</pubDate>
 								<guid isPermaLink="false">
 									<xsl:value-of select="substring-before(., 'T')"/>

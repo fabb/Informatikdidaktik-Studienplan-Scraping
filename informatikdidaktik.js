@@ -1,5 +1,5 @@
 /*
-Fabian Ehrentraud, 2011-02-26
+Fabian Ehrentraud, 2011-02-27
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -30,9 +30,9 @@ function onLoad() {
 	var day = String("0").concat(String(today.getDate()));
 	day = day.substr(day.length-2);
 	
-	var date = year.concat("-").concat(month).concat("-").concat(day)
+	var date = year.concat("-").concat(month).concat("-").concat(day);
 	
-	localStorage.visitdate = date;
+	if(localStorage) localStorage.visitdate = date;
 }
 
 /*
@@ -40,14 +40,14 @@ this is an expensive workaround for correctly redrawing in IE and Safari
 */
 function redrawFix() {
 	var element = document.getElementsByTagName("body")[0];
-	element.className = element.className
+	element.className = element.className;
 }
 
 /*
 writes the last visit date from localStorage to a div in the document
 */
 function writeDate() {
-	if(localStorage.visitdate){
+	if(localStorage && localStorage.visitdate){
 		document.querySelector('*[data-name~="lastvisitdate_div"]').removeAttribute("hidden");
 		document.querySelector('*[data-name~="lastvisitdate"]').appendChild(document.createTextNode(localStorage.visitdate));
 	}
