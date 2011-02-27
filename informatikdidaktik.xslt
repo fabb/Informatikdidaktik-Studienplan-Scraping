@@ -346,7 +346,7 @@ TODO
 																							</xsl:attribute>
 																						</xsl:if>
 																						<xsl:if test="string(info)">
-																							Infos: <xsl:value-of select="info"/>
+																							Info: <xsl:value-of select="info"/>
 																						</xsl:if>
 																					</td>
 																				</tr>

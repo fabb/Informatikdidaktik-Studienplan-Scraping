@@ -412,7 +412,7 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 		content: "";
 	}
 	
-	*[data-noPrint~="true"], #meta .controls, #footer {
+	*[data-noPrint~="true"], #meta .meta-nonprint, #meta .controls, #footer {
 		display: none;
 	}
 	
