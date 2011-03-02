@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-02-27
+Fabian Ehrentraud, 2011-03-02
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -234,6 +234,19 @@ TODO
 							<!-- warning: this way, no " and ' is allowed in the variable name -->
 							<h2 onclick="hideshowDiv('{$modulgruppeID}')">
 								<xsl:value-of select="title"/>
+								<xsl:if test="count(semester_suggestion) &gt; 0">
+									<span class="semester_suggestions">
+										<xsl:text> (</xsl:text>
+										<xsl:for-each select="semester_suggestion">
+											<xsl:if test="not(position() = 1)">
+												<xsl:text> &amp; </xsl:text>
+											</xsl:if>
+											<xsl:value-of select="."/>
+											<xsl:text>.</xsl:text>
+										</xsl:for-each>
+										<xsl:text> Semester)</xsl:text>
+									</span>
+								</xsl:if>
 							</h2>
 							<div class="modulgruppe-body" data-name="modulgruppe">
 								<xsl:attribute name="id">
@@ -251,6 +264,19 @@ TODO
 										<!-- warning: this way, no "and ' is allowed in the variable name -->
 										<h3 onclick="hideshowDiv('{$modulID}')">
 											<xsl:value-of select="title"/>
+											<xsl:if test="count(semester_suggestion) &gt; 0">
+												<span class="semester_suggestions">
+													<xsl:text> (</xsl:text>
+													<xsl:for-each select="semester_suggestion">
+														<xsl:if test="not(position() = 1)">
+															<xsl:text> &amp; </xsl:text>
+														</xsl:if>
+														<xsl:value-of select="."/>
+														<xsl:text>.</xsl:text>
+													</xsl:for-each>
+													<xsl:text> Semester)</xsl:text>
+												</span>
+											</xsl:if>
 										</h3>
 										<div class="modul-body" data-name="modul">
 											<xsl:attribute name="id">
