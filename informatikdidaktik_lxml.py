@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-02-27
+# Fabian Ehrentraud, 2011-03-03
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -159,6 +159,17 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 		#fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
 
 		if(fachB and fach_typeB): #ignore sws and ects
+		
+			#update ects and sws - they must already exist
+			fach_sws_ = f.find("sws")
+			fach_sws_.text = (lva_fach_sws or "").strip().replace(",",".")
+			if len(fach_sws_.text) == 1:
+				fach_sws_.text += ".0"
+			fach_ects_ = f.find("ects")
+			fach_ects_.text = (lva_fach_ects or "").strip().replace(",",".")
+			if len(fach_ects_.text) == 1:
+				fach_ects_.text += ".0"
+			
 			return(f) #return first matching
 
 	if createNonexistentNodes:
@@ -253,7 +264,7 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 	if len(lva_ects_.text) == 1:
 		lva_ects_.text += ".0"
 	lva_info_ = lva.find("info") if lva.find("info") is not None else etree.SubElement(lva, "info")
-	if "manuell" in lva_info_.text:
+	if "manuell" in (lva_info_.text or ""):
 		print("Manually registered LVA overwritten")
 		found_lva = None #to print out LVA details in the end of the function
 	lva_info_.text = (lva_info or "").strip()
@@ -318,19 +329,27 @@ def checkSchema(xml_root, xsd=xsd):
 def writeXml(xml_root, filename=xmlfilename):
 	#writes xml to the given filename
 	
-	print("Writing XML file " + filename + " + backup")
+	print("Writing XML file " + filename + " + backups")
 	
 	xml = etree.tostring(xml_root.getroottree(), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
 	#print(xml) #unicode problem
+	
+	writedate = str(datetime.datetime.now()).replace(":",".").replace(" ","_")
 
+	basename, extension = os.path.splitext(filename)
+	
+	#backup of original if it exists
+	if os.path.exists(filename):
+		os.rename(filename, basename + "_" + writedate + "_old" + extension)
+	
+	#write new
 	f = open(filename, 'w')
 	f.write(xml)
 	f.close()
-
-	basename, extension = os.path.splitext(filename)
-
-	f = open(basename + "_" + str(datetime.datetime.now()).replace(":",".").replace(" ","_") + extension, "w")
+	
+	#write backup of new
+	f = open(basename + "_" + writedate + extension, "w")
 	f.write(xml)
 	f.close()
 
@@ -359,7 +378,13 @@ def loadXml(xmlfilename, xmlRootname=xmlRootname, xsd=xsd, loadExisting=True, ch
 		#create xml
 		return(makeRoot(xmlRootname, xsd))
 
-		
+def isFreshXml(xml_root):
+	#true if xml already contains study structure
+	if xml_root.find("stpl") is None:
+		return True
+	else:
+		return False
+
 """ generate rss """
 
 
@@ -782,7 +807,8 @@ raise Exception(x) #FIXME no unicode exception messages
 xml_root = loadXml(xmlfilename, loadExisting=True, checkXmlSchema=True) #TODO loadExisting=True
 
 #get structure
-getTU(xml_root, tiss, createNonexistentNodes=True, getLvas=False)
+if isFreshXml(xml_root):
+	getTU(xml_root, tiss, createNonexistentNodes=True, getLvas=False)
 
 #get legacy lvas before adding other lvas
 getFile(xml_root)
