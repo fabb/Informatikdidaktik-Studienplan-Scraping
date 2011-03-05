@@ -88,6 +88,9 @@ a {
 a:hover {
 	text-decoration: underline;
 }
+.currentlva a {
+	color: #00A;
+}
 
 strong {
 	font-style: italic;
@@ -294,10 +297,6 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 .lvas table td {
 	padding-left: 0.5em;
 	padding-right: 0.5em;
-}
-
-.lvas table td a {
-	color: #00d;
 }
 
 .nolvas {

@@ -12,6 +12,8 @@ Licensed under the Open Software License (OSL 3.0)
 TODO
 	save collapse state to localStorage
 	checkboxes for done lvas, store to localStorage / loadable file
+	as each wahlmodul has to be done on one of either universities, don't display the fach title and sort by university
+	show ects and contained elements in headers
 -->
 
 	<!-- use method html to avoid self closing tags; xslt 2.0 would support method xhtml -->
@@ -70,7 +72,7 @@ TODO
 				<meta name="keywords" content="TU Wien, Uni Wien, LVAs, Lehrveranstaltungen, Studienplan, Informatikdidaktik, 950, Zusammenfassung, XSLT, XML" />
 				<meta name="author" content="Fabian Ehrentraud" />
 			</head>
-			<body onload="document.controls.reset();onLoad();">
+			<body onload="document.controls.reset();onLoad();hideshowLiNoprint('quelle','quellen');">
 				<div id="header">
 					<h1>
 						Studienplan <xsl:value-of select="stpl_collection/stpl/title"></xsl:value-of>

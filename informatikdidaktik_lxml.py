@@ -23,6 +23,8 @@ import os.path
 # when finally Tiss is updated to allow searching for old semesters' LVAs of a certain study code, incorporate the according scraping
 # Interdisziplinäres Praktikum: Interaktionsdesign is wrongly assigned in Tiss (not to all according modules), fix this
 # update date in an existing lva when any content has changed?
+# "E-Commerce", "Online Communities und E-Commerce", "Secure E-commerce" are not the same (fuzzyEq: E-Commerce contained in others)
+# "Seminar aus Computergraphik", "Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" are not the same (fuzzyEq: Seminar aus Computergraphik contained in other)
 
 
 studyname = "Informatikdidaktik"
@@ -162,13 +164,23 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 		
 			#update ects and sws - they must already exist
 			fach_sws_ = f.find("sws")
+			old_fach_sws = fach_sws_.text
 			fach_sws_.text = (lva_fach_sws or "").strip().replace(",",".")
 			if len(fach_sws_.text) == 1:
 				fach_sws_.text += ".0"
+			if fach_sws_.text is None or fach_sws_.text == "":
+				fach_sws_.text = old_fach_sws #don't delete already existing content
+			
 			fach_ects_ = f.find("ects")
+			old_fach_ects = fach_ects_.text
 			fach_ects_.text = (lva_fach_ects or "").strip().replace(",",".")
 			if len(fach_ects_.text) == 1:
 				fach_ects_.text += ".0"
+			if fach_ects_.text is None or fach_ects_.text == "":
+				fach_ects_.text = old_fach_ects #don't delete already existing content
+			
+			if old_fach_sws != fach_sws_.text or old_fach_ects != fach_ects_.text: #TODO more than just SWS and ECTS
+				print("Fach updated: %s"%(f.find("title").text + " " + f.find("type").text + " " + fach_sws_.text + " " + fach_ects_.text))
 			
 			return(f) #return first matching
 
@@ -179,18 +191,13 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 		fach_type_ = etree.SubElement(fach, "type")
 		fach_type_.text = (lva_fach_type or "").strip()
 		fach_sws_ = etree.SubElement(fach, "sws")
-		old_fach_sws = fach_sws_.text
 		fach_sws_.text = (lva_fach_sws or "").strip().replace(",",".")
 		if len(fach_sws_.text) == 1:
 			fach_sws_.text += ".0"
 		fach_ects_ = etree.SubElement(fach, "ects")
-		old_fach_sws = fach_sws_.text
 		fach_ects_.text = (lva_fach_ects or "").strip().replace(",",".")
 		if len(fach_ects_.text) == 1:
 			fach_ects_.text += ".0"
-		
-		if old_fach_sws != fach_sws_.text or old_fach_ects != fach_ects_.text: #TODO more than just SWS and ECTS
-			print("Fach updated: %s"%(fach_title_.text + " " + fach_type_.text + " " + fach_sws_.text + " " + fach_ects_.text))
 
 		print("New Fach: %s"%(fach_title_.text + " " + fach_type_.text + " " + fach_sws_.text + " " + fach_ects_.text))
 
@@ -285,11 +292,10 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 		lva_query_date_ = lva.find("query_date") if lva.find("query_date") is not None else etree.SubElement(lva, "query_date")
 		lva_query_date_.text = datetime.datetime.now().isoformat()
 	
-	if old_lva_sws != lva_sws_.text or old_lva_ects != lva_ects_.text: #TODO more than just SWS and ECTS
-		print("LVA updated: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
-	
 	if found_lva is None:
 		print("New LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
+	elif old_lva_sws != lva_sws_.text or old_lva_ects != lva_ects_.text: #TODO more than just SWS and ECTS
+		print("LVA updated: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
 	"""
 	else: #FIXME only for debugging
 		raise Exception("Existing LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
@@ -432,7 +438,7 @@ def fuzzyEq(wantedStr, compStr, threshold=0.89): #FIXME
 		if f in compStr and f not in wantedStr: #but NOT the other way around
 			return(False)
 	
-	if wantedStr in compStr or compStr in wantedStr: #FIXME does not take account for spelling errors
+	if wantedStr in compStr or compStr in wantedStr: #FIXME does not take account for spelling errors; problem with "E-Commerce"
 		return(True)
 	
 	subfach = compStr.split('"')
@@ -619,6 +625,11 @@ def uniExtract(xml_root, semester,url, universityName=uni, createNonexistentNode
 				lva_fach_type = "VU"
 			elif "Studieneingangsphase" in lva_fach:
 				lva_fach = u"Einführung in professionalisiertes pädagogisches Handeln"
+			elif u"Computerunterstütztes Lernen" in lva_fach or "Vernetztes Lernen" in lva_fach:
+				lva_fach_ects = "3.0"
+			elif "Unterrichtspraktikum Informatikdidaktik" in lva_fach: #at Uni, this course is split into two semesters
+				lva_fach_sws = ""
+				lva_fach_ects = ""
 			
 			if "Wahlmodul" in lva_modulgruppe:
 				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
@@ -718,7 +729,7 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			if '"Grundl.u.Praxis d.eLearning" od. "eTutoring, Moderation von e-Learning"' in lva_fach:
 				lva_fach = '"Grundlagen und Praxis des eLearning" oder "eTutoring, Moderation von e-Learning"'
 			elif "Erwachsenenbildung und Lebenslanges Lernen" in lva_fach: #deprecated
-				lva_fach = u'"Theorie und Praxis des Lehrens und Lernens" (veraltet) oder "Erwachsenenbildung und Lebenslanges Lernen"'
+				lva_fach = u'"Theorie und Praxis des Lehrens und Lernens" oder "Erwachsenenbildung und Lebenslanges Lernen"'
 			elif u"(4) Experiment. Gestaltung von MM-Anwend. + Präsentationsstrategien 1" in lva_fach:
 				lva_fach = u"(4) Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1"
 			lva_fach_type = f.text.partition(' ')[0]
@@ -737,9 +748,12 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 				lva_key_type_sem = f.xpath('div')[0].text
 				lva_key, lva_type, lva_semester = lva_key_type_sem.strip().split(' ')
 				lva_title_url = f.xpath('div/a')[0]
+				#lva_canceled = f.xpath('div/span')[0].text if f.xpath('div/span') is not None else ""
+				lva_canceled = "abgesagt" if "canceled" in f.attrib.get("class").lower() else ""
 				lva_url = lva_title_url.attrib.get("href") #.replace('&','&amp;')
 				lva_title = lva_title_url.text
-				lva_info = f.xpath('../following-sibling::*[contains(@class,"nodeTableInfoColumn")]/div')[0].text #can be None
+				#lva_info = f.xpath('../following-sibling::*[contains(@class,"nodeTableInfoColumn")]/div')[0].text #can be None
+				lva_info = lva_canceled
 				lva_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
 				lva_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
 				
@@ -753,6 +767,9 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 
 def getFile(xml_root, filename=legacyFile, universityName=tu):
 	#retrieves lvas from old python script output file and writes to xml
+	
+	print("Scraping %s"%(filename))
+	
 	if filename.startswith("http"):
 		f = urllib.urlopen(filename)
 	else:
