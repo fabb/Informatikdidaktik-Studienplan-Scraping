@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-03-03
+# Fabian Ehrentraud, 2011-03-05
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -179,14 +179,19 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 		fach_type_ = etree.SubElement(fach, "type")
 		fach_type_.text = (lva_fach_type or "").strip()
 		fach_sws_ = etree.SubElement(fach, "sws")
+		old_fach_sws = fach_sws_.text
 		fach_sws_.text = (lva_fach_sws or "").strip().replace(",",".")
 		if len(fach_sws_.text) == 1:
 			fach_sws_.text += ".0"
 		fach_ects_ = etree.SubElement(fach, "ects")
+		old_fach_sws = fach_sws_.text
 		fach_ects_.text = (lva_fach_ects or "").strip().replace(",",".")
 		if len(fach_ects_.text) == 1:
 			fach_ects_.text += ".0"
 		
+		if old_fach_sws != fach_sws_.text or old_fach_ects != fach_ects_.text: #TODO more than just SWS and ECTS
+			print("Fach updated: %s"%(fach_title_.text + " " + fach_type_.text + " " + fach_sws_.text + " " + fach_ects_.text))
+
 		print("New Fach: %s"%(fach_title_.text + " " + fach_type_.text + " " + fach_sws_.text + " " + fach_ects_.text))
 
 		return(fach)
@@ -256,17 +261,19 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 	lva_type_ = lva.find("type") if lva.find("type") is not None else etree.SubElement(lva, "type")
 	lva_type_.text = (lva_type or "").strip()
 	lva_sws_ = lva.find("sws") if lva.find("sws") is not None else etree.SubElement(lva, "sws")
+	old_lva_sws = lva_sws_.text
 	lva_sws_.text = (lva_sws or "").strip().replace(",",".")
 	if len(lva_sws_.text) == 1:
 		lva_sws_.text += ".0"
 	lva_ects_ = lva.find("ects") if lva.find("ects") is not None else etree.SubElement(lva, "ects")
+	old_lva_ects = lva_ects_.text
 	lva_ects_.text = (lva_ects or "").strip().replace(",",".")
 	if len(lva_ects_.text) == 1:
 		lva_ects_.text += ".0"
 	lva_info_ = lva.find("info") if lva.find("info") is not None else etree.SubElement(lva, "info")
 	if "manuell" in (lva_info_.text or ""):
 		print("Manually registered LVA overwritten")
-		found_lva = None #to print out LVA details in the end of the function
+		found_lva = None #to print out LVA details in the end of the function and update the query date
 	lva_info_.text = (lva_info or "").strip()
 	lva_url_ = lva.find("url") if lva.find("url") is not None else etree.SubElement(lva, "url")
 	lva_url_.text = (lva_url or "").strip()
@@ -274,9 +281,12 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 	lva_professor_.text = (lva_professor or "").strip()
 	
 	#TODO this does not update the query date if some fields of an existing lva are updated. but would that be wanted?
-	if lva.find("query_date") is None:
-		lva_query_date_ = etree.SubElement(lva, "query_date")
+	if found_lva is None or lva.find("query_date") is None:
+		lva_query_date_ = lva.find("query_date") if lva.find("query_date") is not None else etree.SubElement(lva, "query_date")
 		lva_query_date_.text = datetime.datetime.now().isoformat()
+	
+	if old_lva_sws != lva_sws_.text or old_lva_ects != lva_ects_.text: #TODO more than just SWS and ECTS
+		print("LVA updated: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
 	
 	if found_lva is None:
 		print("New LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
