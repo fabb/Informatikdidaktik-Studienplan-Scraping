@@ -72,10 +72,12 @@ TODO
 		<xsl:variable name="yearBeforeHighlightSemester">
 			<xsl:value-of select="concat(substring($highlightSemester,1,4)-1,substring($highlightSemester,5,1))"/>
 		</xsl:variable>
+
+		<xsl:variable name="firstStpl" select="stpl_collection/stpl[1]"/>
 		
 		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
 			<head>
-				<title>Studienplan <xsl:value-of select="stpl_collection/stpl/title"></xsl:value-of></title>
+				<title>Studienplan <xsl:value-of select="$firstStpl/title"></xsl:value-of></title>
 				<link rel="stylesheet" type="text/css" href="informatikdidaktik.css" />
 				<link rel="alternate" type="application/rss+xml" title="LVA Feed" href="informatikdidaktik_rss.xml" />
 				<script src="informatikdidaktik.js" type="text/javascript" charset="utf-8"></script>
@@ -87,9 +89,9 @@ TODO
 			<body onload="document.controls.reset();onLoad();hideshowLiNoprint('quelle','quellen');">
 				<div id="header">
 					<h1>
-						Studienplan <xsl:value-of select="stpl_collection/stpl/title"></xsl:value-of>
-						<xsl:if test="count(stpl_collection/stpl/version)!=0">
-							(<xsl:value-of select="stpl_collection/stpl/version"/>)
+						Studienplan <xsl:value-of select="$firstStpl/title"></xsl:value-of>
+						<xsl:if test="count($firstStpl/version)!=0">
+							(<xsl:value-of select="$firstStpl/version"/>)
 						</xsl:if>
 					</h1>
 				</div>
@@ -134,13 +136,13 @@ TODO
 						</ul>
 					</div>
 					<p class="stpl-pdf">
-						<xsl:if test="count(stpl_collection/stpl/url) &gt; 0 and string(stpl_collection/stpl/url)">
+						<xsl:if test="count($firstStpl/url) &gt; 0 and string($firstStpl/url)">
 							Studienplan PDF: 
 							<a>
 								<xsl:attribute name="href">
-									<xsl:value-of select="stpl_collection/stpl/url"/>
+									<xsl:value-of select="$firstStpl/url"/>
 								</xsl:attribute>
-								<xsl:value-of select="stpl_collection/stpl/url"/>
+								<xsl:value-of select="$firstStpl/url"/>
 							</a>
 						</xsl:if>
 					</p>
@@ -153,7 +155,7 @@ TODO
 									<option selected="selected">
 										Alle zeigen
 									</option>
-									<xsl:for-each select="stpl_collection/stpl/modulgruppe/modul/fach/lva/university">
+									<xsl:for-each select="$firstStpl/modulgruppe/modul/fach/lva/university">
 										<xsl:sort select="." order="descending"/>
 										<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
 										<xsl:if test="count(./preceding::university[current() = .])=0">
@@ -170,7 +172,7 @@ TODO
 								<!--onchange does not fire in FF when changed with keyboard keys-->
 								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value);hideold(this.form.hideolderCheck.checked);">
 									<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
-									<xsl:for-each select="stpl_collection/stpl/modulgruppe/modul/fach/lva/semester[not (. = preceding::semester)]">
+									<xsl:for-each select="$firstStpl/modulgruppe/modul/fach/lva/semester[not (. = preceding::semester)]">
 										<xsl:sort select="." order="descending"/>
 										<option>
 											<xsl:if test=".=$highlightSemester">
@@ -195,7 +197,7 @@ TODO
 									<option selected="selected">
 										Alle zeigen
 									</option>
-									<xsl:for-each select="stpl_collection/stpl/modulgruppe/modul/fach/lva/query_date">
+									<xsl:for-each select="$firstStpl/modulgruppe/modul/fach/lva/query_date">
 										<xsl:sort select="." order="descending"/>
 										<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
 										<xsl:if test="count(./preceding::query_date[name(..)='lva' and substring-before(current(), 'T') = substring-before(., 'T')])=0">
@@ -236,7 +238,7 @@ TODO
 					</div>
 				</div>
 				<div id="content">
-					<xsl:for-each select="stpl_collection/stpl/modulgruppe">
+					<xsl:for-each select="$firstStpl/modulgruppe">
 						<div data-name="wholemodulgruppe">
 							<xsl:attribute name="data-nolvas_static">
 								<xsl:value-of select="count(.//lva)=0"/>
