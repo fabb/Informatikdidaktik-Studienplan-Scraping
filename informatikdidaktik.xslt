@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-03-03
+Fabian Ehrentraud, 2011-03-06
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -22,6 +22,19 @@ TODO
 	<!-- html5 has short doctype, not even doctype-system="about:legacy-compat" should be necessary, but is here as some XSLT processors hide the doctype as a whole if it is missing -->
 	<!-- XHTML version of html5 should not need a doctype at all, but that leads to problems -->
 	<xsl:output method="html" media-type="text/html" doctype-system="about:legacy-compat" cdata-section-elements="script style" indent="yes" encoding="utf-8"/>
+	
+
+	<!-- remove ", ', spaces, comma, braces and + from variable name -->
+	<xsl:template name="removeSpecialChars">
+		<xsl:param name="inputstring"/>
+		
+		<!-- workaround for XSLT 1.0 where handling both apostrophes and quotes in one string is a bit complicated -->
+		<xsl:variable name="apos">'</xsl:variable>
+		
+		<xsl:value-of select="translate($inputstring,concat($apos,'&quot; ,()+'),'_______')"/>
+	</xsl:template>
+
+	
 	
 	<xsl:template match="/">
 	
@@ -154,7 +167,7 @@ TODO
 								</select>
 							</div>
 							<div class="sidebyside">
-								Semester hervorheben:
+								Semester <span class="highlightSem">hervorheben</span>:
 								<!--onchange does not fire in FF when changed with keyboard keys-->
 								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value);hideold(this.form.hideolderCheck.checked);">
 									<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
@@ -231,7 +244,10 @@ TODO
 							</xsl:attribute>
 							<xsl:variable name="modulgruppeID">
 								<!-- remove ", ', spaces, comma, braces and + from variable name -->
-								<xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>
+								<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
+								<xsl:call-template name="removeSpecialChars">
+									<xsl:with-param name="inputstring" select="./title"/>
+								</xsl:call-template>
 							</xsl:variable>
 							<!-- warning: this way, no " and ' is allowed in the variable name -->
 							<h2 onclick="hideshowDiv('{$modulgruppeID}')">
@@ -262,7 +278,10 @@ TODO
 										</xsl:attribute>
 										<xsl:variable name="modulID">
 											<!-- remove ", ', spaces, comma, braces and + from variable name -->
-											<xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>
+											<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
+											<xsl:call-template name="removeSpecialChars">
+												<xsl:with-param name="inputstring" select="./title"/>
+											</xsl:call-template>
 										</xsl:variable>
 										<!-- warning: this way, no "and ' is allowed in the variable name -->
 										<h3 onclick="hideshowDiv('{$modulID}')">
@@ -294,7 +313,12 @@ TODO
 													<xsl:variable name="fachID">
 														<!-- remove ", ', spaces, comma, braces and + from variable name -->
 														<!-- add modulID to the fachID as a fach can appear in several wahlmoduls -->
-														<xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>_<xsl:value-of select="type"/>
+														<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>_<xsl:value-of select="type"/-->
+														<xsl:call-template name="removeSpecialChars">
+															<xsl:with-param name="inputstring" select="./title"/>
+														</xsl:call-template>
+														<xsl:text>_</xsl:text>
+														<xsl:value-of select="type"/>
 													</xsl:variable>
 													<!-- warning: this way, no " and ' is allowed in the variable name -->
 													<h4 onclick="hideshowDiv('{$fachID}')">
@@ -309,81 +333,11 @@ TODO
 																<p class="nolvas">Keine LVAs zu diesem Fach</p>
 															</xsl:when>
 															<xsl:otherwise>
-																<table data-name="lvatable">
-																	<tbody>
-																		<xsl:for-each select="lva">
-																			<xsl:sort select="semester" order="descending"/>
-																			<xsl:sort select="university" order="ascending"/>
-																			<xsl:sort select="key" order="ascending"/>
-																			<xsl:variable name="similarLvaSet" select="../lva[./title=current()/title and ./university=current()/university and ./type=current()/type and (./university='Uni' or ./key=current()/key)]"/>
-																			<!--only display LVA when it has the highest semester; it is assumed that there is only one such LVA -->
-																			<!-- at TU there is always the same key, not on the Uni -->
-																			<xsl:if test="count($similarLvaSet[translate(./semester,'SW','05') &gt; translate(current()/semester,'SW','05')])=0">
-																				<tr data-name="lvarow">
-																					<xsl:if test="semester=$highlightSemester">
-																						<xsl:attribute name="class">
-																							<xsl:text>currentlva</xsl:text>
-																						</xsl:attribute>
-																					</xsl:if>
-																					<xsl:attribute name="data-query_date"><!--custom attribute-->
-																						<xsl:for-each select="$similarLvaSet/query_date">
-																							<xsl:sort select="." order="descending"/>
-																							<xsl:if test="position() = 1"><!--XSLT1 hack for getting string-maximum-->
-																								<xsl:value-of select="substring-before(., 'T')"/>
-																							</xsl:if>
-																						</xsl:for-each>
-																					</xsl:attribute>
-																					<td class="lvauniversity" data-name="university"><xsl:value-of select="university"/></td>
-																					<!--<td><xsl:value-of select="semester"/></td>-->
-																					<td class="lvasemester" data-name="semesters">
-																						<xsl:variable name="newestSemester"><xsl:value-of select="semester"/></xsl:variable>
-																						<xsl:for-each select="$similarLvaSet">
-																							<xsl:sort select="semester" order="descending"/>
-																							<xsl:if test="not(position() = 1)">, </xsl:if>
-																							<span data-name="semester">
-																								<!-- problematic when $newestSemester is greater than $highlightSemester -->
-																								<xsl:if test="$newestSemester != $highlightSemester and ./semester = $yearBeforeHighlightSemester">
-																									<xsl:attribute name="class">probableLva</xsl:attribute>
-																								</xsl:if>
-																								<xsl:value-of select="semester"/>
-																							</span>
-																						</xsl:for-each>
-																					</td>
-																					<td class="lvakey"><xsl:value-of select="key"/></td>
-																					<td class="lvatype"><xsl:value-of select="type"/></td>
-																					<td class="lvatitle">
-																						<xsl:choose>
-																							<xsl:when test="url='' or count(url)=0">
-																								<xsl:value-of select="title"/>
-																							</xsl:when>
-																							<xsl:otherwise>
-																								<a>
-																									<xsl:attribute name="href">
-																										<xsl:value-of select="url"/>
-																									</xsl:attribute>
-																									<xsl:value-of select="title"/>
-																								</a>
-																							</xsl:otherwise>
-																						</xsl:choose>
-																					</td>
-																					<td class="lvacredits">
-																						(<xsl:value-of select="sws"/> SWS / <xsl:value-of select="ects"/> ECTS)
-																					</td>
-																					<td class="lvainfo">
-																						<xsl:if test="info = ''">
-																							<xsl:attribute name="class">
-																								<xsl:text>lvainfo_empty</xsl:text>
-																							</xsl:attribute>
-																						</xsl:if>
-																						<xsl:if test="string(info)">
-																							Info: <xsl:value-of select="info"/>
-																						</xsl:if>
-																					</td>
-																				</tr>
-																			</xsl:if>
-																		</xsl:for-each>
-																	</tbody>
-																</table>
+																<xsl:call-template name="lvatable">
+																	<xsl:with-param name="lvas" select="lva"/>
+																	<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+																	<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+																</xsl:call-template>
 															</xsl:otherwise>
 														</xsl:choose>
 													</div>
@@ -408,4 +362,94 @@ TODO
 			</body>
 		</html>
 	</xsl:template>
+	
+	
+	<!-- make a table of given lvas -->
+	<xsl:template name="lvatable">
+		<xsl:param name="lvas"/>
+		<xsl:param name="highlightSemester"/>
+		<xsl:param name="yearBeforeHighlightSemester"/>
+		<xsl:param name="groupUniversities" select="false()"/>
+		
+		<table data-name="lvatable">
+			<tbody>
+				<xsl:for-each select="$lvas">
+				
+					<!-- XSLT 1 trick for different sortings -->
+					<xsl:sort select="university[$groupUniversities = true()]" order="ascending"/>
+					<xsl:sort select="semester" order="descending"/>
+					<xsl:sort select="university[$groupUniversities = false()]" order="ascending"/>
+					<xsl:sort select="key" order="ascending"/>
+				
+					<xsl:variable name="similarLvaSet" select="../lva[./title=current()/title and ./university=current()/university and ./type=current()/type and (./university='Uni' or ./key=current()/key)]"/>
+					<!--only display LVA when it has the highest semester; it is assumed that there is only one such LVA -->
+					<!-- at TU there is always the same key, not on the Uni -->
+					<xsl:if test="count($similarLvaSet[translate(./semester,'SW','05') &gt; translate(current()/semester,'SW','05')])=0">
+						<tr data-name="lvarow">
+							<xsl:if test="semester=$highlightSemester">
+								<xsl:attribute name="class">
+									<xsl:text>currentlva</xsl:text>
+								</xsl:attribute>
+							</xsl:if>
+							<xsl:attribute name="data-query_date"><!--custom attribute-->
+								<xsl:for-each select="$similarLvaSet/query_date">
+									<xsl:sort select="." order="descending"/>
+									<xsl:if test="position() = 1"><!--XSLT1 hack for getting string-maximum-->
+										<xsl:value-of select="substring-before(., 'T')"/>
+									</xsl:if>
+								</xsl:for-each>
+							</xsl:attribute>
+							<td class="lvauniversity" data-name="university"><xsl:value-of select="university"/></td>
+							<!--<td><xsl:value-of select="semester"/></td>-->
+							<td class="lvasemester" data-name="semesters">
+								<xsl:variable name="newestSemester"><xsl:value-of select="semester"/></xsl:variable>
+								<xsl:for-each select="$similarLvaSet">
+									<xsl:sort select="semester" order="descending"/>
+									<xsl:if test="not(position() = 1)">, </xsl:if>
+									<span data-name="semester">
+										<!-- problematic when $newestSemester is greater than $highlightSemester -->
+										<xsl:if test="$newestSemester != $highlightSemester and ./semester = $yearBeforeHighlightSemester">
+											<xsl:attribute name="class">probableLva</xsl:attribute>
+										</xsl:if>
+										<xsl:value-of select="semester"/>
+									</span>
+								</xsl:for-each>
+							</td>
+							<td class="lvakey"><xsl:value-of select="key"/></td>
+							<td class="lvatype"><xsl:value-of select="type"/></td>
+							<td class="lvatitle">
+								<xsl:choose>
+									<xsl:when test="count(url)=0 or url=''">
+										<xsl:value-of select="title"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<a>
+											<xsl:attribute name="href">
+												<xsl:value-of select="url"/>
+											</xsl:attribute>
+											<xsl:value-of select="title"/>
+										</a>
+									</xsl:otherwise>
+								</xsl:choose>
+							</td>
+							<td class="lvacredits">
+								(<xsl:value-of select="sws"/> SWS / <xsl:value-of select="ects"/> ECTS)
+							</td>
+							<td class="lvainfo">
+								<xsl:if test="info = ''">
+									<xsl:attribute name="class">
+										<xsl:text>lvainfo_empty</xsl:text>
+									</xsl:attribute>
+								</xsl:if>
+								<xsl:if test="string(info)">
+									Info: <xsl:value-of select="info"/>
+								</xsl:if>
+							</td>
+						</tr>
+					</xsl:if>
+				</xsl:for-each>
+			</tbody>
+		</table>
+	</xsl:template>
+
 </xsl:stylesheet>
