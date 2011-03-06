@@ -28,6 +28,7 @@ Licensed under the Open Software License (OSL 3.0)
 									<xs:sequence>
 										<xs:element name="title" type="xs:string"/>
 										<xs:element name="semester_suggestion" type="xs:integer" minOccurs="0" maxOccurs="unbounded"/>
+										<xs:element name="info" type="xs:string" minOccurs="0"/>
 										<xs:element name="modul" minOccurs="0" maxOccurs="unbounded">
 											<xs:complexType>
 												<xs:sequence>

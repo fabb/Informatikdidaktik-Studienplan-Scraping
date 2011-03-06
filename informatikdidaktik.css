@@ -307,7 +307,43 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 	background-color: #c0e607;
 }
 
-.probableLva {
+.highlightSem {
+	padding-left: 0.1em;
+	padding-right: 0.1em;
+}
+
+
+*[data-tooltip~="tooltip-pre"] {
+	display: none !important;
+}
+*[data-tooltip~="tooltip"] {
+	display: none !important;
+}
+*[data-tooltip~="tooltip-trigger"] {
+	position: relative;
+	cursor: help;
+}
+*[data-tooltip~="tooltip-trigger"]:hover *[data-tooltip~="tooltip"], *[data-tooltip~="tooltip-trigger"]:focus *[data-tooltip~="tooltip"] {
+	display: block !important;
+	
+	background-color: #BBF;
+
+	z-index: 10;
+	position: absolute;
+	top: 120%;
+	left: -0.5em;
+	
+	width: 60em; /*FIXME*/
+	padding: 1em;
+	margin: 0;
+	
+	/*text-align:center;*/
+	font-size: 8pt !important;
+	font-weight: normal !important;
+	color: #4C4C4C;
+}
+
+.probableLva, .highlightPrevSem {
 /*	text-decoration: underline;*/
 /*	border-bottom: 2px dotted black;*/
 	border-bottom-width: 2px;

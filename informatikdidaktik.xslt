@@ -168,7 +168,12 @@ TODO
 								</select>
 							</div>
 							<div class="sidebyside">
-								Semester <span class="highlightSem">hervorheben</span>:
+								Semester 
+								<span data-tooltip="tooltip-trigger"><span class="highlightSem">hervorheben</span>
+									<span data-tooltip="tooltip-pre"> - </span>
+									<span data-tooltip="tooltip">Zusätzlich ist es bei LVAs die vor 2 Semestern stattgefunden haben möglich dass sie wieder im aktuellen Semester stattfinden werden, aber noch nicht angekündigt sind. Daher wird in diesem Fall das entsprechende Semester <span class="highlightPrevSem">hervorgehoben</span>.
+									</span>
+								</span>:
 								<!--onchange does not fire in FF when changed with keyboard keys-->
 								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value);hideold(this.form.hideolderCheck.checked);">
 									<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
@@ -250,8 +255,14 @@ TODO
 									<xsl:with-param name="inputstring" select="./title"/>
 								</xsl:call-template>
 							</xsl:variable>
+							<xsl:variable name="hasInfo" select="count(info) &gt; 0"/>
 							<!-- warning: this way, no " and ' is allowed in the variable name -->
 							<h2 onclick="hideshowDiv('{$modulgruppeID}')">
+								<xsl:if test="$hasInfo">
+									<xsl:attribute name="data-tooltip">
+										<xsl:text>tooltip-trigger</xsl:text>
+									</xsl:attribute>
+								</xsl:if>
 								<xsl:value-of select="title"/>
 								<xsl:if test="count(semester_suggestion) &gt; 0">
 									<span class="semester_suggestions">
@@ -265,6 +276,12 @@ TODO
 											<xsl:text>.</xsl:text>
 										</xsl:for-each>
 										<xsl:text> Semester)</xsl:text>
+									</span>
+								</xsl:if>
+								<xsl:if test="$hasInfo">
+									<span data-tooltip="tooltip-pre"> - </span>
+									<span data-tooltip="tooltip">
+										<xsl:value-of select="info"/>
 									</span>
 								</xsl:if>
 							</h2>
