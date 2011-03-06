@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-03-05
+# Fabian Ehrentraud, 2011-03-06
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -23,8 +23,6 @@ import os.path
 # when finally Tiss is updated to allow searching for old semesters' LVAs of a certain study code, incorporate the according scraping
 # Interdisziplinäres Praktikum: Interaktionsdesign is wrongly assigned in Tiss (not to all according modules), fix this
 # update date in an existing lva when any content has changed?
-# "E-Commerce", "Online Communities und E-Commerce", "Secure E-commerce" are not the same (fuzzyEq: E-Commerce contained in others)
-# "Seminar aus Computergraphik", "Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" are not the same (fuzzyEq: Seminar aus Computergraphik contained in other)
 
 
 studyname = "Informatikdidaktik"
@@ -155,7 +153,7 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 	fach_s = modul.findall("fach")
 	for f in fach_s:
 		#print(etree.tostring(f))
-		fachB = fuzzyEq(lva_fach, f.find("title").text)
+		fachB = fuzzyEq(lva_fach, f.find("title").text, substringmatch=False)
 		fach_typeB = fuzzyEq(lva_fach_type, f.find("type").text)
 		#fach_swsB = fuzzyEq(lva_fach_sws, f.find("sws").text)
 		#fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
@@ -213,7 +211,7 @@ def getMatchingFach(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
 	fach_s = xml_root.xpath('//fach')
 	for f in fach_s:
 		#print(etree.tostring(f))
-		fachB = fuzzyEq(lva_fach, f.find("title").text)
+		fachB = fuzzyEq(lva_fach, f.find("title").text, substringmatch=False)
 		fach_typeB = fuzzyEq(lva_fach_type, f.find("type").text, threshold=1.0)
 		#fach_swsB = fuzzyEq(lva_fach_sws, f.find("sws").text)
 		#fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
@@ -241,7 +239,7 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 		#print(etree.tostring(f))
 		universityB = fuzzyEq(lva_university, l.find("university").text)
 		semesterB = fuzzyEq(lva_semester, l.find("semester").text)
-		titleB = fuzzyEq(lva_title, l.find("title").text)
+		titleB = fuzzyEq(lva_title, l.find("title").text, substringmatch=False)
 		keyB = fuzzyEq(lva_key, l.find("key").text)
 		typeB = fuzzyEq(lva_type, l.find("type").text, threshold=1.0)
 		#swsB = fuzzyEq(lva_sws, l.find("sws").text, threshold=0.0)
@@ -416,8 +414,9 @@ def generateRss(xml_root, rssfilename=rss_xml):
 
 """ fuzzy matching """
 
-def fuzzyEq(wantedStr, compStr, threshold=0.89): #FIXME
+def fuzzyEq(wantedStr, compStr, threshold=0.89, substringmatch=True): #FIXME threshold
 	#compares the two strings for approximate equalness
+	#substringmatch=False still matches substrings that are contained between quotes
 	
 	#"E-Tutoring, Moderation von E-Learning" vs "eTutoring, Moderation von e-Learning" => ratio of 0.93
 	#"Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1" vs "(4) Experiment. Gestaltung von MM-Anwend. + Präsentationsstrategien 1"  => ratio of 0.895
@@ -437,19 +436,26 @@ def fuzzyEq(wantedStr, compStr, threshold=0.89): #FIXME
 	for f in fixes_comp:
 		if f in compStr and f not in wantedStr: #but NOT the other way around
 			return(False)
-	
-	if wantedStr in compStr or compStr in wantedStr: #FIXME does not take account for spelling errors; problem with "E-Commerce"
-		return(True)
-	
+
 	subfach = compStr.split('"')
 	if len(subfach) > 1:
 		subfach1 = subfach[1]
 		subfach2 = subfach[3]
-		return(difflib.SequenceMatcher(None, subfach1, wantedStr).ratio() >= threshold or difflib.SequenceMatcher(None, subfach2, wantedStr).ratio() >= threshold)
+		if difflib.SequenceMatcher(None, subfach1, wantedStr).ratio() >= threshold or difflib.SequenceMatcher(None, subfach2, wantedStr).ratio() >= threshold:
+			return(True)
 	
 	#return(wantedStr.strip() == compStr.strip())
-	return(difflib.SequenceMatcher(None, wantedStr, compStr).ratio() >= threshold)
+	if difflib.SequenceMatcher(None, wantedStr, compStr).ratio() >= threshold:
+		return(True)
 
+	#substringmatch because of:
+	# "E-Commerce", "Online Communities und E-Commerce", "Secure E-commerce" are not the same
+	# "Seminar aus Computergraphik", "Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" are not the same 
+	# "Kommunikation", "Kommunikation und Moderation" are not the same
+	if substringmatch and (wantedStr in compStr or compStr in wantedStr): #FIXME does not take account for spelling errors; problem with "E-Commerce"
+		return(True)
+	
+	return(False)
 
 
 """ uni scrape """
