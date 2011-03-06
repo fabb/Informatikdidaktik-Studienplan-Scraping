@@ -62,7 +62,7 @@ def makeRoot(rootname=xmlRootname, schema=xsd, comment=xmlcomment, xsltstyleshee
 
 	root.addprevious(etree.PI("xml-stylesheet", 'type="text/xsl" href="%s"'%(xsltstylesheet)))
 
-	return(root)
+	return root
 
 def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexistentNodes=False):
 	#gets the given stpl in the xml or creates it
@@ -85,7 +85,7 @@ def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexist
 					previous.addnext(stpl_url_)
 				stpl_url_.text = lva_stpl_url.strip()
 				
-			return(s) #return first matching
+			return s #return first matching
 
 	if createNonexistentNodes:
 		stpl = etree.SubElement(xml_root, "stpl")
@@ -96,7 +96,7 @@ def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexist
 		stpl_url_ = etree.SubElement(stpl, "url")
 		stpl_url_.text = (lva_stpl_url or "").strip()
 
-		return(stpl)
+		return stpl
 	else:
 		raise Exception("STPL %s %s not found"%(lva_stpl,lva_stpl_version))
 
@@ -111,14 +111,14 @@ def getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNo
 		modulgruppeB = fuzzyEq(lva_modulgruppe, m.find("title").text)
 
 		if(modulgruppeB):
-			return(m) #return first matching
+			return m #return first matching
 
 	if createNonexistentNodes:
 		modulgruppe = etree.SubElement(stpl, "modulgruppe")
 		modulgruppe_title_ = etree.SubElement(modulgruppe, "title")
 		modulgruppe_title_.text = (lva_modulgruppe or "").strip()
 	
-		return(modulgruppe)
+		return modulgruppe
 	else:
 		#print("Modulgruppe %s not found"%(lva_modulgruppe))
 		raise Exception("Modulgruppe %s not found"%(lva_modulgruppe))
@@ -134,14 +134,14 @@ def getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, crea
 		modulB = fuzzyEq(lva_modul, m.find("title").text)
 
 		if(modulB):
-			return(m) #return first matching
+			return m #return first matching
 
 	if createNonexistentNodes:
 		modul = etree.SubElement(modulgruppe, "modul")
 		modul_title_ = etree.SubElement(modul, "title")
 		modul_title_.text = (lva_modul or "").strip()
 	
-		return(modul)
+		return modul
 	else:
 		raise Exception("Modul %s not found"%(lva_modul))
 
@@ -180,7 +180,7 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 			if old_fach_sws != fach_sws_.text or old_fach_ects != fach_ects_.text: #TODO more than just SWS and ECTS
 				print("Fach updated: %s"%(f.find("title").text + " " + f.find("type").text + " " + fach_sws_.text + " " + fach_ects_.text))
 			
-			return(f) #return first matching
+			return f #return first matching
 
 	if createNonexistentNodes:
 		fach = etree.SubElement(modul, "fach")
@@ -199,7 +199,7 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 
 		print("New Fach: %s"%(fach_title_.text + " " + fach_type_.text + " " + fach_sws_.text + " " + fach_ects_.text))
 
-		return(fach)
+		return fach
 	else:
 		raise Exception("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
 
@@ -217,7 +217,7 @@ def getMatchingFach(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
 		#fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
 
 		if(fachB and fach_typeB): #ignore sws and ects
-			return(f) #return first matching
+			return f #return first matching
 
 	raise Exception("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
 
@@ -250,7 +250,7 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 		if(universityB and semesterB and titleB and keyB and typeB): # ignore sws, ects, info, url and prof
 			found_lva = l
 			break #return first matching
-			#return(l)
+			#return l
 
 	#lva = found_lva or etree.SubElement(fach, "lva") #or: update existing lva #__nonzero__ will be changed in ElementTree
 	lva = found_lva if found_lva is not None else etree.SubElement(fach, "lva") #or: update existing lva #__nonzero__ will be changed in ElementTree
@@ -299,7 +299,7 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 		raise Exception("Existing LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
 	"""
 
-	return(lva)
+	return lva
 
 def addSource(xml_root, url, query_date):
 	#adds an url source entry in the given xml
@@ -335,10 +335,10 @@ def checkSchema(xml_root, xsd=xsd):
 	#print(xmlschema.validate(doc))
 	try:
 		xmlschema.assertValid(xml_root)
-		return(True)
+		return True
 	except etree.DocumentInvalid:
 		print(xmlschema.error_log)
-		return(False)
+		return False
 
 def writeXml(xml_root, filename=xmlfilename):
 	#writes xml to the given filename
@@ -380,17 +380,17 @@ def readXml(filename, checkXmlSchema=False):
 		if not checkSchema(xml_root):
 			raise Exception("Verifying XML Schema failed")
 	
-	return(xml_root)
+	return xml_root
 
 def loadXml(xmlfilename, xmlRootname=xmlRootname, xsd=xsd, loadExisting=True, checkXmlSchema=False):
 	#open existing file if it exists or create new xml
 	#check xml only when file is opened
 	if loadExisting and os.path.exists(xmlfilename):
 		#open existing file
-		return(readXml(xmlfilename, checkXmlSchema))
+		return readXml(xmlfilename, checkXmlSchema)
 	else:
 		#create xml
-		return(makeRoot(xmlRootname, xsd))
+		return makeRoot(xmlRootname, xsd)
 
 def isFreshXml(xml_root):
 	#true if xml already contains study structure
@@ -405,7 +405,7 @@ def isFreshXml(xml_root):
 def transformXslt(xml_root, xsltfilename=rss_xslt):
 	xslt_root = readXml(xsltfilename)
 	transform = etree.XSLT(xslt_root)
-	return(transform(xml_root).getroot())
+	return transform(xml_root).getroot()
 
 def generateRss(xml_root, rssfilename=rss_xml):
 	result_tree = transformXslt(xml_root)
@@ -429,33 +429,33 @@ def fuzzyEq(wantedStr, compStr, threshold=0.89, substringmatch=True): #FIXME thr
 	fixes_wanted = ["(1)","(2)","(3)","(4)","seminar 1","seminar 2","logik","systeme 1","systeme 2"] #(1)-(4) could lead to problems if those lvas were provided by Uni which does not categorize into fach
 	for f in fixes_wanted:
 		if f in wantedStr and f not in compStr: #but NOT the other way around
-			return(False)
+			return False
 
 	#warning: "Knowledge Management" does not fit to "Knowledge Management im Bildungsbereich"
 	fixes_comp = ["bildungsbereich"]
 	for f in fixes_comp:
 		if f in compStr and f not in wantedStr: #but NOT the other way around
-			return(False)
+			return False
 
 	subfach = compStr.split('"')
 	if len(subfach) > 1:
 		subfach1 = subfach[1]
 		subfach2 = subfach[3]
 		if difflib.SequenceMatcher(None, subfach1, wantedStr).ratio() >= threshold or difflib.SequenceMatcher(None, subfach2, wantedStr).ratio() >= threshold:
-			return(True)
+			return True
 	
 	#return(wantedStr.strip() == compStr.strip())
 	if difflib.SequenceMatcher(None, wantedStr, compStr).ratio() >= threshold:
-		return(True)
+		return True
 
 	#substringmatch because of:
 	# "E-Commerce", "Online Communities und E-Commerce", "Secure E-commerce" are not the same
 	# "Seminar aus Computergraphik", "Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" are not the same 
 	# "Kommunikation", "Kommunikation und Moderation" are not the same
 	if substringmatch and (wantedStr in compStr or compStr in wantedStr): #FIXME does not take account for spelling errors; problem with "E-Commerce"
-		return(True)
+		return True
 	
-	return(False)
+	return False
 
 
 """ uni scrape """
@@ -469,7 +469,7 @@ def srange((from_year,from_semester),(to_year,to_semester)):
 		if not from_semester in ws or not to_semester in ws:
 			raise Exception()
 	except (TypeError, ValueError, OverflowError, Exception): #int conversion failed
-		return([])
+		return []
 
 	yy = range(y_f,y_t+1)
 
@@ -481,9 +481,9 @@ def srange((from_year,from_semester),(to_year,to_semester)):
 		if to_semester == ws[0]:
 			combin.pop()
 	except IndexError:
-		return([])
+		return []
 	
-	return(combin)
+	return combin
 
 def currentSemester():
 	#calculates the current semester - from january on, the following summer semester will be output, from july on, the following winter semester
@@ -492,13 +492,13 @@ def currentSemester():
 	current_year = str(year)
 	current_sem = "S" if month < 7 else "W"
 	#TODO this gets the summer courses in january which might be a bit late
-	return(current_year,current_sem)
+	return (current_year,current_sem)
 
 def getUniUrls((from_year,from_semester)=uniSemesterFrom, (to_year,to_semester)=currentSemester()):
 	#builds urls of websites with all studies of the given semester range
 	uniurl = "http://online.univie.ac.at/vlvz?fakultaet=-1&semester=%s"
 	urls = OrderedDict([(sem,uniurl%(''.join(sem[::-1]))) for sem in srange((from_year,from_semester),(to_year,to_semester))])
-	return(urls)
+	return urls
 
 def fetchUrl(url, studyname=studyname):
 	#gets the url in the <a> tag that is next to the studyname
@@ -509,14 +509,14 @@ def fetchUrl(url, studyname=studyname):
 	doc.make_links_absolute(url)
 	#<div class="vlvz_kurz"><a href="/vlvz?kapitel=510&amp;semester=S2011">5.10</a> Master Informatikdidaktik</div>
 	link = doc.xpath('//div[contains(@class,"vlvz_kurz") and contains(.,"%s")]/a'%studyname)[0].attrib.get("href") #lxml only is capable of XPath, thus no lower-case() function available for a case insensitive search
-	return(link)
+	return link
 
 def fetchAllUrls(uniurls, studyname=studyname):
 	#resolves all urls in the dictionary with the function fetchUrl
 	uniurls2 = uniurls.copy()
 	for semester, url in uniurls2.items():
 		uniurls2[semester] = fetchUrl(url,studyname)
-	return(uniurls2)
+	return uniurls2
 
 def uniExtract(xml_root, semester,url, universityName=uni, createNonexistentNodes=False):
 	#extracts lvas from given url (uni) and writes to xml
