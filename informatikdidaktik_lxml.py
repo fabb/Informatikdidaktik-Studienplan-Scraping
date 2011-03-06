@@ -100,7 +100,7 @@ def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexist
 	else:
 		raise Exception("STPL %s %s not found"%(lva_stpl,lva_stpl_version))
 
-def getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes=False):
+def getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes=False, iswahlmodulgruppe = False):
 	#gets the given modulgruppe in the xml or creates it
 	stpl = getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexistentNodes=createNonexistentNodes)
 
@@ -111,10 +111,14 @@ def getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNo
 		modulgruppeB = fuzzyEq(lva_modulgruppe, m.find("title").text)
 
 		if(modulgruppeB):
+			if iswahlmodulgruppe: #for inserting afterwards
+				m.set("wahlmodulgruppe", "true")
 			return m #return first matching
 
 	if createNonexistentNodes:
 		modulgruppe = etree.SubElement(stpl, "modulgruppe")
+		if iswahlmodulgruppe:
+			modulgruppe.set("wahlmodulgruppe", "true")
 		modulgruppe_title_ = etree.SubElement(modulgruppe, "title")
 		modulgruppe_title_.text = (lva_modulgruppe or "").strip()
 	
@@ -579,6 +583,7 @@ def uniExtract(xml_root, semester,url, universityName=uni, createNonexistentNode
 			#print(lva_anchor)
 			#http://online.univie.ac.at/vlvz?kapitel=510&semester=S2011#510_3
 			#<h3 class="chapter4" id="510_3">Modul...
+			iswahlmodulgruppe = False
 			if "Pflichtmodul" not in lva_modul and "Wahlmodul" not in lva_modul:
 				getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes) #TODO
 			elif "Vertiefung Informatik" in lva_modulgruppe:
@@ -586,7 +591,8 @@ def uniExtract(xml_root, semester,url, universityName=uni, createNonexistentNode
 					lva_modulgruppe = u"Modulgruppe Vertiefung Informatik, Pflichtmodul"
 				if "Wahlmodul" in lva_modul:
 					lva_modulgruppe = u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)"
-				getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes)
+					iswahlmodulgruppe = True
+				getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes, iswahlmodulgruppe)
 			#print("4: " + lva_modul + "<")
 		elif "chapter5" in f.attrib.get("class"): #modul bei vertiefungs-modulgruppe
 			#lva_modul2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0].strip()
@@ -713,7 +719,10 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 				lva_modulgruppe = lva_modulgruppe.partition("Modul")[2]
 			"""
 			lva_modul = ""
-			getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes)
+			iswahlmodulgruppe = False
+			if "Wahlmodul" in lva_modulgruppe:
+				iswahlmodulgruppe = True
+			getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes, iswahlmodulgruppe)
 			#print("1: " + lva_modulgruppe + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" in f.attrib.get("class"):
 			lva_modul = u"ICT-Infrastruktur für Bildungsaufgaben" #TODO

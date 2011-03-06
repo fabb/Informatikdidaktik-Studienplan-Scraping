@@ -12,7 +12,6 @@ Licensed under the Open Software License (OSL 3.0)
 TODO
 	save collapse state to localStorage
 	checkboxes for done lvas, store to localStorage / loadable file
-	as each wahlmodul has to be done on one of either universities, don't display the fach title and sort by university
 	show ects and contained elements in headers
 -->
 
@@ -220,16 +219,16 @@ TODO
 								<input name="hideemptyCheck" type="checkbox" onclick="hideempty(this.form.hideemptyCheck.checked)"/> Verstecke leere Kategorien
 							</div>
 							<div>
-								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');}}">
+								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('wahlmodul');showAllDiv('fach');}}">
 										<b>Zeige Modulgruppen</b>
 								</button>
-								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modulgruppe');hideAllDiv('modul');showAllDiv('fach');}}">
+								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modulgruppe');hideAllDiv('modul');hideAllDiv('wahlmodul');showAllDiv('fach');}}">
 										<b>Zeige Module</b>
 								</button>
-								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('fach');}}">
+								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('wahlmodul');hideAllDiv('fach');}}">
 										<b>Zeige Fächer</b>
 								</button>
-								<button type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('fach');">
+								<button type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('wahlmodul');showAllDiv('fach');">
 										<b>Zeige alles</b>
 								</button>
 							</div>
@@ -305,44 +304,83 @@ TODO
 											<xsl:attribute name="id">
 												<xsl:value-of select="$modulID"/>
 											</xsl:attribute>
-											<xsl:for-each select="fach">
-												<div class="fach" data-name="wholefach">
-													<xsl:attribute name="data-nolvas_static">
-														<xsl:value-of select="count(.//lva)=0"/>
+											
+											<xsl:choose>
+												<xsl:when test="ancestor::modulgruppe[@wahlmodulgruppe = true()]">
+												
+													<!-- overwrite data-name -->
+													<xsl:attribute name="data-name">
+														<xsl:text>wahlmodul</xsl:text>
 													</xsl:attribute>
-													<xsl:variable name="fachID">
-														<!-- remove ", ', spaces, comma, braces and + from variable name -->
-														<!-- add modulID to the fachID as a fach can appear in several wahlmoduls -->
-														<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>_<xsl:value-of select="type"/-->
-														<xsl:call-template name="removeSpecialChars">
-															<xsl:with-param name="inputstring" select="./title"/>
-														</xsl:call-template>
-														<xsl:text>_</xsl:text>
-														<xsl:value-of select="type"/>
-													</xsl:variable>
-													<!-- warning: this way, no " and ' is allowed in the variable name -->
-													<h4 onclick="hideshowDiv('{$fachID}')">
-														<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
-													</h4>
-													<div class="lvas" data-name="fach">
-														<xsl:attribute name="id">
-															<xsl:value-of select="$fachID"/>
+												
+													<!--div class="fach" data-name="wholefach"-->
+													<div class="fach"><!--just for styling-->
+														<xsl:attribute name="data-nolvas_static">
+															<xsl:value-of select="count(..//lva)=0"/>
 														</xsl:attribute>
-														<xsl:choose>
-															<xsl:when test="count(lva)=0">
-																<p class="nolvas">Keine LVAs zu diesem Fach</p>
-															</xsl:when>
-															<xsl:otherwise>
-																<xsl:call-template name="lvatable">
-																	<xsl:with-param name="lvas" select="lva"/>
-																	<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
-																	<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
-																</xsl:call-template>
-															</xsl:otherwise>
-														</xsl:choose>
+														<div class="lvas" data-name="wahlfach">
+														<!--div class="lvas"-->
+															<xsl:choose>
+																<xsl:when test="count(fach/lva)=0">
+																	<p class="nolvas">Keine LVAs zu diesem Modul</p>
+																</xsl:when>
+																<xsl:otherwise>
+																	<xsl:call-template name="lvatable">
+																		<xsl:with-param name="lvas" select="fach/lva"/>
+																		<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+																		<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+																		<xsl:with-param name="groupUniversities" select="true()"/>
+																	</xsl:call-template>
+																</xsl:otherwise>
+															</xsl:choose>
+														</div>
 													</div>
-												</div>
-											</xsl:for-each>
+													
+												</xsl:when>
+												<xsl:otherwise>
+												
+													<xsl:for-each select="fach">
+														<div class="fach" data-name="wholefach">
+															<xsl:attribute name="data-nolvas_static">
+																<xsl:value-of select="count(.//lva)=0"/>
+															</xsl:attribute>
+															<xsl:variable name="fachID">
+																<!-- remove ", ', spaces, comma, braces and + from variable name -->
+																<!-- add modulID to the fachID as a fach can appear in several wahlmoduls -->
+																<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>_<xsl:value-of select="type"/-->
+																<xsl:call-template name="removeSpecialChars">
+																	<xsl:with-param name="inputstring" select="./title"/>
+																</xsl:call-template>
+																<xsl:text>_</xsl:text>
+																<xsl:value-of select="type"/>
+															</xsl:variable>
+															<!-- warning: this way, no " and ' is allowed in the variable name -->
+															<h4 onclick="hideshowDiv('{$fachID}')">
+																<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
+															</h4>
+															<div class="lvas" data-name="fach">
+																<xsl:attribute name="id">
+																	<xsl:value-of select="$fachID"/>
+																</xsl:attribute>
+																<xsl:choose>
+																	<xsl:when test="count(lva)=0">
+																		<p class="nolvas">Keine LVAs zu diesem Fach</p>
+																	</xsl:when>
+																	<xsl:otherwise>
+																		<xsl:call-template name="lvatable">
+																			<xsl:with-param name="lvas" select="lva"/>
+																			<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+																			<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+																		</xsl:call-template>
+																	</xsl:otherwise>
+																</xsl:choose>
+															</div>
+														</div>
+													</xsl:for-each>
+													
+												</xsl:otherwise>
+											</xsl:choose>
+
 										</div>
 									</div>
 								</xsl:for-each>
