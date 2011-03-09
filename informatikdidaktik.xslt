@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-03-06
+Fabian Ehrentraud, 2011-03-09
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -96,7 +96,7 @@ TODO
 					</h1>
 				</div>
 				<div id="meta">
-					<p class="meta-nonprint" data-name="data-meta-nonprint" onclick="hideshowLiNoprint(null,'meta');">
+					<p class="meta-nonprint" data-name="data-meta-nonprint" onclick="hideshowLiNoprint(null,'meta');" tabindex="0">
 						Diesen Abschnitt <span class="hideWhenNonprint">nicht </span>drucken
 					</p>
 					<p class="info">Kombination der abgehaltenen LVAs der <em>Uni Wien</em> und der <em>TU Wien</em> der vergangenen und kommenden Semester</p>
@@ -116,7 +116,7 @@ TODO
 					</p>
 					<div id="quellen">
 						<ul>
-						<li class="list-header" onclick="hideshowLiNoprint('quelle','quellen');">
+						<li class="list-header" onclick="hideshowLiNoprint('quelle','quellen');" tabindex="0">
 							Quellen
 						</li>
 						<!--xsl:for-each select="stpl_collection/source"-->
@@ -169,7 +169,7 @@ TODO
 							</div>
 							<div class="sidebyside">
 								Semester 
-								<span data-tooltip="tooltip-trigger"><span class="highlightSem">hervorheben</span>
+								<span data-tooltip="tooltip-trigger" tabindex="0"><span class="highlightSem">hervorheben</span>
 									<span data-tooltip="tooltip-pre"> - </span>
 									<span data-tooltip="tooltip">Zusätzlich ist es bei LVAs die vor 2 Semestern stattgefunden haben möglich dass sie wieder im aktuellen Semester stattfinden werden, aber noch nicht angekündigt sind. Daher wird in diesem Fall das entsprechende Semester <span class="highlightPrevSem">hervorgehoben</span>.
 									</span>
@@ -257,7 +257,7 @@ TODO
 							</xsl:variable>
 							<xsl:variable name="hasInfo" select="count(info) &gt; 0"/>
 							<!-- warning: this way, no " and ' is allowed in the variable name -->
-							<h2 onclick="hideshowDiv('{$modulgruppeID}')">
+							<h2 onclick="hideshowDiv('{$modulgruppeID}')" tabindex="0">
 								<xsl:if test="$hasInfo">
 									<xsl:attribute name="data-tooltip">
 										<xsl:text>tooltip-trigger</xsl:text>
@@ -302,7 +302,7 @@ TODO
 											</xsl:call-template>
 										</xsl:variable>
 										<!-- warning: this way, no "and ' is allowed in the variable name -->
-										<h3 onclick="hideshowDiv('{$modulID}')">
+										<h3 onclick="hideshowDiv('{$modulID}')" tabindex="0">
 											<xsl:value-of select="title"/>
 											<xsl:if test="count(semester_suggestion) &gt; 0">
 												<span class="semester_suggestions">
@@ -374,7 +374,7 @@ TODO
 																<xsl:value-of select="type"/>
 															</xsl:variable>
 															<!-- warning: this way, no " and ' is allowed in the variable name -->
-															<h4 onclick="hideshowDiv('{$fachID}')">
+															<h4 onclick="hideshowDiv('{$fachID}')" tabindex="0">
 																<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
 															</h4>
 															<div class="lvas" data-name="fach">

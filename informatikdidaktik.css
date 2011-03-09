@@ -2,7 +2,7 @@
 
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-03-06
+Fabian Ehrentraud, 2011-03-07
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -372,7 +372,8 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 	width: 10em;
 }
 .lvas table .lvainfo {
-	width: 12em;
+	/*width: 12em;*/
+	max-width: 24em;
 }
 .lvas table .lvainfo_empty {
 	width: 0;
