@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-03-09
+Fabian Ehrentraud, 2011-03-12
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -33,12 +33,30 @@ TODO
 		<xsl:value-of select="translate($inputstring,concat($apos,'&quot; ,()+'),'_______')"/>
 	</xsl:template>
 
+
+	<!-- calculate whether given fach contains only lvas at one university -->
+	<xsl:template name="multipleUniversities">
+		<xsl:param name="fachnodes"/>
+		
+		<!--xsl:value-of select="count(lva[not(university = preceding-sibling::lva/university)]) &gt; 1"/-->
+		
+		<!-- dirty XSLT1 hack to check if condition is true for all -->
+		<xsl:variable name="multiList">
+			<xsl:for-each select="$fachnodes">
+				<xsl:value-of select="count(./lva[not(./university = ./preceding-sibling::lva/university)]) &gt; 1"/>
+				<xsl:text> </xsl:text>
+			</xsl:for-each>
+		</xsl:variable>
+		<xsl:value-of select="not(contains($multiList, 'false'))"/>
+	</xsl:template>
+		
+
 	
 	
 	<xsl:template match="/">
 	
 		<!-- workaround for XSLT 1.0 where handling both apostrophes and quotes in one string is a bit complicated -->
-		<xsl:variable name="apos">'</xsl:variable>
+		<!--xsl:variable name="apos">'</xsl:variable-->
 	
 		<xsl:variable name="latestQuerydate">
 			<xsl:for-each select="/stpl_collection/source/query_date">
@@ -226,6 +244,9 @@ TODO
 								<input name="hideemptyCheck" type="checkbox" onclick="hideempty(this.form.hideemptyCheck.checked)"/> Verstecke leere Kategorien
 							</div>
 							<div>
+								<input name="hideuniCheck" type="checkbox" onclick="hideuni(this.form.hideuniCheck.checked)"/> Zeige nur Fächer, welche nur an <strong>einer</strong> Universität angeboten werden
+							</div>
+							<div>
 								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('wahlmodul');showAllDiv('fach');}}">
 										<b>Zeige Modulgruppen</b>
 								</button>
@@ -248,6 +269,20 @@ TODO
 							<xsl:attribute name="data-nolvas_static">
 								<xsl:value-of select="count(.//lva)=0"/>
 							</xsl:attribute>
+							<xsl:choose>
+								<xsl:when test=".[@wahlmodulgruppe = true()]">
+									<xsl:attribute name="data-wahlmodulgruppe">
+										<xsl:text>true</xsl:text>
+									</xsl:attribute>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:attribute name="data-multipleuniversities_static">
+										<xsl:call-template name="multipleUniversities">
+											<xsl:with-param name="fachnodes" select="./modul/fach"/>
+										</xsl:call-template>
+									</xsl:attribute>
+								</xsl:otherwise>
+							</xsl:choose>
 							<xsl:variable name="modulgruppeID">
 								<!-- remove ", ', spaces, comma, braces and + from variable name -->
 								<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
@@ -294,6 +329,17 @@ TODO
 										<xsl:attribute name="data-nolvas_static">
 											<xsl:value-of select="count(.//lva)=0"/>
 										</xsl:attribute>
+										<xsl:choose>
+											<xsl:when test=".[@wahlmodulgruppe = true()]">
+											</xsl:when>
+											<xsl:otherwise>
+												<xsl:attribute name="data-multipleuniversities_static">
+													<xsl:call-template name="multipleUniversities">
+														<xsl:with-param name="fachnodes" select="./fach"/>
+													</xsl:call-template>
+												</xsl:attribute>
+											</xsl:otherwise>
+										</xsl:choose>
 										<xsl:variable name="modulID">
 											<!-- remove ", ', spaces, comma, braces and + from variable name -->
 											<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
@@ -362,6 +408,11 @@ TODO
 														<div class="fach" data-name="wholefach">
 															<xsl:attribute name="data-nolvas_static">
 																<xsl:value-of select="count(.//lva)=0"/>
+															</xsl:attribute>
+															<xsl:attribute name="data-multipleuniversities_static">
+																<xsl:call-template name="multipleUniversities">
+																	<xsl:with-param name="fachnodes" select="."/>
+																</xsl:call-template>
 															</xsl:attribute>
 															<xsl:variable name="fachID">
 																<!-- remove ", ', spaces, comma, braces and + from variable name -->

@@ -1,5 +1,5 @@
 /*
-Fabian Ehrentraud, 2011-02-27
+Fabian Ehrentraud, 2011-03-12
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -281,6 +281,20 @@ function hideempty(hide) {
 		document.getElementById("content").setAttribute("data-hideempty","true");
 	}else{
 		document.getElementById("content").setAttribute("data-hideempty","false");
+	}
+
+	redrawFix();
+}
+
+/*
+assigngs a custom attribute to the ID "content"
+which hides/shows (according to the given parameter hide) by css all child elements which have got certain other attributes
+*/
+function hideuni(hide) {
+	if(hide){
+		document.getElementById("content").setAttribute("data-hideuni","true");
+	}else{
+		document.getElementById("content").setAttribute("data-hideuni","false");
 	}
 
 	redrawFix();

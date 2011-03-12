@@ -2,7 +2,7 @@
 
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-03-07
+Fabian Ehrentraud, 2011-03-12
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -93,8 +93,8 @@ a:hover {
 }
 
 strong {
-	font-style: italic;
-	text-transform: uppercase;
+	/*font-style: italic;*/
+	/*text-transform: uppercase;*/
 }
 
 ul {
@@ -242,7 +242,11 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 	display: none !important;
 }
 
-#content[data-hideempty~="true"] [data-nolvas~="true"], #content[data-hideempty="true"][data-nolvas~="true"], #content[data-hideempty~="true"] [data-nolvas_static~="true"], #content[data-hideempty="true"][data-nolvas_static~="true"] {
+#content[data-hideempty~="true"] [data-nolvas~="true"], #content[data-hideempty~="true"] [data-nolvas_static~="true"] {
+	display: none !important;
+}
+
+#content[data-hideuni~="true"] [data-multipleuniversities_static~="true"], #content[data-hideuni~="true"] [data-wahlmodulgruppe~="true"], #content[data-hideuni~="true"] [data-nolvas_static~="true"] {
 	display: none !important;
 }
 
