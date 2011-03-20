@@ -375,6 +375,9 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 	text-align: right;
 	width: 10em;
 }
+.ects_incorrect {
+	color: red;
+}
 .lvas table .lvainfo {
 	/*width: 12em;*/
 	max-width: 24em;

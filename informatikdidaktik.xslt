@@ -395,6 +395,7 @@ TODO
 																		<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
 																		<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
 																		<xsl:with-param name="groupUniversities" select="true()"/>
+																		<xsl:with-param name="sws1_5ects" select="true()"/>
 																	</xsl:call-template>
 																</xsl:otherwise>
 															</xsl:choose>
@@ -478,6 +479,7 @@ TODO
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		<xsl:param name="groupUniversities" select="false()"/>
+		<xsl:param name="sws1_5ects" select="false()"/>
 		
 		<table data-name="lvatable">
 			<tbody>
@@ -541,7 +543,26 @@ TODO
 								</xsl:choose>
 							</td>
 							<td class="lvacredits">
-								(<xsl:value-of select="sws"/> SWS / <xsl:value-of select="ects"/> ECTS)
+								<xsl:text>(</xsl:text>
+								<span class="sws">
+									<xsl:value-of select="sws"/>
+									<xsl:text> SWS</xsl:text>
+								</span>
+								<xsl:text> / </xsl:text>
+								<span class="ects">
+									<xsl:if test="$sws1_5ects and (1.5*sws != ects)">
+										<xsl:attribute name="class">
+											<xsl:text>ects_incorrect</xsl:text>
+										</xsl:attribute>
+										<xsl:attribute name="title">
+											<!-- TODO this is data that should be stored in xml file -->
+											<xsl:text>Diese ECTS sind falsch eingetragen, da laut TU-Dekanat mit 1.5 umgerechnet werden sollte.</xsl:text>
+										</xsl:attribute>
+									</xsl:if>
+									<xsl:value-of select="ects"/>
+									<xsl:text> ECTS</xsl:text>
+								</span>
+								<xsl:text>)</xsl:text>
 							</td>
 							<td class="lvainfo">
 								<xsl:if test="info = ''">
