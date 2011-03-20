@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-03-12
+Fabian Ehrentraud, 2011-03-20
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -270,7 +270,7 @@ TODO
 								<xsl:value-of select="count(.//lva)=0"/>
 							</xsl:attribute>
 							<xsl:choose>
-								<xsl:when test=".[@wahlmodulgruppe = true()]">
+								<xsl:when test="@wahlmodulgruppe = true()">
 									<xsl:attribute name="data-wahlmodulgruppe">
 										<xsl:text>true</xsl:text>
 									</xsl:attribute>
@@ -330,7 +330,7 @@ TODO
 											<xsl:value-of select="count(.//lva)=0"/>
 										</xsl:attribute>
 										<xsl:choose>
-											<xsl:when test=".[@wahlmodulgruppe = true()]">
+											<xsl:when test="@wahlmodulgruppe = true()">
 											</xsl:when>
 											<xsl:otherwise>
 												<xsl:attribute name="data-multipleuniversities_static">
