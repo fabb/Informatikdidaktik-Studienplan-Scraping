@@ -23,6 +23,7 @@ import os.path
 # when finally Tiss is updated to allow searching for old semesters' LVAs of a certain study code, incorporate the according scraping
 # Interdisziplinäres Praktikum: Interaktionsdesign is wrongly assigned in Tiss (not to all according modules), fix this
 # update date in an existing lva when any content has changed?
+# LVA Wiki https://vowi.fsinf.at/wiki/Alle_LVAs_(TU_Wien)
 
 
 studyname = "Informatikdidaktik"
