@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-03-20
+# Fabian Ehrentraud, 2011-06-22
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -19,7 +19,6 @@ import os.path
 
 #TODO
 # make replacement rules more transparent and encapsulated
-# cache old semesters which will not change anymore and don't read them in
 # when finally Tiss is updated to allow searching for old semesters' LVAs of a certain study code, incorporate the according scraping
 # Interdisziplinäres Praktikum: Interaktionsdesign is wrongly assigned in Tiss (not to all according modules), fix this
 # update date in an existing lva when any content has changed?
@@ -504,14 +503,71 @@ def srange((from_year,from_semester),(to_year,to_semester)):
 	
 	return combin
 
-def currentSemester():
+def currentSemester(realCurrent=False):
 	#calculates the current semester - from january on, the following summer semester will be output, from july on, the following winter semester
 	year = datetime.datetime.now().year
 	month = datetime.datetime.now().month
 	current_year = str(year)
-	current_sem = "S" if month < 7 else "W"
-	#TODO this gets the summer courses in january which might be a bit late
+	if realCurrent: #new semester only when it really has begun
+		current_sem = "S" if month < 10 and month > 2 else "W"
+	else:
+		current_sem = "S" if month < 7 else "W"
+		#TODO this gets the summer courses in january which might be a bit late
 	return (current_year,current_sem)
+
+def smallerSem(sem1, sem2):
+	#returns whether the first semester tuple is smaller than the second
+	(year1,sumwint1) = sem1
+	(year2,sumwint2) = sem2
+	if year1 < year2:
+		return True
+	elif year1 > year2:
+		return False
+	elif year1 == year2 and sumwint1 < sumwint2: #S<W
+		return True
+	else:
+		return False
+
+def dateAfterSemester(date, semester):
+	#returns whether the given date is located in the given semester (or before the next one has started)
+	if date is None or semester is None:
+		return False
+	dateS = date.split('-')
+	year = dateS[0]
+	month = dateS[1]
+	if int(month) < 10 and int(month) > 2:
+		dateSumWint = "S"
+	else:
+		dateSumWint = "W"
+		year = str(int(year) - 1)
+	dateSem = (year,dateSumWint)
+	return smallerSem(semester, dateSem)
+
+def hasRecentDate(xml_root, referring_url, sem):
+	#checks whether the given referring_url was checked after the semester was over
+	#TODO get rid of sem
+	sources = xml_root.findall("source")
+	for s in sources:
+		ref_url = s.find("referring_url")
+		if ref_url is not None and ref_url.text == referring_url:
+			query_dates = s.findall("query_date")
+			newestDate = None
+			for d in query_dates:
+				if newestDate == None or d.text > newestDate: #TODO make time stamp comparison more sophisticated FIXME
+					newestDate = d.text
+			return dateAfterSemester(newestDate, sem)
+	return False
+
+def pruneUni(xml_root, uniurls):
+	#removes all urls which do not need to be scraped
+	uniurls2 = uniurls.copy()
+	current_sem = currentSemester(True)
+	
+	for sem,referring_url in uniurls2.items():
+		if smallerSem(sem, current_sem) and hasRecentDate(xml_root, referring_url, sem):
+			del uniurls2[sem]
+	
+	return uniurls2
 
 def getUniUrls((from_year,from_semester)=uniSemesterFrom, (to_year,to_semester)=currentSemester()):
 	#builds urls of websites with all studies of the given semester range
@@ -675,8 +731,10 @@ def getUni(xml_root, createNonexistentNodes=False):
 	#s_to = ("2011","S")
 	#uniurls = getUniUrls(s_from, s_to)
 	uniurls = getUniUrls()
-	#TODO remove cached urls
-	unicontenturls = fetchAllUrls(uniurls,studyname)
+	
+	pruned_uniurls = pruneUni(xml_root, uniurls)
+	
+	unicontenturls = fetchAllUrls(pruned_uniurls,studyname)
 	for sem,(referring_url,url) in unicontenturls.items():
 		#print(sem[0] + sem[1] + "<>" + url + "<")
 		uniExtract(xml_root, sem, url, referring_url, createNonexistentNodes=createNonexistentNodes)
