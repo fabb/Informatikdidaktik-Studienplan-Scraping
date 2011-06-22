@@ -36,6 +36,7 @@ xmlRootname = "stpl_collection"
 
 rss_xslt = "informatikdidaktik_rss.xslt"
 rss_xml = "informatikdidaktik_rss.xml"
+backupfolder = "backup/" # needs trailing slash
 
 tiss = "https://tiss.tuwien.ac.at/curriculum/curriculumVersion.xhtml?locale=de&studyCode=066950&version=2009U.0"
 
@@ -345,7 +346,7 @@ def checkSchema(xml_root, xsd=xsd):
 		print(xmlschema.error_log)
 		return False
 
-def writeXml(xml_root, filename=xmlfilename):
+def writeXml(xml_root, filename=xmlfilename, backupfolder=backupfolder):
 	#writes xml to the given filename
 	
 	print("Writing XML file " + filename + " + backups")
@@ -360,7 +361,7 @@ def writeXml(xml_root, filename=xmlfilename):
 	
 	#backup of original if it exists
 	if os.path.exists(filename):
-		os.rename(filename, basename + "_" + writedate + "_old" + extension)
+		os.renames(filename, backupfolder + basename + "_" + writedate + "_old" + extension)
 	
 	#write new
 	f = open(filename, 'w')
@@ -368,7 +369,7 @@ def writeXml(xml_root, filename=xmlfilename):
 	f.close()
 	
 	#write backup of new
-	f = open(basename + "_" + writedate + extension, "w")
+	f = open(backupfolder + basename + "_" + writedate + extension, "w")
 	f.write(xml)
 	f.close()
 
