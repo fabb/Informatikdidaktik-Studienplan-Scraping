@@ -856,8 +856,20 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			
 """ parse legacy file """
 
+def wasUrlScraped(xml_root, url):
+	#checks whether given url was somewhen scraped already
+	sources = xml_root.findall("source")
+	for s in sources:
+		url_ = s.find("url")
+		if url_ is not None and url_.text == url:
+			return True #could also check whether query_date elements exists, but is not necessary
+	return False
+
 def getFile(xml_root, filename=legacyFile, universityName=tu):
 	#retrieves lvas from old python script output file and writes to xml
+	
+	if wasUrlScraped(xml_root, filename):
+		return #nothing to do
 	
 	print("Scraping %s"%(filename))
 	
