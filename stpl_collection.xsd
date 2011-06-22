@@ -13,6 +13,7 @@ Licensed under the Open Software License (OSL 3.0)
 					<xs:complexType>
 						<xs:sequence>
 							<xs:element name="url" type="xs:anyURI"/>
+							<xs:element name="referring_url" type="xs:anyURI" minOccurs="0"/>
 							<xs:element name="query_date" type="xs:dateTime" maxOccurs="unbounded"/>
 						</xs:sequence>
 					</xs:complexType>

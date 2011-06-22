@@ -307,7 +307,7 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 
 	return lva
 
-def addSource(xml_root, url, query_date):
+def addSource(xml_root, url, query_date, referring_url=None):
 	#adds an url source entry in the given xml
 	
 	found_source = None
@@ -326,6 +326,19 @@ def addSource(xml_root, url, query_date):
 		xml_root.insert(0, source)
 		url_ = source.find("url") if source.find("url") is not None else etree.SubElement(source, "url")
 		url_.text = (url or "")
+	
+	if referring_url is not None:
+		ref_url = source.find("referring_url")
+		if ref_url is None:
+			ref_url = etree.Element("referring_url")
+			
+			url_ = source.find("url")
+			if source.find("url") is not None:
+				url_.addnext(ref_url)
+			else: #should not happen
+				raise Exception("No URL element present in XML for %s"%(url))
+		
+		ref_url.text = (referring_url or "")
 	
 	query_date_ = etree.SubElement(source, "query_date")
 	query_date_.text = (query_date or "")
@@ -521,10 +534,10 @@ def fetchAllUrls(uniurls, studyname=studyname):
 	#resolves all urls in the dictionary with the function fetchUrl
 	uniurls2 = uniurls.copy()
 	for semester, url in uniurls2.items():
-		uniurls2[semester] = fetchUrl(url,studyname)
+		uniurls2[semester] = (url,fetchUrl(url,studyname))
 	return uniurls2
 
-def uniExtract(xml_root, semester,url, universityName=uni, createNonexistentNodes=False):
+def uniExtract(xml_root, semester,url, referring_url, universityName=uni, createNonexistentNodes=False):
 	#extracts lvas from given url (uni) and writes to xml
 	
 	print("Scraping %s"%(url))
@@ -540,7 +553,7 @@ def uniExtract(xml_root, semester,url, universityName=uni, createNonexistentNode
 	if len(founds) == 0:
 		raise Exception("No elements found in %s"%(url))
 
-	addSource(xml_root, url, datetime.datetime.now().isoformat())
+	addSource(xml_root, url, datetime.datetime.now().isoformat(), referring_url)
 
 	#print(founds)
 	
@@ -664,9 +677,9 @@ def getUni(xml_root, createNonexistentNodes=False):
 	uniurls = getUniUrls()
 	#TODO remove cached urls
 	unicontenturls = fetchAllUrls(uniurls,studyname)
-	for sem,url in unicontenturls.items():
+	for sem,(referring_url,url) in unicontenturls.items():
 		#print(sem[0] + sem[1] + "<>" + url + "<")
-		uniExtract(xml_root, sem, url, createNonexistentNodes=createNonexistentNodes)
+		uniExtract(xml_root, sem, url, referring_url, createNonexistentNodes=createNonexistentNodes)
 
 
 """ TU scraping """
