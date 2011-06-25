@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-06-22
+# Fabian Ehrentraud, 2011-06-25
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -22,6 +22,8 @@ import os.path
 # when finally Tiss is updated to allow searching for old semesters' LVAs of a certain study code, incorporate the according scraping
 # Interdisziplinäres Praktikum: Interaktionsdesign is wrongly assigned in Tiss (not to all according modules), fix this
 # update date in an existing lva when any content has changed?
+# support multiple professors
+# scrape professors from Tiss
 # LVA Wiki https://vowi.fsinf.at/wiki/Alle_LVAs_(TU_Wien)
 
 
@@ -546,6 +548,7 @@ def dateAfterSemester(date, semester):
 def hasRecentDate(xml_root, referring_url, sem):
 	#checks whether the given referring_url was checked after the semester was over
 	#TODO get rid of sem
+	#return False
 	sources = xml_root.findall("source")
 	for s in sources:
 		ref_url = s.find("referring_url")
@@ -695,6 +698,10 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 			lva_ects = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].getchildren()[0].tail.strip().partition(' ')[2]
 			#print(lva_ects)
 
+			lva_professors = map(lambda e: e.text, f.xpath('../div[contains(@class,"vlvz_vortragende")]/a'))
+			lva_professor = ', '.join([x.strip() for x in lva_professors])
+			#print(lva_professor)
+
 			lva_info = "" #FIXME
 			
 			#print(lva_title)
@@ -719,7 +726,7 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 			else:
 				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
 			
-			addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, createNonexistentNodes=False)
+			addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, lva_professor, createNonexistentNodes=False)
 			
 			#print("X: " + lva_key + "," + lva_type + "," + lva_semester + "<:>" + lva_title + " - " + lva_anchor + "<")
 		else:
