@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-06-25
+# Fabian Ehrentraud, 2011-07-02
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -39,7 +39,9 @@ rss_xslt = "informatikdidaktik_rss.xslt"
 rss_xml = "informatikdidaktik_rss.xml"
 backupfolder = "backup/" # needs trailing slash
 
-tiss = "https://tiss.tuwien.ac.at/curriculum/curriculumVersion.xhtml?locale=de&studyCode=066950&version=2009U.0"
+#tiss = "https://tiss.tuwien.ac.at/curriculum/curriculumVersion.xhtml?locale=de&studyCode=066950&version=2009U.0"
+tiss = "https://tiss.tuwien.ac.at/curriculum/public/curriculum.xhtml?key=56898&semester=CURRENT"
+tiss_next = "https://tiss.tuwien.ac.at/curriculum/public/curriculum.xhtml?key=56898&semester=NEXT"
 
 uniSemesterFrom = ("2009","W") #Informatikdidaktik exists since 2009W
 #uniSemesterTo = ("2011","S") #use default currentSemester()
@@ -749,7 +751,7 @@ def getUni(xml_root, createNonexistentNodes=False):
 
 """ TU scraping """
 
-def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLvas=True):
+def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLvas=True, lva_stpl_version="2009U.0"):
 	#gets lvas from given url (Tiss) and writes to xml
 	
 	print("Scraping %s"%(url))
@@ -782,8 +784,8 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 	for f in founds:
 		#print(etree.tostring(f))
 		if "nodeTable-level-0" in f.attrib.get("class"):
-			lva_stpl = f.text.strip().partition(' ')[0]
-			lva_stpl_version = f.text.strip().partition(' ')[2]
+			lva_stpl = f.text.strip() #.partition(' ')[0]
+			#lva_stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
 			lva_modulgruppe, lva_modul = "", ""
 			getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url, createNonexistentNodes=createNonexistentNodes)
 			#print("0: " + lva_stpl + "<>" + lva_stpl_version + "<")
@@ -808,8 +810,11 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			lva_modul = u"ICT-Infrastruktur für Bildungsaufgaben" #TODO
 			lva_fach = f.text.partition(' ')[2]
 			lva_fach_type = f.text.partition(' ')[0]
-			lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-			lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+			#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+			lva_fach_sws = f.xpath('../following-sibling::td')[1].text
+			lva_fach_ects = f.xpath('../following-sibling::td')[2].text
+
 			getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes) #could be leaved alone with the current createNonexistentNodes
 			getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
 			#print("2i " + lva_modul + "<")
@@ -831,8 +836,10 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			if u"Grundlagen der Kommunikations- und Medientheorie" in lva_fach: #wrongly assigned in TISS
 				lva_fach = u'"Medienpädagogik" oder "Grundlagen der Kommunikations- und Medientheorie"'
 				lva_fach_type = "VO"
-			lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-			lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+			#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+			lva_fach_sws = f.xpath('../following-sibling::td')[1].text
+			lva_fach_ects = f.xpath('../following-sibling::td')[2].text
 
 			if "Wahlmodul" in lva_modulgruppe:
 				#if getLvas: #don't add Fach at all when getLvas=False as Wahlmodule can contain *any* Fach which isn't important for the structure
@@ -852,8 +859,10 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 				lva_title = lva_title_url.text
 				#lva_info = f.xpath('../following-sibling::*[contains(@class,"nodeTableInfoColumn")]/div')[0].text #can be None
 				lva_info = lva_canceled
-				lva_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-				lva_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+				#lva_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+				#lva_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+				lva_sws = f.xpath('../following-sibling::td')[1].text
+				lva_ects = f.xpath('../following-sibling::td')[2].text
 				
 				addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, createNonexistentNodes=False)
 				#print("4: " + lva_key + "," + lva_type + "," + lva_semester + "<:>" + lva_title + " - " + lva_url + "<")
@@ -952,6 +961,7 @@ getFile(xml_root)
 
 #get lvas from TU
 getTU(xml_root, tiss, createNonexistentNodes=False)
+getTU(xml_root, tiss_next, createNonexistentNodes=False)
 
 #get lvas from Uni
 getUni(xml_root, createNonexistentNodes=False)
