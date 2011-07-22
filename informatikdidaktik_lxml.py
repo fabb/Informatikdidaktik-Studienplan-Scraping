@@ -784,13 +784,13 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 	for f in founds:
 		#print(etree.tostring(f))
 		if "nodeTable-level-0" in f.attrib.get("class"):
-			lva_stpl = f.text.strip() #.partition(' ')[0]
+			lva_stpl = f.text + f.xpath('span')[0].text
 			#lva_stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
 			lva_modulgruppe, lva_modul = "", ""
 			getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url, createNonexistentNodes=createNonexistentNodes)
 			#print("0: " + lva_stpl + "<>" + lva_stpl_version + "<")
 		elif "nodeTable-level-1" in f.attrib.get("class"):
-			lva_modulgruppe = f.text
+			lva_modulgruppe = f.xpath('span')[0].text
 			"""
 			#strip unnecessary "Modul" or similar
 			if "Pflichtmodulgruppe" in lva_modulgruppe:
@@ -808,8 +808,10 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			#print("1: " + lva_modulgruppe + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" in f.attrib.get("class"):
 			lva_modul = u"ICT-Infrastruktur für Bildungsaufgaben" #TODO
-			lva_fach = f.text.partition(' ')[2]
-			lva_fach_type = f.text.partition(' ')[0]
+			#lva_fach = f.text.partition(' ')[2]
+			#lva_fach_type = f.text.partition(' ')[0]
+			lva_fach = f.xpath('span')[0].text
+			lva_fach_type = f.text
 			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
 			#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
 			lva_fach_sws = f.xpath('../following-sibling::td')[1].text
@@ -819,21 +821,22 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
 			#print("2i " + lva_modul + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
-			lva_modul = f.text
+			lva_modul = f.xpath('span')[0].text
 			if "Infomatik" in lva_modul:
 				lva_modul = lva_modul.replace("Infomatik","Informatik")
 			getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes)
 			#print("2: " + lva_modul + "<")
 		elif "nodeTable-level-3" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			lva_fach = f.text.partition(' ')[2]
+			#lva_fach = f.text.partition(' ')[2]
+			lva_fach = f.xpath('span')[0].text
+			lva_fach_type = f.text
 			if '"Grundl.u.Praxis d.eLearning" od. "eTutoring, Moderation von e-Learning"' in lva_fach:
 				lva_fach = '"Grundlagen und Praxis des eLearning" oder "eTutoring, Moderation von e-Learning"'
 			elif "Erwachsenenbildung und Lebenslanges Lernen" in lva_fach: #deprecated
 				lva_fach = u'"Theorie und Praxis des Lehrens und Lernens" oder "Erwachsenenbildung und Lebenslanges Lernen"'
 			elif u"(4) Experiment. Gestaltung von MM-Anwend. + Präsentationsstrategien 1" in lva_fach:
 				lva_fach = u"(4) Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1"
-			lva_fach_type = f.text.partition(' ')[0]
-			if u"Grundlagen der Kommunikations- und Medientheorie" in lva_fach: #wrongly assigned in TISS
+			elif u"Grundlagen der Kommunikations- und Medientheorie" in lva_fach: #wrongly assigned in TISS
 				lva_fach = u'"Medienpädagogik" oder "Grundlagen der Kommunikations- und Medientheorie"'
 				lva_fach_type = "VO"
 			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
