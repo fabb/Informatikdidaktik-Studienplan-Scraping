@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-07-02
+# Fabian Ehrentraud, 2011-08-06
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -15,6 +15,7 @@ from lxml import html
 import difflib
 import urllib
 import os.path
+import logging
 
 
 #TODO
@@ -25,6 +26,8 @@ import os.path
 # support multiple professors
 # scrape professors from Tiss
 # LVA Wiki https://vowi.fsinf.at/wiki/Alle_LVAs_(TU_Wien)
+# import argparse http://docs.python.org/library/argparse.html
+# logging of Exceptions
 
 
 studyname = "Informatikdidaktik"
@@ -50,6 +53,22 @@ tu = "TU"
 
 legacyFile = "http://web.student.tuwien.ac.at/~e0725639/informatikdidaktik/informatikdidaktik_tuwel_legacy_2010-09-02.txt"
 
+
+""" logging """
+
+logger = logging.getLogger('informatikdidaktik')
+logger.setLevel(logging.DEBUG)
+#logging.basicConfig(filename='informatikdidaktik.log', level=logging.INFO) # level=logging.DEBUG # format='%(levelname)s:%(message)s'
+consoleloghandler = logging.StreamHandler()
+consoleloghandler.setLevel(logging.INFO)
+fileloghandler = logging.FileHandler('informatikdidaktik.log')
+fileloghandler.setLevel(logging.DEBUG)
+#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(levelname)s: %(message)s')
+consoleloghandler.setFormatter(formatter)
+fileloghandler.setFormatter(formatter)
+logger.addHandler(consoleloghandler)
+logger.addHandler(fileloghandler)
 
 
 """ create xml """
@@ -206,7 +225,7 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 		if len(fach_ects_.text) == 1:
 			fach_ects_.text += ".0"
 
-		print("New Fach: %s"%(fach_title_.text + " " + fach_type_.text + " " + fach_sws_.text + " " + fach_ects_.text))
+		logger.info("New Fach: %s"%(fach_title_.text + " " + fach_type_.text + " " + fach_sws_.text + " " + fach_ects_.text))
 
 		return fach
 	else:
@@ -286,7 +305,7 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 		lva_ects_.text += ".0"
 	lva_info_ = lva.find("info") if lva.find("info") is not None else etree.SubElement(lva, "info")
 	if "manuell" in (lva_info_.text or ""):
-		print("Manually registered LVA overwritten")
+		logger.info("Manually registered LVA overwritten")
 		found_lva = None #to print out LVA details in the end of the function and update the query date
 	lva_info_.text = (lva_info or "").strip()
 	lva_url_ = lva.find("url") if lva.find("url") is not None else etree.SubElement(lva, "url")
@@ -300,9 +319,9 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 		lva_query_date_.text = datetime.datetime.now().isoformat()
 	
 	if found_lva is None:
-		print("New LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
+		logger.info("New LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
 	elif old_lva_sws != lva_sws_.text or old_lva_ects != lva_ects_.text: #TODO more than just SWS and ECTS
-		print("LVA updated: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
+		logger.info("LVA updated: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
 	"""
 	else: #FIXME only for debugging
 		raise Exception("Existing LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
@@ -359,13 +378,13 @@ def checkSchema(xml_root, xsd=xsd):
 		xmlschema.assertValid(xml_root)
 		return True
 	except etree.DocumentInvalid:
-		print(xmlschema.error_log)
+		logger.warning(xmlschema.error_log)
 		return False
 
 def writeXml(xml_root, filename=xmlfilename, backupfolder=backupfolder):
 	#writes xml to the given filename
 	
-	print("Writing XML file " + filename + " + backups")
+	logger.info("Writing XML file " + filename + " + backups")
 	
 	xml = etree.tostring(xml_root.getroottree(), pretty_print=True, xml_declaration=True, encoding="utf-8")
 
@@ -391,7 +410,7 @@ def writeXml(xml_root, filename=xmlfilename, backupfolder=backupfolder):
 
 def readXml(filename, checkXmlSchema=False):
 	
-	print("Reading in existing XML file " + filename)
+	logger.info("Reading in existing XML file " + filename)
 	
 	parser = etree.XMLParser(remove_blank_text=True) #read in a pretty printed xml and don't interpret whitespaces as meaningful data => this allows correct output pretty printing
 	xml_root = etree.parse(filename, parser).getroot()
@@ -583,7 +602,7 @@ def getUniUrls((from_year,from_semester)=uniSemesterFrom, (to_year,to_semester)=
 def fetchUrl(url, studyname=studyname):
 	#gets the url in the <a> tag that is next to the studyname
 	
-	print("Querying %s"%(url))
+	logger.info("Querying %s"%(url))
 	
 	doc = html.parse(url).getroot()
 	doc.make_links_absolute(url)
@@ -601,7 +620,7 @@ def fetchAllUrls(uniurls, studyname=studyname):
 def uniExtract(xml_root, semester,url, referring_url, universityName=uni, createNonexistentNodes=False):
 	#extracts lvas from given url (uni) and writes to xml
 	
-	print("Scraping %s"%(url))
+	logger.info("Scraping %s"%(url))
 	
 	doc = html.parse(url).getroot()
 
@@ -754,7 +773,7 @@ def getUni(xml_root, createNonexistentNodes=False):
 def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLvas=True, lva_stpl_version="2009U.0"):
 	#gets lvas from given url (Tiss) and writes to xml
 	
-	print("Scraping %s"%(url))
+	logger.info("Scraping %s"%(url))
 
 	#doc = html.parse(url).getroot()
 
@@ -890,7 +909,7 @@ def getFile(xml_root, filename=legacyFile, universityName=tu):
 	if wasUrlScraped(xml_root, filename):
 		return #nothing to do
 	
-	print("Scraping %s"%(filename))
+	logger.info("Scraping %s"%(filename))
 	
 	if filename.startswith("http"):
 		f = urllib.urlopen(filename)
@@ -951,6 +970,8 @@ raise Exception(x) #FIXME no unicode exception messages
 """
 
 #raise Exception()
+
+logger.info("*** Informatikdidaktik Scraping started ***")
 
 #open existing file if it exists or create new xml
 xml_root = loadXml(xmlfilename, loadExisting=True, checkXmlSchema=True) #TODO loadExisting=True
