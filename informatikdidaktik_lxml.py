@@ -998,8 +998,13 @@ else:
 	print("XML is NOT valid")
 """
 
-#write xml to file + backupfile
-writeXml(xml_root, filename=xmlfilename)
+save = raw_input("Should the results be saved? (yes, no)\n")
+save = (save or "").strip().lower()
 
-#generate and write rss to file + backupfile
-generateRss(xml_root)
+if save == "y" or save == "yes":
+
+	#write xml to file + backupfile
+	writeXml(xml_root, filename=xmlfilename)
+
+	#generate and write rss to file + backupfile
+	generateRss(xml_root)
