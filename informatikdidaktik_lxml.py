@@ -53,6 +53,8 @@ tu = "TU"
 
 legacyFile = "http://web.student.tuwien.ac.at/~e0725639/informatikdidaktik/informatikdidaktik_tuwel_legacy_2010-09-02.txt"
 
+newstuff = False
+
 
 """ logging """
 
@@ -69,6 +71,13 @@ consoleloghandler.setFormatter(formatter)
 fileloghandler.setFormatter(formatter)
 logger.addHandler(consoleloghandler)
 logger.addHandler(fileloghandler)
+
+
+""" global notification """
+
+def didChange():
+	#global notification that a detail has changed
+	newstuff = True
 
 
 """ create xml """
@@ -109,8 +118,10 @@ def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexist
 					previous.addnext(stpl_url_)
 				stpl_url_.text = lva_stpl_url.strip()
 				
+				didChange()
+				
 			return s #return first matching
-
+	
 	if createNonexistentNodes:
 		stpl = etree.SubElement(xml_root, "stpl")
 		stpl_title_ = etree.SubElement(stpl, "title")
@@ -119,6 +130,8 @@ def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexist
 		stpl_version_.text = (lva_stpl_version or "").strip()
 		stpl_url_ = etree.SubElement(stpl, "url")
 		stpl_url_.text = (lva_stpl_url or "").strip()
+		
+		didChange()
 
 		return stpl
 	else:
@@ -137,14 +150,19 @@ def getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNo
 		if(modulgruppeB):
 			if iswahlmodulgruppe: #for inserting afterwards
 				m.set("wahlmodulgruppe", "true")
+				
+				didChange()
+			
 			return m #return first matching
-
+			
 	if createNonexistentNodes:
 		modulgruppe = etree.SubElement(stpl, "modulgruppe")
 		if iswahlmodulgruppe:
 			modulgruppe.set("wahlmodulgruppe", "true")
 		modulgruppe_title_ = etree.SubElement(modulgruppe, "title")
 		modulgruppe_title_.text = (lva_modulgruppe or "").strip()
+		
+		didChange()
 	
 		return modulgruppe
 	else:
@@ -168,6 +186,8 @@ def getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, crea
 		modul = etree.SubElement(modulgruppe, "modul")
 		modul_title_ = etree.SubElement(modul, "title")
 		modul_title_.text = (lva_modul or "").strip()
+		
+		didChange()
 	
 		return modul
 	else:
@@ -207,6 +227,8 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 			
 			if old_fach_sws != fach_sws_.text or old_fach_ects != fach_ects_.text: #TODO more than just SWS and ECTS
 				print("Fach updated: %s"%(f.find("title").text + " " + f.find("type").text + " " + fach_sws_.text + " " + fach_ects_.text))
+				
+				didChange()
 			
 			return f #return first matching
 
@@ -226,6 +248,8 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 			fach_ects_.text += ".0"
 
 		logger.info("New Fach: %s"%(fach_title_.text + " " + fach_type_.text + " " + fach_sws_.text + " " + fach_ects_.text))
+		
+		didChange()
 
 		return fach
 	else:
@@ -320,8 +344,10 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fac
 	
 	if found_lva is None:
 		logger.info("New LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
+		didChange()
 	elif old_lva_sws != lva_sws_.text or old_lva_ects != lva_ects_.text: #TODO more than just SWS and ECTS
 		logger.info("LVA updated: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
+		didChange()
 	"""
 	else: #FIXME only for debugging
 		raise Exception("Existing LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
@@ -348,6 +374,8 @@ def addSource(xml_root, url, query_date, referring_url=None):
 		xml_root.insert(0, source)
 		url_ = source.find("url") if source.find("url") is not None else etree.SubElement(source, "url")
 		url_.text = (url or "")
+		
+		didChange()
 	
 	if referring_url is not None:
 		ref_url = source.find("referring_url")
@@ -359,6 +387,8 @@ def addSource(xml_root, url, query_date, referring_url=None):
 				url_.addnext(ref_url)
 			else: #should not happen
 				raise Exception("No URL element present in XML for %s"%(url))
+		
+			didChange()
 		
 		ref_url.text = (referring_url or "")
 	
@@ -997,6 +1027,10 @@ if(checkSchema(xml_root)):
 else:
 	print("XML is NOT valid")
 """
+
+if newstuff:
+	logger.info("Something has changed")
+	#TODO send mail or something when special flag has been set
 
 save = raw_input("Should the results be saved? (yes, no)\n")
 save = (save or "").strip().lower()
