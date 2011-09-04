@@ -28,6 +28,7 @@ import logging
 # LVA Wiki https://vowi.fsinf.at/wiki/Alle_LVAs_(TU_Wien)
 # import argparse http://docs.python.org/library/argparse.html
 # logging of Exceptions
+# restructure xml to allow lvas directly under modulgruppe
 
 
 studyname = "Informatikdidaktik"
@@ -677,7 +678,7 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 			lva_stpl_version = "2009U.0" #TODO
 			lva_modulgruppe, lva_modul, lva_anchor, lva_modul2 = "", "", "", ""
 			getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexistentNodes=createNonexistentNodes)
-			#print("2: " + lva_studium + "<")
+			#print("2: " + lva_stpl + " " + lva_stpl_version + "<")
 		elif "chapter3" in f.attrib.get("class"): #modulgruppe
 			#.strip().partition(' ')[2]
 			lva_modulgruppe = f.text.strip().partition(' ')[2].strip().partition('(')[0]
@@ -692,6 +693,9 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 			#Vertiefung Informatik, Wahlmodule (2 sind zu wählen)
 			if "Vertiefung Informatik" not in lva_modulgruppe: #TODO
 				getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes)
+			if u"Freifächer" in lva_modulgruppe: #TODO restructure xml to allow lvas directly under modulgruppe
+				lva_modul = u"Freifächer"
+				getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, True) #TODO
 			#print("3: " + lva_modulgruppe + "<")
 		elif "chapter4" in f.attrib.get("class"): #modul
 			lva_modul = f.text.strip().partition(' ')[2]
@@ -772,7 +776,7 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 				lva_fach_sws = ""
 				lva_fach_ects = ""
 			
-			if "Wahlmodul" in lva_modulgruppe:
+			if "Wahlmodul" in lva_modulgruppe or u"Freifächer" in lva_modulgruppe:
 				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
 			else:
 				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
