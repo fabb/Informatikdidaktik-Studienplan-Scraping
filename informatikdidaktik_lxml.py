@@ -863,8 +863,8 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			lva_fach_type = f.text
 			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
 			#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-			lva_fach_sws = f.xpath('../following-sibling::td')[1].text
-			lva_fach_ects = f.xpath('../following-sibling::td')[2].text
+			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
+			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
 
 			getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes) #could be leaved alone with the current createNonexistentNodes
 			getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
@@ -890,8 +890,8 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 				lva_fach_type = "VO"
 			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
 			#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-			lva_fach_sws = f.xpath('../following-sibling::td')[1].text
-			lva_fach_ects = f.xpath('../following-sibling::td')[2].text
+			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
+			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
 
 			if "Wahlmodul" in lva_modulgruppe:
 				#if getLvas: #don't add Fach at all when getLvas=False as Wahlmodule can contain *any* Fach which isn't important for the structure
@@ -913,8 +913,8 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 				lva_info = lva_canceled
 				#lva_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
 				#lva_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-				lva_sws = f.xpath('../following-sibling::td')[1].text
-				lva_ects = f.xpath('../following-sibling::td')[2].text
+				lva_sws = f.xpath('../following-sibling::td')[2].text
+				lva_ects = f.xpath('../following-sibling::td')[3].text
 				
 				addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, createNonexistentNodes=False)
 				#print("4: " + lva_key + "," + lva_type + "," + lva_semester + "<:>" + lva_title + " - " + lva_url + "<")
