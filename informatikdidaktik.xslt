@@ -275,200 +275,10 @@ TODO
 					</div>
 				</div>
 				<div id="content">
-					<xsl:for-each select="$firstStpl/modulgruppe">
-						<div data-name="wholemodulgruppe">
-							<xsl:attribute name="data-nolvas_static">
-								<xsl:value-of select="count(.//lva)=0"/>
-							</xsl:attribute>
-							<xsl:choose>
-								<xsl:when test="@wahlmodulgruppe = true()">
-									<xsl:attribute name="data-wahlmodulgruppe">
-										<xsl:text>true</xsl:text>
-									</xsl:attribute>
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:attribute name="data-multipleuniversities_static">
-										<xsl:call-template name="multipleUniversities">
-											<xsl:with-param name="fachnodes" select="./modul/fach"/>
-										</xsl:call-template>
-									</xsl:attribute>
-								</xsl:otherwise>
-							</xsl:choose>
-							<xsl:variable name="modulgruppeID">
-								<!-- remove ", ', spaces, comma, braces and + from variable name -->
-								<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
-								<xsl:call-template name="removeSpecialChars">
-									<xsl:with-param name="inputstring" select="./title"/>
-								</xsl:call-template>
-							</xsl:variable>
-							<xsl:variable name="hasInfo" select="count(info) &gt; 0"/>
-							<!-- warning: this way, no " and ' is allowed in the variable name -->
-							<h2 onclick="hideshowDiv('{$modulgruppeID}')" tabindex="0">
-								<xsl:if test="$hasInfo">
-									<xsl:attribute name="data-tooltip">
-										<xsl:text>tooltip-trigger</xsl:text>
-									</xsl:attribute>
-								</xsl:if>
-								<xsl:value-of select="title"/>
-								<xsl:if test="count(semester_suggestion) &gt; 0">
-									<span class="semester_suggestions">
-										<xsl:text> (</xsl:text>
-										<xsl:for-each select="semester_suggestion">
-											<xsl:sort select="." order="ascending"/>
-											<xsl:if test="not(position() = 1)">
-												<xsl:text> &amp; </xsl:text>
-											</xsl:if>
-											<xsl:value-of select="."/>
-											<xsl:text>.</xsl:text>
-										</xsl:for-each>
-										<xsl:text> Semester)</xsl:text>
-									</span>
-								</xsl:if>
-								<xsl:if test="$hasInfo">
-									<span data-tooltip="tooltip-pre"> - </span>
-									<span data-tooltip="tooltip">
-										<xsl:value-of select="info"/>
-									</span>
-								</xsl:if>
-							</h2>
-							<div class="modulgruppe-body" data-name="modulgruppe">
-								<xsl:attribute name="id">
-									<xsl:value-of select="$modulgruppeID"/>
-								</xsl:attribute>
-								<xsl:for-each select="modul">
-									<div data-name="wholemodul">
-										<xsl:attribute name="data-nolvas_static">
-											<xsl:value-of select="count(.//lva)=0"/>
-										</xsl:attribute>
-										<xsl:choose>
-											<xsl:when test="@wahlmodulgruppe = true()">
-											</xsl:when>
-											<xsl:otherwise>
-												<xsl:attribute name="data-multipleuniversities_static">
-													<xsl:call-template name="multipleUniversities">
-														<xsl:with-param name="fachnodes" select="./fach"/>
-													</xsl:call-template>
-												</xsl:attribute>
-											</xsl:otherwise>
-										</xsl:choose>
-										<xsl:variable name="modulID">
-											<!-- remove ", ', spaces, comma, braces and + from variable name -->
-											<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
-											<xsl:call-template name="removeSpecialChars">
-												<xsl:with-param name="inputstring" select="./title"/>
-											</xsl:call-template>
-										</xsl:variable>
-										<!-- warning: this way, no "and ' is allowed in the variable name -->
-										<h3 onclick="hideshowDiv('{$modulID}')" tabindex="0">
-											<xsl:value-of select="title"/>
-											<xsl:if test="count(semester_suggestion) &gt; 0">
-												<span class="semester_suggestions">
-													<xsl:text> (</xsl:text>
-													<xsl:for-each select="semester_suggestion">
-														<xsl:sort select="." order="ascending"/>
-														<xsl:if test="not(position() = 1)">
-															<xsl:text> &amp; </xsl:text>
-														</xsl:if>
-														<xsl:value-of select="."/>
-														<xsl:text>.</xsl:text>
-													</xsl:for-each>
-													<xsl:text> Semester)</xsl:text>
-												</span>
-											</xsl:if>
-										</h3>
-										<div class="modul-body" data-name="modul">
-											<xsl:attribute name="id">
-												<xsl:value-of select="$modulID"/>
-											</xsl:attribute>
-											
-											<xsl:choose>
-												<xsl:when test="ancestor::modulgruppe[@wahlmodulgruppe = true()]">
-												
-													<!-- overwrite data-name -->
-													<xsl:attribute name="data-name">
-														<xsl:text>wahlmodul</xsl:text>
-													</xsl:attribute>
-												
-													<!--div class="fach" data-name="wholefach"-->
-													<div class="fach"><!--just for styling-->
-														<xsl:attribute name="data-nolvas_static">
-															<xsl:value-of select="count(..//lva)=0"/>
-														</xsl:attribute>
-														<div class="lvas" data-name="wahlfach">
-														<!--div class="lvas"-->
-															<xsl:choose>
-																<xsl:when test="count(fach/lva)=0">
-																	<p class="nolvas">Keine LVAs zu diesem Modul</p>
-																</xsl:when>
-																<xsl:otherwise>
-																	<xsl:call-template name="lvatable">
-																		<xsl:with-param name="lvas" select="fach/lva"/>
-																		<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
-																		<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
-																		<xsl:with-param name="groupUniversities" select="true()"/>
-																		<xsl:with-param name="sws1_5ects" select="true()"/>
-																	</xsl:call-template>
-																</xsl:otherwise>
-															</xsl:choose>
-														</div>
-													</div>
-													
-												</xsl:when>
-												<xsl:otherwise>
-												
-													<xsl:for-each select="fach">
-														<div class="fach" data-name="wholefach">
-															<xsl:attribute name="data-nolvas_static">
-																<xsl:value-of select="count(.//lva)=0"/>
-															</xsl:attribute>
-															<xsl:attribute name="data-multipleuniversities_static">
-																<xsl:call-template name="multipleUniversities">
-																	<xsl:with-param name="fachnodes" select="."/>
-																</xsl:call-template>
-															</xsl:attribute>
-															<xsl:variable name="fachID">
-																<!-- remove ", ', spaces, comma, braces and + from variable name -->
-																<!-- add modulID to the fachID as a fach can appear in several wahlmoduls -->
-																<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>_<xsl:value-of select="type"/-->
-																<xsl:call-template name="removeSpecialChars">
-																	<xsl:with-param name="inputstring" select="./title"/>
-																</xsl:call-template>
-																<xsl:text>_</xsl:text>
-																<xsl:value-of select="type"/>
-															</xsl:variable>
-															<!-- warning: this way, no " and ' is allowed in the variable name -->
-															<h4 onclick="hideshowDiv('{$fachID}')" tabindex="0">
-																<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
-															</h4>
-															<div class="lvas" data-name="fach">
-																<xsl:attribute name="id">
-																	<xsl:value-of select="$fachID"/>
-																</xsl:attribute>
-																<xsl:choose>
-																	<xsl:when test="count(lva)=0">
-																		<p class="nolvas">Keine LVAs zu diesem Fach</p>
-																	</xsl:when>
-																	<xsl:otherwise>
-																		<xsl:call-template name="lvatable">
-																			<xsl:with-param name="lvas" select="lva"/>
-																			<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
-																			<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
-																		</xsl:call-template>
-																	</xsl:otherwise>
-																</xsl:choose>
-															</div>
-														</div>
-													</xsl:for-each>
-													
-												</xsl:otherwise>
-											</xsl:choose>
-
-										</div>
-									</div>
-								</xsl:for-each>
-							</div>
-						</div>
-					</xsl:for-each>
+					<xsl:apply-templates select="$firstStpl/modulgruppe">
+						<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+						<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+					</xsl:apply-templates>
 				</div>
 				<div id="footer">
 					<p>
@@ -481,6 +291,223 @@ TODO
 				</div>
 			</body>
 		</html>
+	</xsl:template>
+	
+
+	<xsl:template match="modulgruppe">
+		<xsl:param name="highlightSemester"/>
+		<xsl:param name="yearBeforeHighlightSemester"/>
+		
+		<div data-name="wholemodulgruppe">
+			<xsl:attribute name="data-nolvas_static">
+				<xsl:value-of select="count(.//lva)=0"/>
+			</xsl:attribute>
+			<xsl:choose>
+				<xsl:when test="@wahlmodulgruppe = true()">
+					<xsl:attribute name="data-wahlmodulgruppe">
+						<xsl:text>true</xsl:text>
+					</xsl:attribute>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:attribute name="data-multipleuniversities_static">
+						<xsl:call-template name="multipleUniversities">
+							<xsl:with-param name="fachnodes" select="./modul/fach"/>
+						</xsl:call-template>
+					</xsl:attribute>
+				</xsl:otherwise>
+			</xsl:choose>
+			<xsl:variable name="modulgruppeID">
+				<!-- remove ", ', spaces, comma, braces and + from variable name -->
+				<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
+				<xsl:call-template name="removeSpecialChars">
+					<xsl:with-param name="inputstring" select="./title"/>
+				</xsl:call-template>
+			</xsl:variable>
+			<xsl:variable name="hasInfo" select="count(info) &gt; 0"/>
+			<!-- warning: this way, no " and ' is allowed in the variable name -->
+			<h2 onclick="hideshowDiv('{$modulgruppeID}')" tabindex="0">
+				<xsl:if test="$hasInfo">
+					<xsl:attribute name="data-tooltip">
+						<xsl:text>tooltip-trigger</xsl:text>
+					</xsl:attribute>
+				</xsl:if>
+				<xsl:value-of select="title"/>
+				<xsl:if test="count(semester_suggestion) &gt; 0">
+					<span class="semester_suggestions">
+						<xsl:text> (</xsl:text>
+						<xsl:for-each select="semester_suggestion">
+							<xsl:sort select="." order="ascending"/>
+							<xsl:if test="not(position() = 1)">
+								<xsl:text> &amp; </xsl:text>
+							</xsl:if>
+							<xsl:value-of select="."/>
+							<xsl:text>.</xsl:text>
+						</xsl:for-each>
+						<xsl:text> Semester)</xsl:text>
+					</span>
+				</xsl:if>
+				<xsl:if test="$hasInfo">
+					<span data-tooltip="tooltip-pre"> - </span>
+					<span data-tooltip="tooltip">
+						<xsl:value-of select="info"/>
+					</span>
+				</xsl:if>
+			</h2>
+			<div class="modulgruppe-body" data-name="modulgruppe">
+				<xsl:attribute name="id">
+					<xsl:value-of select="$modulgruppeID"/>
+				</xsl:attribute>
+				<xsl:apply-templates select="modul">
+					<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+					<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+				</xsl:apply-templates>
+			</div>
+		</div>
+	</xsl:template>
+
+
+	<xsl:template match="modul">
+		<xsl:param name="highlightSemester"/>
+		<xsl:param name="yearBeforeHighlightSemester"/>
+		
+		<div data-name="wholemodul">
+			<xsl:attribute name="data-nolvas_static">
+				<xsl:value-of select="count(.//lva)=0"/>
+			</xsl:attribute>
+			<xsl:choose>
+				<xsl:when test="@wahlmodulgruppe = true()">
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:attribute name="data-multipleuniversities_static">
+						<xsl:call-template name="multipleUniversities">
+							<xsl:with-param name="fachnodes" select="./fach"/>
+						</xsl:call-template>
+					</xsl:attribute>
+				</xsl:otherwise>
+			</xsl:choose>
+			<xsl:variable name="modulID">
+				<!-- remove ", ', spaces, comma, braces and + from variable name -->
+				<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
+				<xsl:call-template name="removeSpecialChars">
+					<xsl:with-param name="inputstring" select="./title"/>
+				</xsl:call-template>
+			</xsl:variable>
+			<!-- warning: this way, no "and ' is allowed in the variable name -->
+			<h3 onclick="hideshowDiv('{$modulID}')" tabindex="0">
+				<xsl:value-of select="title"/>
+				<xsl:if test="count(semester_suggestion) &gt; 0">
+					<span class="semester_suggestions">
+						<xsl:text> (</xsl:text>
+						<xsl:for-each select="semester_suggestion">
+							<xsl:sort select="." order="ascending"/>
+							<xsl:if test="not(position() = 1)">
+								<xsl:text> &amp; </xsl:text>
+							</xsl:if>
+							<xsl:value-of select="."/>
+							<xsl:text>.</xsl:text>
+						</xsl:for-each>
+						<xsl:text> Semester)</xsl:text>
+					</span>
+				</xsl:if>
+			</h3>
+			<div class="modul-body" data-name="modul">
+				<xsl:attribute name="id">
+					<xsl:value-of select="$modulID"/>
+				</xsl:attribute>
+				
+				<xsl:choose>
+					<xsl:when test="ancestor::modulgruppe[@wahlmodulgruppe = true()]">
+					
+						<!-- overwrite data-name -->
+						<xsl:attribute name="data-name">
+							<xsl:text>wahlmodul</xsl:text>
+						</xsl:attribute>
+					
+						<!--div class="fach" data-name="wholefach"-->
+						<div class="fach"><!--just for styling-->
+							<xsl:attribute name="data-nolvas_static">
+								<xsl:value-of select="count(..//lva)=0"/>
+							</xsl:attribute>
+							<div class="lvas" data-name="wahlfach">
+							<!--div class="lvas"-->
+								<xsl:choose>
+									<xsl:when test="count(fach/lva)=0">
+										<p class="nolvas">Keine LVAs zu diesem Modul</p>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:call-template name="lvatable">
+											<xsl:with-param name="lvas" select="fach/lva"/>
+											<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+											<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+											<xsl:with-param name="groupUniversities" select="true()"/>
+											<xsl:with-param name="sws1_5ects" select="true()"/>
+										</xsl:call-template>
+									</xsl:otherwise>
+								</xsl:choose>
+							</div>
+						</div>
+						
+					</xsl:when>
+					<xsl:otherwise>
+					
+						<xsl:apply-templates select="fach">
+							<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+							<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+						</xsl:apply-templates>
+						
+					</xsl:otherwise>
+				</xsl:choose>
+
+			</div>
+		</div>
+	</xsl:template>
+
+	
+	<xsl:template match="fach">
+		<xsl:param name="highlightSemester"/>
+		<xsl:param name="yearBeforeHighlightSemester"/>
+		
+		<div class="fach" data-name="wholefach">
+			<xsl:attribute name="data-nolvas_static">
+				<xsl:value-of select="count(.//lva)=0"/>
+			</xsl:attribute>
+			<xsl:attribute name="data-multipleuniversities_static">
+				<xsl:call-template name="multipleUniversities">
+					<xsl:with-param name="fachnodes" select="."/>
+				</xsl:call-template>
+			</xsl:attribute>
+			<xsl:variable name="fachID">
+				<!-- remove ", ', spaces, comma, braces and + from variable name -->
+				<!-- add modulID to the fachID as a fach can appear in several wahlmoduls -->
+				<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/>_<xsl:value-of select="type"/-->
+				<xsl:call-template name="removeSpecialChars">
+					<xsl:with-param name="inputstring" select="./title"/>
+				</xsl:call-template>
+				<xsl:text>_</xsl:text>
+				<xsl:value-of select="type"/>
+			</xsl:variable>
+			<!-- warning: this way, no " and ' is allowed in the variable name -->
+			<h4 onclick="hideshowDiv('{$fachID}')" tabindex="0">
+				<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
+			</h4>
+			<div class="lvas" data-name="fach">
+				<xsl:attribute name="id">
+					<xsl:value-of select="$fachID"/>
+				</xsl:attribute>
+				<xsl:choose>
+					<xsl:when test="count(lva)=0">
+						<p class="nolvas">Keine LVAs zu diesem Fach</p>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:call-template name="lvatable">
+							<xsl:with-param name="lvas" select="lva"/>
+							<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+							<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+						</xsl:call-template>
+					</xsl:otherwise>
+				</xsl:choose>
+			</div>
+		</div>
 	</xsl:template>
 	
 	
