@@ -164,6 +164,17 @@ TODO
 							</a>
 						</xsl:if>
 					</p>
+					<p class="informatikforum" data-noPrint="true">
+						<xsl:if test="count($firstStpl/forum) &gt; 0 and string($firstStpl/forum)">
+							Forum: 
+							<a>
+								<xsl:attribute name="href">
+									<xsl:value-of select="$firstStpl/forum"/>
+								</xsl:attribute>
+								<xsl:value-of select="$firstStpl/forum"/>
+							</a>
+						</xsl:if>
+					</p>
 					<div class="controls">
 						<form name="controls">
 							<div>

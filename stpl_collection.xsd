@@ -24,6 +24,7 @@ Licensed under the Open Software License (OSL 3.0)
 							<xs:element name="title" type="xs:string"/>
 							<xs:element name="version" type="xs:string" minOccurs="0"/>
 							<xs:element name="url" type="xs:anyURI" minOccurs="0"/>
+							<xs:element name="forum" type="xs:anyURI" minOccurs="0"/>
 							<xs:element name="modulgruppe" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:sequence>
