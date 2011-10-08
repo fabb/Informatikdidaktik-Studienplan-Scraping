@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Fabian Ehrentraud, 2011-03-06
+e0725639@mail.student.tuwien.ac.at
+https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
+Licensed under the Open Software License (OSL 3.0)
+-->
+<rng:grammar xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+	<rng:start>
+		<rng:ref name="stpl_collection"/>
+	</rng:start>
+
+	
+	<rng:define name="stpl_collection">
+		<rng:element name="stpl_collection">
+	
+			<rng:oneOrMore>
+				<rng:ref name="source"/>
+			</rng:oneOrMore>
+			
+			<rng:ref name="stpl"/>
+
+		</rng:element>
+	</rng:define>
+	
+	
+	<rng:define name="source">
+		<rng:element name="source">
+
+			<rng:element name="url">
+				<rng:data type="anyURI"/>
+			</rng:element>
+			
+			<rng:optional>
+				<rng:element name="referring_url">
+					<rng:data type="anyURI"/>
+				</rng:element>
+			</rng:optional>
+			
+			<rng:oneOrMore>
+				<rng:element name="query_date">
+					<rng:data type="dateTime"/>
+				</rng:element>
+			</rng:oneOrMore>
+
+		</rng:element>
+	</rng:define>
+	
+	
+	<rng:define name="stpl">
+		<rng:element name="stpl">
+			<rng:element name="title">
+				<rng:data type="string"/>
+			</rng:element>
+			
+			<rng:optional>
+				<rng:element name="version">
+					<rng:data type="string"/>
+				</rng:element>
+			</rng:optional>
+			
+			<rng:optional>
+				<rng:element name="url">
+					<rng:data type="anyURI"/>
+				</rng:element>
+			</rng:optional>
+			
+			<rng:optional>
+				<rng:element name="forum">
+					<rng:data type="anyURI"/>
+				</rng:element>
+			</rng:optional>
+			
+			<rng:zeroOrMore>
+				<rng:ref name="modulgruppe"/>
+			</rng:zeroOrMore>
+
+		</rng:element>
+	</rng:define>
+
+		
+	<rng:define name="modulgruppe">
+		<rng:element name="modulgruppe">
+		
+			<rng:optional>
+				<rng:attribute name="wahlmodulgruppe">
+					<rng:data type="boolean"/>
+				</rng:attribute>
+			</rng:optional>
+		
+			<rng:element name="title">
+				<rng:data type="string"/>
+			</rng:element>
+			
+			<rng:zeroOrMore>
+				<rng:element name="semester_suggestion">
+					<rng:data type="integer"/>
+				</rng:element>
+			</rng:zeroOrMore>
+			
+			<rng:optional>
+				<rng:element name="info">
+					<rng:data type="string"/>
+				</rng:element>
+			</rng:optional>
+			
+			<rng:zeroOrMore>
+				<rng:ref name="modul"/>
+			</rng:zeroOrMore>
+
+		</rng:element>
+	</rng:define>
+	
+	
+	<rng:define name="modul">
+		<rng:element name="modul">
+		
+			<rng:element name="title">
+				<rng:data type="string"/>
+			</rng:element>
+			
+			<rng:zeroOrMore>
+				<rng:element name="semester_suggestion">
+					<rng:data type="integer"/>
+				</rng:element>
+			</rng:zeroOrMore>
+			
+			<rng:zeroOrMore>
+				<rng:ref name="fach"/>
+			</rng:zeroOrMore>
+
+		</rng:element>
+	</rng:define>
+
+	
+	<rng:define name="fach">
+		<rng:element name="fach">
+		
+			<rng:element name="title">
+				<rng:data type="string">
+					<rng:param name="minLength">1</rng:param>
+				</rng:data>
+			</rng:element>
+			
+			<rng:element name="type">
+				<rng:data type="string">
+					<rng:param name="minLength">2</rng:param>
+					<rng:param name="maxLength">2</rng:param>
+				</rng:data>
+			</rng:element>
+			
+			<rng:element name="sws">
+				<rng:data type="string">
+					<rng:param name="pattern">(\d([.]\d)?)?</rng:param>
+				</rng:data>
+			</rng:element>
+			
+			<rng:element name="ects">
+				<rng:data type="string">
+					<rng:param name="pattern">(\d([.]\d)?)?</rng:param>
+				</rng:data>
+			</rng:element>
+			
+			<rng:zeroOrMore>
+				<rng:ref name="lva"/>
+			</rng:zeroOrMore>
+
+		</rng:element>
+	</rng:define>
+
+	
+	<rng:define name="lva">
+		<rng:element name="lva">
+
+			<rng:interleave>
+				<rng:element name="university">
+					<rng:data type="string">
+						<rng:param name="minLength">1</rng:param>
+					</rng:data>
+				</rng:element>
+			
+				<rng:element name="semester">
+					<rng:data type="string">
+						<rng:param name="pattern">\d\d\d\d[W,S]</rng:param>
+					</rng:data>
+				</rng:element>
+			
+				<rng:element name="title">
+					<rng:data type="string">
+						<rng:param name="minLength">1</rng:param>
+					</rng:data>
+				</rng:element>
+			
+				<rng:element name="key">
+					<rng:data type="string">
+						<rng:param name="pattern">[a-zA-Z0-9]{1,3}[.]?[a-zA-Z0-9]{3}</rng:param>
+					</rng:data>
+				</rng:element>
+			
+				<rng:element name="type">
+					<rng:data type="string">
+						<rng:param name="minLength">2</rng:param>
+						<rng:param name="maxLength">2</rng:param>
+					</rng:data>
+				</rng:element>
+			
+				<rng:element name="sws">
+					<rng:data type="double">
+						<rng:param name="pattern">\d([.]\d)?</rng:param>
+					</rng:data>
+				</rng:element>
+			
+				<rng:element name="ects">
+					<rng:data type="double">
+						<rng:param name="pattern">\d([.]\d)?</rng:param>
+					</rng:data>
+				</rng:element>
+			
+				<rng:element name="info">
+					<rng:data type="string"/>
+				</rng:element>
+			
+				<rng:element name="url">
+					<rng:data type="anyURI"/>
+				</rng:element>
+			
+				<rng:element name="professor">
+					<rng:data type="string"/>
+				</rng:element>
+			
+				<rng:optional>
+					<rng:element name="query_date">
+						<rng:data type="dateTime"/>
+					</rng:element>
+				</rng:optional>
+			</rng:interleave>
+
+		</rng:element>
+	</rng:define>
+
+	
+</rng:grammar>

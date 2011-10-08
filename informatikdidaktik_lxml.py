@@ -35,7 +35,7 @@ studyname = "Informatikdidaktik"
 
 xmlfilename = "informatikdidaktik.xml"
 xmlcomment = "\nFabian Ehrentraud, 2011\ne0725639@mail.student.tuwien.ac.at\nhttps://github.com/fabb/Informatikdidaktik-Studienplan-Scraping\n"
-xsd = "stpl_collection.xsd"
+rng = "stpl_collection.rng"
 xslt = "informatikdidaktik.xslt"
 xmlRootname = "stpl_collection"
 
@@ -83,9 +83,9 @@ def didChange():
 
 """ create xml """
 
-def makeRoot(rootname=xmlRootname, schema=xsd, comment=xmlcomment, xsltstylesheet=xslt):
+def makeRoot(rootname=xmlRootname, schema=rng, comment=xmlcomment, xsltstylesheet=xslt):
 	#creates an stpl xml with xslt PI
-	root = etree.Element(rootname, nsmap={"xsi": "http://www.w3.org/2001/XMLSchema-instance"}, attrib={"{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation": schema})
+	root = etree.Element(rootname)
 	#root.append( etree.Element("child1") )
 
 	# root.insert(0, etree.Element("child0"))
@@ -396,20 +396,18 @@ def addSource(xml_root, url, query_date, referring_url=None):
 	query_date_ = etree.SubElement(source, "query_date")
 	query_date_.text = (query_date or "")
 
-def checkSchema(xml_root, xsd=xsd):
+def checkSchema(xml_root, rng=rng):
 	#checks whether the given xml is correct according to the schema
 	
-	#TODO extract schema from xml
-	
-	xmlschema_doc = etree.parse(xsd)
-	xmlschema = etree.XMLSchema(xmlschema_doc)
+	relaxng_doc = etree.parse(rng)
+	relaxng = etree.RelaxNG(relaxng_doc)
 
 	#print(xmlschema.validate(doc))
 	try:
-		xmlschema.assertValid(xml_root)
+		relaxng.assertValid(xml_root)
 		return True
 	except etree.DocumentInvalid:
-		logger.warning(xmlschema.error_log)
+		logger.warning(relaxng.error_log)
 		return False
 
 def writeXml(xml_root, filename=xmlfilename, backupfolder=backupfolder):
@@ -454,7 +452,7 @@ def readXml(filename, checkXmlSchema=False):
 	
 	return xml_root
 
-def loadXml(xmlfilename, xmlRootname=xmlRootname, xsd=xsd, loadExisting=True, checkXmlSchema=False):
+def loadXml(xmlfilename, xmlRootname=xmlRootname, rng=rng, loadExisting=True, checkXmlSchema=False):
 	#open existing file if it exists or create new xml
 	#check xml only when file is opened
 	if loadExisting and os.path.exists(xmlfilename):
@@ -462,7 +460,7 @@ def loadXml(xmlfilename, xmlRootname=xmlRootname, xsd=xsd, loadExisting=True, ch
 		return readXml(xmlfilename, checkXmlSchema)
 	else:
 		#create xml
-		return makeRoot(xmlRootname, xsd)
+		return makeRoot(xmlRootname, rng)
 
 def isFreshXml(xml_root):
 	#true if xml already contains study structure
@@ -1025,7 +1023,7 @@ getTU(xml_root, tiss_next, createNonexistentNodes=False)
 getUni(xml_root, createNonexistentNodes=False)
 
 """
-#check if generated xml is correct regarding xsd
+#check if generated xml is correct regarding rng
 if(checkSchema(xml_root)):
 	print("XML is valid")
 else:
