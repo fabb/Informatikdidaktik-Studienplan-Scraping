@@ -565,17 +565,43 @@ TODO
 							<!--<td><xsl:value-of select="semester"/></td>-->
 							<td class="lvasemester" data-name="semesters">
 								<xsl:variable name="newestSemester"><xsl:value-of select="semester"/></xsl:variable>
-								<xsl:for-each select="$similarLvaSet">
-									<xsl:sort select="semester" order="descending"/>
-									<xsl:if test="not(position() = 1)">, </xsl:if>
-									<span data-name="semester">
-										<!-- problematic when $newestSemester is greater than $highlightSemester -->
-										<xsl:if test="$newestSemester != $highlightSemester and ./semester = $yearBeforeHighlightSemester">
-											<xsl:attribute name="class">probableLva</xsl:attribute>
-										</xsl:if>
-										<xsl:value-of select="semester"/>
-									</span>
-								</xsl:for-each>
+								<xsl:variable name="showmax"><xsl:value-of select="3"/></xsl:variable>
+								<xsl:choose>
+									<xsl:when test="count($similarLvaSet/semester) &gt; ($showmax + 1)">
+										<span data-tooltip="tooltip-trigger" tabindex="0">
+											<span class="highlightSem">
+												<xsl:call-template name="semesters">
+													<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+													<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+													<xsl:with-param name="newestSemester" select="$newestSemester"/>
+													<xsl:with-param name="lvas" select="$similarLvaSet"/>
+													<xsl:with-param name="showall" select="false()"/>
+													<xsl:with-param name="showmax" select="$showmax"/>
+												</xsl:call-template>
+												<xsl:text> ...</xsl:text>
+											</span>
+											<span data-tooltip="tooltip-pre"> - </span>
+											<span data-tooltip="tooltip">
+												<xsl:call-template name="semesters">
+													<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+													<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+													<xsl:with-param name="newestSemester" select="$newestSemester"/>
+													<xsl:with-param name="lvas" select="$similarLvaSet"/>
+													<xsl:with-param name="showall" select="true()"/>
+												</xsl:call-template>
+											</span>
+										</span>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:call-template name="semesters">
+											<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+											<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+											<xsl:with-param name="newestSemester" select="$newestSemester"/>
+											<xsl:with-param name="lvas" select="$similarLvaSet"/>
+											<xsl:with-param name="showall" select="true()"/>
+										</xsl:call-template>
+									</xsl:otherwise>
+								</xsl:choose>
 							</td>
 							<td class="lvakey"><xsl:value-of select="key"/></td>
 							<td class="lvatype"><xsl:value-of select="type"/></td>
@@ -631,6 +657,31 @@ TODO
 				</xsl:for-each>
 			</tbody>
 		</table>
+	</xsl:template>
+	
+	
+	<xsl:template name="semesters">
+		<xsl:param name="highlightSemester"/>
+		<xsl:param name="yearBeforeHighlightSemester"/>
+		<xsl:param name="newestSemester"/>
+		<xsl:param name="lvas"/>
+		<xsl:param name="showall"/>
+		<xsl:param name="showmax" select="4"/>
+		
+		<xsl:for-each select="$lvas">
+			<xsl:sort select="semester" order="descending"/>
+		
+			<xsl:if test="$showall or (position() &lt; ($showmax + 1))">
+				<xsl:if test="not(position() = 1)">, </xsl:if>
+				<span data-name="semester">
+					<!-- problematic when $newestSemester is greater than $highlightSemester -->
+					<xsl:if test="$newestSemester != $highlightSemester and ./semester = $yearBeforeHighlightSemester">
+						<xsl:attribute name="class">probableLva</xsl:attribute>
+					</xsl:if>
+					<xsl:value-of select="semester"/>
+				</span>
+			</xsl:if>
+		</xsl:for-each>
 	</xsl:template>
 
 </xsl:stylesheet>
