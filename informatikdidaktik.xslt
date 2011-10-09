@@ -415,55 +415,69 @@ TODO
 					<xsl:value-of select="$modulID"/>
 				</xsl:attribute>
 				
-				<xsl:choose>
-					<xsl:when test="ancestor::modulgruppe[@wahlmodulgruppe = true()]">
+				<xsl:if test="ancestor::modulgruppe[@wahlmodulgruppe = true()]">
+					<!-- overwrite data-name -->
+					<xsl:attribute name="data-name">
+						<xsl:text>wahlmodul</xsl:text>
+					</xsl:attribute>
 					
-						<!-- overwrite data-name -->
-						<xsl:attribute name="data-name">
-							<xsl:text>wahlmodul</xsl:text>
-						</xsl:attribute>
-					
-						<!--div class="fach" data-name="wholefach"-->
-						<div class="fach"><!--just for styling-->
-							<xsl:attribute name="data-nolvas_static">
-								<xsl:value-of select="count(..//lva)=0"/>
-							</xsl:attribute>
-							<div class="lvas" data-name="wahlfach">
-							<!--div class="lvas"-->
-								<xsl:choose>
-									<xsl:when test="count(fach/lva)=0">
-										<p class="nolvas">Keine LVAs zu diesem Modul</p>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:call-template name="lvatable">
-											<xsl:with-param name="lvas" select="fach/lva"/>
-											<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
-											<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
-											<xsl:with-param name="groupUniversities" select="true()"/>
-											<xsl:with-param name="sws1_5ects" select="true()"/>
-										</xsl:call-template>
-									</xsl:otherwise>
-								</xsl:choose>
-							</div>
-						</div>
-						
-					</xsl:when>
-					<xsl:otherwise>
-					
-						<xsl:apply-templates select="fach">
-							<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
-							<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
-						</xsl:apply-templates>
-						
-					</xsl:otherwise>
-				</xsl:choose>
+					<xsl:if test="count(.//lva)=0">
+						<xsl:call-template name="empty_wahlmodul"/>
+					</xsl:if>
+				</xsl:if>
+				
+				<xsl:apply-templates select="fach">
+					<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+					<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+				</xsl:apply-templates>
 
+			</div>
+		</div>
+	</xsl:template>
+	
+	
+	<xsl:template name="empty_wahlmodul">
+		<!--div class="fach" data-name="wholefach"-->
+		<div class="fach"><!--just for styling-->
+			<xsl:attribute name="data-nolvas_static">
+				<xsl:text>true</xsl:text>
+			</xsl:attribute>
+			<div class="lvas" data-name="wahlfach">
+				<p class="nolvas">Keine LVAs zu diesem Modul</p>
 			</div>
 		</div>
 	</xsl:template>
 
 	
-	<xsl:template match="fach">
+	<xsl:template match="fach[ancestor::modulgruppe[@wahlmodulgruppe = true()]]">
+		<xsl:param name="highlightSemester"/>
+		<xsl:param name="yearBeforeHighlightSemester"/>
+		
+		<!-- combine lvas from several wahlfachs into one table -->
+		<xsl:if test="count(../fach/lva) and position() = 1">
+
+			<!--div class="fach" data-name="wholefach"-->
+			<div class="fach"><!--just for styling-->
+				<xsl:attribute name="data-nolvas_static">
+					<xsl:value-of select="count(..//lva)=0"/>
+				</xsl:attribute>
+				<div class="lvas" data-name="wahlfach">
+				<!--div class="lvas"-->
+					<xsl:call-template name="lvatable">
+						<xsl:with-param name="lvas" select="../fach/lva"/>
+						<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+						<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+						<xsl:with-param name="groupUniversities" select="true()"/>
+						<xsl:with-param name="sws1_5ects" select="true()"/>
+					</xsl:call-template>
+				</div>
+			</div>
+			
+		</xsl:if>
+	</xsl:template>
+
+	
+	<xsl:template match="fach[ancestor::modulgruppe[@wahlmodulgruppe = false()]]">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		
