@@ -340,7 +340,11 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lv
 	if "manuell" in (lva_info_.text or ""):
 		logger.info("Manually registered LVA overwritten")
 		found_lva = None #to print out LVA details in the end of the function and update the query date
-	lva_info_.text = (lva_info or "").strip()
+	if (lva_info_.text or "") != "" and (lva_info or "").strip() != "":
+		logger.info(u"Existing Info will be lost for Fach %s: %s"%(lva_title_.text + " " + lva_type_.text, lva_info_.text))
+		lva_info_.text = (lva_info or "").strip()
+		logger.info(u"New Info: %s"%(lva_info_.text))
+		didChange()
 	lva_url_ = lva.find("url") if lva.find("url") is not None else etree.SubElement(lva, "url")
 	lva_url_.text = (lva_url or "").strip()
 	lva_professor_ = lva.find("professor") if lva.find("professor") is not None else etree.SubElement(lva, "professor")
