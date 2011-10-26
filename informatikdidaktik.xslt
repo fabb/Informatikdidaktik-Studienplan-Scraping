@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-10-24
+Fabian Ehrentraud, 2011-10-26
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -167,7 +167,7 @@ TODO
 							</a>
 						</xsl:if>
 					</p>
-					<p class="informatikforum" data-noPrint="true">
+					<p class="informatikforum" data-no_print="true">
 						<xsl:if test="count($firstStpl/forum) &gt; 0 and string($firstStpl/forum)">
 							<xsl:text>Forum: </xsl:text>
 							<a>
@@ -302,7 +302,7 @@ TODO
 	</xsl:template>
 	
 
-	<xsl:template match="modul1">
+	<xsl:template match="modul1" xmlns="http://www.w3.org/1999/xhtml">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		
@@ -374,7 +374,7 @@ TODO
 	</xsl:template>
 
 
-	<xsl:template match="modul2">
+	<xsl:template match="modul2" xmlns="http://www.w3.org/1999/xhtml">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		
@@ -444,7 +444,7 @@ TODO
 	</xsl:template>
 	
 	
-	<xsl:template name="empty_wahlmodul">
+	<xsl:template name="empty_wahlmodul" xmlns="http://www.w3.org/1999/xhtml">
 		<!--div class="fach" data-name="wholefach"-->
 		<div class="fach"><!--just for styling-->
 			<xsl:attribute name="data-nolvas_static">
@@ -457,7 +457,7 @@ TODO
 	</xsl:template>
 
 	
-	<xsl:template match="fach[ancestor::modul1[@wahlmodulgruppe = true()]]">
+	<xsl:template match="fach[ancestor::modul1[@wahlmodulgruppe = true()]]" xmlns="http://www.w3.org/1999/xhtml">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		
@@ -485,7 +485,7 @@ TODO
 	</xsl:template>
 
 	
-	<xsl:template match="fach[ancestor::modul1[@wahlmodulgruppe = false()]]">
+	<xsl:template match="fach[ancestor::modul1[@wahlmodulgruppe = false()]]" xmlns="http://www.w3.org/1999/xhtml">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		
@@ -534,7 +534,7 @@ TODO
 	
 	
 	<!-- make a table of given lvas -->
-	<xsl:template name="lvatable">
+	<xsl:template name="lvatable" xmlns="http://www.w3.org/1999/xhtml">
 		<xsl:param name="lvas"/>
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
@@ -668,7 +668,7 @@ TODO
 	</xsl:template>
 	
 	
-	<xsl:template name="semesters">
+	<xsl:template name="semesters" xmlns="http://www.w3.org/1999/xhtml">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		<xsl:param name="newestSemester"/>

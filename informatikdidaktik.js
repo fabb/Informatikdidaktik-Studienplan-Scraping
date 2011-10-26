@@ -79,14 +79,14 @@ also assigns an attribute to the second given ID
 which will then not be printed if the first element is hidden
 */
 function hideshowLiNoprint(name,idPrint){
-	if(document.getElementById(idPrint).getAttribute("data-noPrint") == "true"){
+	if(document.getElementById(idPrint).getAttribute("data-no_print") == "true"){
 		if(name){
 			var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
 			for (var i=0; i < elements.length; i++) {
 				elements[i].setAttribute("data-hide","false");
 			}
 		}
-		document.getElementById(idPrint).setAttribute("data-noPrint","false");
+		document.getElementById(idPrint).setAttribute("data-no_print","false");
 	}else{
 		if(name){
 			var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
@@ -94,7 +94,7 @@ function hideshowLiNoprint(name,idPrint){
 				elements[i].setAttribute("data-hide","true");
 			}
 		}
-		document.getElementById(idPrint).setAttribute("data-noPrint","true");
+		document.getElementById(idPrint).setAttribute("data-no_print","true");
 	}
 
 	redrawFix();
