@@ -211,7 +211,13 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,l
 
 		if(fachB and fach_typeB): #ignore sws and ects
 		
-			#update ects and sws - they must already exist
+			#update type, ects and sws - they must already exist
+			fach_type_ = f.find("type")
+			old_fach_type = fach_type_.text
+			fach_type_.text = (lva_fach_type or "").strip()
+			if fach_type_.text is None or fach_type_.text == "":
+				fach_type_.text = old_fach_type #don't delete already existing content
+			
 			fach_sws_ = f.find("sws")
 			old_fach_sws = fach_sws_.text
 			fach_sws_.text = (lva_fach_sws or "").strip().replace(",",".")
@@ -228,7 +234,7 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,l
 			if fach_ects_.text is None or fach_ects_.text == "":
 				fach_ects_.text = old_fach_ects #don't delete already existing content
 			
-			if old_fach_sws != fach_sws_.text or old_fach_ects != fach_ects_.text: #TODO more than just SWS and ECTS
+			if old_fach_type != fach_type_.text or old_fach_sws != fach_sws_.text or old_fach_ects != fach_ects_.text: #TODO more than just type, SWS and ECTS
 				print("Fach updated: %s"%(f.find("title").text + " " + f.find("type").text + " " + fach_sws_.text + " " + fach_ects_.text))
 				
 				didChange()
