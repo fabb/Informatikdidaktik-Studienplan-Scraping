@@ -107,20 +107,23 @@ TODO
 			<body onload="document.controls.reset();onLoad();hideshowLiNoprint('quelle','quellen');">
 				<div id="header">
 					<h1>
-						Studienplan <xsl:value-of select="$firstStpl/title"></xsl:value-of>
+						<xsl:text>Studienplan </xsl:text>
+						<xsl:value-of select="$firstStpl/title"></xsl:value-of>
 						<xsl:if test="count($firstStpl/version)!=0">
-							(<xsl:value-of select="$firstStpl/version"/>)
+							<xsl:text> (</xsl:text>
+							<xsl:value-of select="$firstStpl/version"/>
+							<xsl:text>)</xsl:text>
 						</xsl:if>
 					</h1>
 				</div>
 				<div id="meta">
 					<p class="meta-nonprint" data-name="data-meta-nonprint" onclick="hideshowLiNoprint(null,'meta');" tabindex="0">
-						Diesen Abschnitt <span class="hideWhenNonprint">nicht </span>drucken
+						<xsl:text>Diesen Abschnitt </xsl:text><span class="hideWhenNonprint">nicht</span><xsl:text> drucken</xsl:text>
 					</p>
 					<p class="info">Kombination der abgehaltenen LVAs der <em>Uni Wien</em> und der <em>TU Wien</em> der vergangenen und kommenden Semester</p>
 					<p class="info">Zusammengestellt von <span class="author">Fabian Ehrentraud (fabb)</span></p>
 					<p class="version">
-						Version vom 
+						<xsl:text>Version vom </xsl:text>
 						<xsl:choose>
 							<xsl:when test="function-available('fn:format-dateTime')">
 								<xsl:value-of select="fn:format-dateTime(xs:dateTime($latestQuerydate),'[D01].[M01].[Y0001], [H01]:[m01]:[s01]')"/>
@@ -135,7 +138,7 @@ TODO
 					<div id="quellen">
 						<ul>
 						<li class="list-header" onclick="hideshowLiNoprint('quelle','quellen');" tabindex="0">
-							Quellen
+							<xsl:text>Quellen</xsl:text>
 						</li>
 						<!--xsl:for-each select="stpl_collection/source"-->
 						<!-- each source with same url only ONCE -->
@@ -155,7 +158,7 @@ TODO
 					</div>
 					<p class="stpl-pdf">
 						<xsl:if test="count($firstStpl/url) &gt; 0 and string($firstStpl/url)">
-							Studienplan PDF: 
+							<xsl:text>Studienplan PDF: </xsl:text>
 							<a>
 								<xsl:attribute name="href">
 									<xsl:value-of select="$firstStpl/url"/>
@@ -166,7 +169,7 @@ TODO
 					</p>
 					<p class="informatikforum" data-noPrint="true">
 						<xsl:if test="count($firstStpl/forum) &gt; 0 and string($firstStpl/forum)">
-							Forum: 
+							<xsl:text>Forum: </xsl:text>
 							<a>
 								<xsl:attribute name="href">
 									<xsl:value-of select="$firstStpl/forum"/>
@@ -178,11 +181,11 @@ TODO
 					<div class="controls">
 						<form name="controls">
 							<div>
-								Nur LVAs der Uni anzeigen:
+								<xsl:text>Nur LVAs der Uni anzeigen: </xsl:text>
 								<!--onchange does not fire in FF when changed with keyboard keys-->
 								<select name="universitySelect" size="1" onchange="showUniversity(this.form.universitySelect.selectedIndex==0, this.form.universitySelect.options[this.form.universitySelect.selectedIndex].value)">
 									<option selected="selected">
-										Alle zeigen
+										<xsl:text>Alle zeigen</xsl:text>
 									</option>
 									<xsl:for-each select="$firstStpl//university">
 										<xsl:sort select="." order="descending"/>
@@ -197,12 +200,13 @@ TODO
 								</select>
 							</div>
 							<div class="sidebyside">
-								Semester 
+								<xsl:text>Semester </xsl:text>
 								<span data-tooltip="tooltip-trigger" tabindex="0"><span class="highlightSem">hervorheben</span>
 									<span data-tooltip="tooltip-pre"> - </span>
-									<span data-tooltip="tooltip">Zusätzlich ist es bei LVAs die vor 2 Semestern stattgefunden haben möglich dass sie wieder im aktuellen Semester stattfinden werden, aber noch nicht angekündigt sind. Daher wird in diesem Fall das entsprechende Semester <span class="highlightPrevSem">hervorgehoben</span>.
+									<span data-tooltip="tooltip">Zusätzlich ist es bei LVAs die vor 2 Semestern stattgefunden haben möglich dass sie wieder im aktuellen Semester stattfinden werden, aber noch nicht angekündigt sind. Daher wird in diesem Fall das entsprechende Semester <span class="highlightPrevSem">hervorgehoben</span><xsl:text>.</xsl:text>
 									</span>
-								</span>:
+								</span>
+								<xsl:text>: </xsl:text>
 								<!--onchange does not fire in FF when changed with keyboard keys-->
 								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value);hideold(this.form.hideolderCheck.checked);">
 									<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
@@ -216,20 +220,21 @@ TODO
 										</option>
 									</xsl:for-each>
 									<option>
-										keines
+										<xsl:text>keines</xsl:text>
 									</option>
 								</select>
 							</div>
 							<div class="sidebyside">
-								<input name="hideolderCheck" type="checkbox" onclick="hideold(this.form.hideolderCheck.checked)"/> Verstecke ältere LVAs
+								<input name="hideolderCheck" type="checkbox" onclick="hideold(this.form.hideolderCheck.checked)"/>
+								<xsl:text> Verstecke ältere LVAs</xsl:text>
 							</div>
 							<div class="sidebyside_linebreakdummy"></div>
 							<div class="sidebyside">
-								Anzeigen hinzugefügter LVAs seit:
+								<xsl:text>Anzeigen hinzugefügter LVAs seit: </xsl:text>
 								<!--onchange does not fire in FF when changed with keyboard keys-->
 								<select name="dateSelect" size="1" onchange="showOldestDate(this.form.dateSelect.selectedIndex==0, this.form.dateSelect.options[this.form.dateSelect.selectedIndex].value)">
 									<option selected="selected">
-										Alle zeigen
+										<xsl:text>Alle zeigen</xsl:text>
 									</option>
 									<xsl:for-each select="$firstStpl//lva/query_date">
 										<xsl:sort select="." order="descending"/>
@@ -244,31 +249,34 @@ TODO
 								</select>
 							</div>
 							<div class="sidebyside lastvisit" data-name="lastvisitdate_div" hidden="hidden">
-								Diese Seite wurde zuletzt besucht: 
+								<xsl:text>Diese Seite wurde zuletzt besucht: </xsl:text>
 								<span data-name="lastvisitdate"></span>
 							</div>
 							<div class="sidebyside_linebreakdummy"></div>
 							<div class="sidebyside">
-								<input name="hideheadersCheck" type="checkbox" onclick="hideheaders(this.form.hideheadersCheck.checked)"/> Verstecke Überschriften
+								<input name="hideheadersCheck" type="checkbox" onclick="hideheaders(this.form.hideheadersCheck.checked)"/>
+								<xsl:text> Verstecke Überschriften</xsl:text>
 							</div>
 							<div class="sidebyside">
-								<input name="hideemptyCheck" type="checkbox" onclick="hideempty(this.form.hideemptyCheck.checked)"/> Verstecke leere Kategorien
+								<input name="hideemptyCheck" type="checkbox" onclick="hideempty(this.form.hideemptyCheck.checked)"/>
+								<xsl:text> Verstecke leere Kategorien</xsl:text>
 							</div>
 							<div>
-								<input name="hideuniCheck" type="checkbox" onclick="hideuni(this.form.hideuniCheck.checked)"/> Zeige nur Fächer, welche nur an <strong>einer</strong> Universität angeboten werden
+								<input name="hideuniCheck" type="checkbox" onclick="hideuni(this.form.hideuniCheck.checked)"/>
+								<xsl:text> Zeige nur Fächer, welche nur an </xsl:text><strong>einer</strong><xsl:text> Universität angeboten werden</xsl:text>
 							</div>
 							<div>
 								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{hideAllDiv('modul1');showAllDiv('modul2');showAllDiv('wahlmodul');showAllDiv('fach');}}">
-										<b>Zeige Modulgruppen</b>
+									<b>Zeige Modulgruppen</b>
 								</button>
 								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modul1');hideAllDiv('modul2');hideAllDiv('wahlmodul');showAllDiv('fach');}}">
-										<b>Zeige Module</b>
+									<b>Zeige Module</b>
 								</button>
 								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modul1');showAllDiv('modul2');hideAllDiv('wahlmodul');hideAllDiv('fach');}}">
-										<b>Zeige Fächer</b>
+									<b>Zeige Fächer</b>
 								</button>
 								<button type="button" value="" onclick="showAllDiv('modul1');showAllDiv('modul2');showAllDiv('wahlmodul');showAllDiv('fach');">
-										<b>Zeige alles</b>
+									<b>Zeige alles</b>
 								</button>
 							</div>
 						</form>
