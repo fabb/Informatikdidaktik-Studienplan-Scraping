@@ -1,5 +1,5 @@
 /*
-Fabian Ehrentraud, 2011-03-12
+Fabian Ehrentraud, 2011-10-26
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -105,7 +105,7 @@ hides all elements with the given NAME
 by assigning a custom attribute which is hidden by css
 element does not necessarily have to be a DIV
 */
-function hideAllDiv(name){ /*name can be modulgruppe, modul or fach*/
+function hideAllDiv(name){ /*name can be modul1, modul2 or fach*/
 	var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
 	for (var i=0; i < elements.length; i++) {
 		elements[i].setAttribute("data-hide","true");
@@ -237,13 +237,13 @@ function propagateVisibility(showeverything) {
 	for (var i=0; i < wholefachs.length; i++) {
 		wholefachs[i].setAttribute("data-nolvas","true");
 	}
-	var wholemoduls = document.querySelectorAll('*[data-name~="wholemodul"]');
-	for (var i=0; i < wholemoduls.length; i++) {
-		wholemoduls[i].setAttribute("data-nolvas","true");
+	var wholemodul2s = document.querySelectorAll('*[data-name~="wholemodul2"]');
+	for (var i=0; i < wholemodul2s.length; i++) {
+		wholemodul2s[i].setAttribute("data-nolvas","true");
 	}
-	var wholemodulgruppes = document.querySelectorAll('*[data-name~="wholemodulgruppe"]');
-	for (var i=0; i < wholemodulgruppes.length; i++) {
-		wholemodulgruppes[i].setAttribute("data-nolvas","true");
+	var wholemodul1s = document.querySelectorAll('*[data-name~="wholemodul1"]');
+	for (var i=0; i < wholemodul1s.length; i++) {
+		wholemodul1s[i].setAttribute("data-nolvas","true");
 	}
 
 	var tables = document.querySelectorAll('*[data-name~="lvatable"]');
@@ -252,8 +252,8 @@ function propagateVisibility(showeverything) {
 			//TODO parentNode method not very change-proof (XPath?)
 			tables[i].parentNode.setAttribute("data-nocontent","false"); /*fach*/
 			tables[i].parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholefach*/
-			tables[i].parentNode.parentNode.parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholemodul*/
-			tables[i].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholemodulgruppe*/
+			tables[i].parentNode.parentNode.parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholemodul2*/
+			tables[i].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholemodul1*/
 		} else {
 			var subrows = tables[i].firstChild.childNodes; //firstChild is tbody
 			for (var j=0; j < subrows.length; j++) {
@@ -261,8 +261,8 @@ function propagateVisibility(showeverything) {
 					//TODO parentNode method not very change-proof (XPath?)
 					tables[i].parentNode.setAttribute("data-nocontent","false"); /*fach*/
 					tables[i].parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholefach*/
-					tables[i].parentNode.parentNode.parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholemodul*/
-					tables[i].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholemodulgruppe*/
+					tables[i].parentNode.parentNode.parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholemodul2*/
+					tables[i].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholemodul1*/
 					break;
 				}
 			}
@@ -306,8 +306,8 @@ which hides/shows (according to the given parameter hide) by css all child eleme
 */
 function hideheaders(hide) {
 	if(hide){
-		showAllDiv('modulgruppe');
-		showAllDiv('modul');
+		showAllDiv('modul1');
+		showAllDiv('modul2');
 		showAllDiv('fach');
 		document.getElementById("content").setAttribute("data-hideheaders","true");
 	}else{

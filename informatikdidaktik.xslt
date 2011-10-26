@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-03-20
+Fabian Ehrentraud, 2011-10-24
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -184,7 +184,7 @@ TODO
 									<option selected="selected">
 										Alle zeigen
 									</option>
-									<xsl:for-each select="$firstStpl/modulgruppe/modul/fach/lva/university">
+									<xsl:for-each select="$firstStpl//university">
 										<xsl:sort select="." order="descending"/>
 										<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
 										<xsl:if test="count(./preceding::university[current() = .])=0">
@@ -206,7 +206,7 @@ TODO
 								<!--onchange does not fire in FF when changed with keyboard keys-->
 								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value);hideold(this.form.hideolderCheck.checked);">
 									<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
-									<xsl:for-each select="$firstStpl/modulgruppe/modul/fach/lva/semester[not (. = preceding::semester)]">
+									<xsl:for-each select="$firstStpl//lva/semester[not (. = preceding::semester)]">
 										<xsl:sort select="." order="descending"/>
 										<option>
 											<xsl:if test=".=$highlightSemester">
@@ -231,7 +231,7 @@ TODO
 									<option selected="selected">
 										Alle zeigen
 									</option>
-									<xsl:for-each select="$firstStpl/modulgruppe/modul/fach/lva/query_date">
+									<xsl:for-each select="$firstStpl//lva/query_date">
 										<xsl:sort select="." order="descending"/>
 										<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
 										<xsl:if test="count(./preceding::query_date[name(..)='lva' and substring-before(current(), 'T') = substring-before(., 'T')])=0">
@@ -258,16 +258,16 @@ TODO
 								<input name="hideuniCheck" type="checkbox" onclick="hideuni(this.form.hideuniCheck.checked)"/> Zeige nur Fächer, welche nur an <strong>einer</strong> Universität angeboten werden
 							</div>
 							<div>
-								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{hideAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('wahlmodul');showAllDiv('fach');}}">
+								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{hideAllDiv('modul1');showAllDiv('modul2');showAllDiv('wahlmodul');showAllDiv('fach');}}">
 										<b>Zeige Modulgruppen</b>
 								</button>
-								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modulgruppe');hideAllDiv('modul');hideAllDiv('wahlmodul');showAllDiv('fach');}}">
+								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modul1');hideAllDiv('modul2');hideAllDiv('wahlmodul');showAllDiv('fach');}}">
 										<b>Zeige Module</b>
 								</button>
-								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modulgruppe');showAllDiv('modul');hideAllDiv('wahlmodul');hideAllDiv('fach');}}">
+								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modul1');showAllDiv('modul2');hideAllDiv('wahlmodul');hideAllDiv('fach');}}">
 										<b>Zeige Fächer</b>
 								</button>
-								<button type="button" value="" onclick="showAllDiv('modulgruppe');showAllDiv('modul');showAllDiv('wahlmodul');showAllDiv('fach');">
+								<button type="button" value="" onclick="showAllDiv('modul1');showAllDiv('modul2');showAllDiv('wahlmodul');showAllDiv('fach');">
 										<b>Zeige alles</b>
 								</button>
 							</div>
@@ -275,7 +275,7 @@ TODO
 					</div>
 				</div>
 				<div id="content">
-					<xsl:apply-templates select="$firstStpl/modulgruppe">
+					<xsl:apply-templates select="$firstStpl/modul1">
 						<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
 						<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
 					</xsl:apply-templates>
@@ -294,11 +294,11 @@ TODO
 	</xsl:template>
 	
 
-	<xsl:template match="modulgruppe">
+	<xsl:template match="modul1">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		
-		<div data-name="wholemodulgruppe">
+		<div data-name="wholemodul1">
 			<xsl:attribute name="data-nolvas_static">
 				<xsl:value-of select="count(.//lva)=0"/>
 			</xsl:attribute>
@@ -311,12 +311,12 @@ TODO
 				<xsl:otherwise>
 					<xsl:attribute name="data-multipleuniversities_static">
 						<xsl:call-template name="multipleUniversities">
-							<xsl:with-param name="fachnodes" select="./modul/fach"/>
+							<xsl:with-param name="fachnodes" select="./modul2//fach"/>
 						</xsl:call-template>
 					</xsl:attribute>
 				</xsl:otherwise>
 			</xsl:choose>
-			<xsl:variable name="modulgruppeID">
+			<xsl:variable name="modul1ID">
 				<!-- remove ", ', spaces, comma, braces and + from variable name -->
 				<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
 				<xsl:call-template name="removeSpecialChars">
@@ -325,7 +325,7 @@ TODO
 			</xsl:variable>
 			<xsl:variable name="hasInfo" select="count(info) &gt; 0"/>
 			<!-- warning: this way, no " and ' is allowed in the variable name -->
-			<h2 onclick="hideshowDiv('{$modulgruppeID}')" tabindex="0">
+			<h2 onclick="hideshowDiv('{$modul1ID}')" tabindex="0">
 				<xsl:if test="$hasInfo">
 					<xsl:attribute name="data-tooltip">
 						<xsl:text>tooltip-trigger</xsl:text>
@@ -353,11 +353,11 @@ TODO
 					</span>
 				</xsl:if>
 			</h2>
-			<div class="modulgruppe-body" data-name="modulgruppe">
+			<div class="modul1-body" data-name="modul1">
 				<xsl:attribute name="id">
-					<xsl:value-of select="$modulgruppeID"/>
+					<xsl:value-of select="$modul1ID"/>
 				</xsl:attribute>
-				<xsl:apply-templates select="modul">
+				<xsl:apply-templates select="modul2">
 					<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
 					<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
 				</xsl:apply-templates>
@@ -366,11 +366,11 @@ TODO
 	</xsl:template>
 
 
-	<xsl:template match="modul">
+	<xsl:template match="modul2">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		
-		<div data-name="wholemodul">
+		<div data-name="wholemodul2">
 			<xsl:attribute name="data-nolvas_static">
 				<xsl:value-of select="count(.//lva)=0"/>
 			</xsl:attribute>
@@ -385,7 +385,7 @@ TODO
 					</xsl:attribute>
 				</xsl:otherwise>
 			</xsl:choose>
-			<xsl:variable name="modulID">
+			<xsl:variable name="modul2ID">
 				<!-- remove ", ', spaces, comma, braces and + from variable name -->
 				<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
 				<xsl:call-template name="removeSpecialChars">
@@ -393,7 +393,7 @@ TODO
 				</xsl:call-template>
 			</xsl:variable>
 			<!-- warning: this way, no "and ' is allowed in the variable name -->
-			<h3 onclick="hideshowDiv('{$modulID}')" tabindex="0">
+			<h3 onclick="hideshowDiv('{$modul2ID}')" tabindex="0">
 				<xsl:value-of select="title"/>
 				<xsl:if test="count(semester_suggestion) &gt; 0">
 					<span class="semester_suggestions">
@@ -410,12 +410,12 @@ TODO
 					</span>
 				</xsl:if>
 			</h3>
-			<div class="modul-body" data-name="modul">
+			<div class="modul2-body" data-name="modul2">
 				<xsl:attribute name="id">
-					<xsl:value-of select="$modulID"/>
+					<xsl:value-of select="$modul2ID"/>
 				</xsl:attribute>
 				
-				<xsl:if test="ancestor::modulgruppe[@wahlmodulgruppe = true()]">
+				<xsl:if test="ancestor::modul1[@wahlmodulgruppe = true()]">
 					<!-- overwrite data-name -->
 					<xsl:attribute name="data-name">
 						<xsl:text>wahlmodul</xsl:text>
@@ -449,7 +449,7 @@ TODO
 	</xsl:template>
 
 	
-	<xsl:template match="fach[ancestor::modulgruppe[@wahlmodulgruppe = true()]]">
+	<xsl:template match="fach[ancestor::modul1[@wahlmodulgruppe = true()]]">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		
@@ -477,7 +477,7 @@ TODO
 	</xsl:template>
 
 	
-	<xsl:template match="fach[ancestor::modulgruppe[@wahlmodulgruppe = false()]]">
+	<xsl:template match="fach[ancestor::modul1[@wahlmodulgruppe = false()]]">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		

@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <!--
-Fabian Ehrentraud, 2011-02-27
+Fabian Ehrentraud, 2011-10-26
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -104,7 +104,7 @@ TODO
 		</xsl:variable>
 		
 		<xsl:variable name="latestLVA">
-			<xsl:for-each select="/stpl_collection/stpl/modulgruppe/modul/fach/lva/query_date">
+			<xsl:for-each select="/stpl_collection/stpl//fach/lva/query_date">
 				<!--more complex version: <xsl:if test="count(../source[translate(./query_date, 'TZ:-', '') &gt; translate(current()/query_date, 'TZ:-', '')])=0">-->
 				<xsl:sort select="." order="descending"/>
 				<xsl:if test="position() = 1"><!--XSLT1 hack for getting string-maximum-->
@@ -135,14 +135,14 @@ TODO
 				<!--webMaster>webmaster@example.com</webMaster-->
 				
 				
-				<xsl:for-each select="/stpl_collection/stpl/modulgruppe/modul/fach/lva/query_date">
+				<xsl:for-each select="/stpl_collection/stpl//fach/lva/query_date">
 					<xsl:sort select="." order="descending"/>
 					<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
 					<xsl:if test="count(./preceding::query_date[name(..)='lva' and substring-before(current(), 'T') = substring-before(., 'T')])=0">
 							
 							<item>
 								<title>
-									<xsl:value-of select="count(/stpl_collection/stpl/modulgruppe/modul/fach/lva[starts-with(./query_date, substring-before(current(), 'T'))])"/>
+									<xsl:value-of select="count(/stpl_collection/stpl//fach/lva[starts-with(./query_date, substring-before(current(), 'T'))])"/>
 									neue LVAs
 								</title>
 								<!--TODO make direct link to xml and set selector to only display newest LVAs-->
@@ -156,7 +156,7 @@ TODO
 										<table>
 											<tbody>
 
-												<xsl:for-each select="/stpl_collection/stpl/modulgruppe/modul/fach/lva[starts-with(./query_date, substring-before(current(), 'T'))]">
+												<xsl:for-each select="/stpl_collection/stpl//fach/lva[starts-with(./query_date, substring-before(current(), 'T'))]">
 													<xsl:sort select="semester" order="descending"/>
 													<xsl:sort select="university" order="descending"/>
 													<xsl:sort select="key" order="descending"/>

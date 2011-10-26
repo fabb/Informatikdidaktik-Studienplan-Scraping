@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2011-08-06
+# Fabian Ehrentraud, 2011-10-24
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -29,6 +29,8 @@ import logging
 # import argparse http://docs.python.org/library/argparse.html
 # logging of Exceptions
 # restructure xml to allow lvas directly under modulgruppe
+# new structure with level 3 module
+# hover icon
 
 
 studyname = "Informatikdidaktik"
@@ -52,7 +54,7 @@ uniSemesterFrom = ("2009","W") #Informatikdidaktik exists since 2009W
 uni = "Uni"
 tu = "TU"
 
-legacyFile = "http://web.student.tuwien.ac.at/~e0725639/informatikdidaktik/informatikdidaktik_tuwel_legacy_2010-09-02.txt"
+legacyFile = "http://www.unet.univie.ac.at/~a0725639/informatikdidaktik/informatikdidaktik_tuwel_legacy_2010-09-02.txt"
 
 newstuff = False
 
@@ -138,17 +140,17 @@ def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexist
 	else:
 		raise Exception("STPL %s %s not found"%(lva_stpl,lva_stpl_version))
 
-def getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes=False, iswahlmodulgruppe = False):
-	#gets the given modulgruppe in the xml or creates it
+def getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes=False, iswahlmodulgruppe = False):
+	#gets the given modul1 in the xml or creates it
 	stpl = getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexistentNodes=createNonexistentNodes)
 
-	#modulgruppe_s = stpl.xpath('modulgruppe')
-	modulgruppe_s = stpl.findall("modulgruppe")
-	for m in modulgruppe_s:
+	#modul1_s = stpl.xpath('modul1')
+	modul1_s = stpl.findall("modul1")
+	for m in modul1_s:
 		#print(etree.tostring(m))
-		modulgruppeB = fuzzyEq(lva_modulgruppe, m.find("title").text)
+		modul1B = fuzzyEq(lva_modul1, m.find("title").text)
 
-		if(modulgruppeB):
+		if(modul1B):
 			if iswahlmodulgruppe: #for inserting afterwards
 				m.set("wahlmodulgruppe", "true")
 				
@@ -157,49 +159,49 @@ def getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNo
 			return m #return first matching
 			
 	if createNonexistentNodes:
-		modulgruppe = etree.SubElement(stpl, "modulgruppe")
+		modul1 = etree.SubElement(stpl, "modul1")
 		if iswahlmodulgruppe:
-			modulgruppe.set("wahlmodulgruppe", "true")
-		modulgruppe_title_ = etree.SubElement(modulgruppe, "title")
-		modulgruppe_title_.text = (lva_modulgruppe or "").strip()
+			modul1.set("wahlmodulgruppe", "true")
+		modul1_title_ = etree.SubElement(modul1, "title")
+		modul1_title_.text = (lva_modul1 or "").strip()
 		
 		didChange()
 	
-		return modulgruppe
+		return modul1
 	else:
-		#print("Modulgruppe %s not found"%(lva_modulgruppe))
-		raise Exception("Modulgruppe %s not found"%(lva_modulgruppe))
+		#print("Modul1%s not found"%(lva_modul1))
+		raise Exception("Modul1 %s not found"%(lva_modul1))
 
-def getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes=False):
-	#gets the given modul in the xml or creates it
-	modulgruppe = getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes)
+def getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes=False):
+	#gets the given modul2 in the xml or creates it
+	modul1 = getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes)
 
-	#modul_s = modulgruppe.xpath('modul')
-	modul_s = modulgruppe.findall("modul")
-	for m in modul_s:
+	#modul2_s = modul1.xpath('modul2')
+	modul2_s = modul1.findall("modul2")
+	for m in modul2_s:
 		#print(etree.tostring(m))
-		modulB = fuzzyEq(lva_modul, m.find("title").text)
+		modul2B = fuzzyEq(lva_modul2, m.find("title").text)
 
-		if(modulB):
+		if(modul2B):
 			return m #return first matching
 
 	if createNonexistentNodes:
-		modul = etree.SubElement(modulgruppe, "modul")
-		modul_title_ = etree.SubElement(modul, "title")
-		modul_title_.text = (lva_modul or "").strip()
+		modul2 = etree.SubElement(modul1, "modul2")
+		modul2_title_ = etree.SubElement(modul2, "title")
+		modul2_title_.text = (lva_modul2 or "").strip()
 		
 		didChange()
 	
-		return modul
+		return modul2
 	else:
-		raise Exception("Modul %s not found"%(lva_modul))
+		raise Exception("Modul2 %s not found"%(lva_modul2))
 
-def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=False):
+def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=False):
 	#gets the given fach in the xml or creates it
-	modul = getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes)
+	modul2 = getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes)
 
-	#fach_s = modul.xpath('fach')
-	fach_s = modul.findall("fach")
+	#fach_s = modul2.xpath('fach')
+	fach_s = modul2.findall("fach")
 	for f in fach_s:
 		#print(etree.tostring(f))
 		fachB = fuzzyEq(lva_fach, f.find("title").text, substringmatch=False)
@@ -234,7 +236,7 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 			return f #return first matching
 
 	if createNonexistentNodes:
-		fach = etree.SubElement(modul, "fach")
+		fach = etree.SubElement(modul2, "fach")
 		fach_title_ = etree.SubElement(fach, "title")
 		fach_title_.text = (lva_fach or "").strip()
 		fach_type_ = etree.SubElement(fach, "type")
@@ -259,7 +261,7 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fa
 
 def getMatchingFach(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects):
 	#searches a matching fach anywhere in the given xml
-	#for legacy files, no need to provide lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul
+	#for legacy files, no need to provide lva_stpl,lva_stpl_version,lva_modul1,lva_modul2
 	
 	fach_s = xml_root.xpath('//fach')
 	for f in fach_s:
@@ -274,13 +276,13 @@ def getMatchingFach(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
 
 	raise Exception("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
 
-def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, lva_professor=None, createNonexistentNodes=False, searchMatchingFach=False):
+def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, lva_professor=None, createNonexistentNodes=False, searchMatchingFach=False):
 	""" adds an lva to the given xml """
 	
 	if searchMatchingFach:
 		fach = getMatchingFach(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
 	else:
-		fach = getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
+		fach = getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
 	
 	#for non-given lva_ects, search from fach
 	lva_ects = lva_ects or fach.find("ects").text
@@ -495,6 +497,9 @@ def fuzzyEq(wantedStr, compStr, threshold=0.89, substringmatch=True): #FIXME thr
 	wantedStr = (wantedStr or "").strip().lower()
 	compStr = (compStr or "").strip().lower()
 	
+	if (wantedStr == "vo" and compStr == "vu") or (wantedStr == "vu" and compStr == "vo"):
+		return True # VO and VU are equivalent
+	
 	#warning: lvas "Unterrichtspraktikum Informatikdidaktik 1" and "Unterrichtspraktikum Informatikdidaktik 2" are both for fach "Unterrichtspraktikum Informatikdidaktik"
 	fixes_wanted = ["(1)","(2)","(3)","(4)","seminar 1","seminar 2","logik","systeme 1","systeme 2"] #(1)-(4) could lead to problems if those lvas were provided by Uni which does not categorize into fach
 	for f in fixes_wanted:
@@ -674,59 +679,59 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 		if "chapter2" in f.attrib.get("class"): #studium
 			lva_stpl = f.text.strip().partition(' ')[2].strip().partition(' ')[2]
 			lva_stpl_version = "2009U.0" #TODO
-			lva_modulgruppe, lva_modul, lva_anchor, lva_modul2 = "", "", "", ""
+			lva_modul1, lva_modul2, lva_anchor, lva_modul2_2 = "", "", "", ""
 			getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexistentNodes=createNonexistentNodes)
 			#print("2: " + lva_stpl + " " + lva_stpl_version + "<")
-		elif "chapter3" in f.attrib.get("class"): #modulgruppe
+		elif "chapter3" in f.attrib.get("class"): #modul1
 			#.strip().partition(' ')[2]
-			lva_modulgruppe = f.text.strip().partition(' ')[2].strip().partition('(')[0]
-			lva_modul, lva_anchor, lva_modul2 = "", "", ""
+			lva_modul1 = f.text.strip().partition(' ')[2].strip().partition('(')[0]
+			lva_modul2, lva_anchor, lva_modul2_2 = "", "", ""
 			"""
 			#remove unnecessary words
-			if "Pflichtmodulgruppe" in lva_modulgruppe:
-				lva_modulgruppe = lva_modulgruppe.partition("Pflichtmodulgruppe")[2]
-			elif "Modulgruppe" in lva_modulgruppe:
-				lva_modulgruppe = lva_modulgruppe.partition("Modulgruppe")[2]
+			if "Pflichtmodulgruppe" in lva_modul1:
+				lva_modul1 = lva_modul1.partition("Pflichtmodulgruppe")[2]
+			elif "Modulgruppe" in lva_modul1:
+				lva_modul1 = lva_modul1.partition("Modulgruppe")[2]
 			"""
 			#Vertiefung Informatik, Wahlmodule (2 sind zu wählen)
-			if "Vertiefung Informatik" not in lva_modulgruppe: #TODO
-				getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes)
-			if u"Freifächer" in lva_modulgruppe: #TODO restructure xml to allow lvas directly under modulgruppe
-				lva_modul = u"Freifächer"
-				getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, True) #TODO
-			#print("3: " + lva_modulgruppe + "<")
-		elif "chapter4" in f.attrib.get("class"): #modul
-			lva_modul = f.text.strip().partition(' ')[2]
-			if "ECTS" in lva_modul:
-				if "(" in lva_modul:
-					lva_modul = lva_modul.strip().partition('(')[0]
+			if "Vertiefung Informatik" not in lva_modul1: #TODO
+				getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes)
+			if u"Freifächer" in lva_modul1: #TODO restructure xml to allow lvas directly under modulgruppe
+				lva_modul2 = u"Freifächer"
+				getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, True) #TODO
+			#print("3: " + lva_modul1 + "<")
+		elif "chapter4" in f.attrib.get("class"): #modul2
+			lva_modul2 = f.text.strip().partition(' ')[2]
+			if "ECTS" in lva_modul2:
+				if "(" in lva_modul2:
+					lva_modul2 = lva_modul2.strip().partition('(')[0]
 				else:
-					lva_modul = lva_modul.strip().rpartition(',')[0]
-			lva_modul2 = ""
+					lva_modul2 = lva_modul2.strip().rpartition(',')[0]
+			lva_modul2_2 = ""
 			#remove unnecessary words
-			if "Modul" in lva_modulgruppe:
-				lva_modulgruppe = lva_modulgruppe.partition("Modul")[2]
+			if "Modul" in lva_modul1:
+				lva_modul1 = lva_modul1.partition("Modul")[2]
 			lva_url = f.base + "#" + f.attrib.get("id")
 			#print(lva_anchor)
 			#http://online.univie.ac.at/vlvz?kapitel=510&semester=S2011#510_3
 			#<h3 class="chapter4" id="510_3">Modul...
 			iswahlmodulgruppe = False
-			if "Pflichtmodul" not in lva_modul and "Wahlmodul" not in lva_modul:
-				getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes) #TODO
-			elif "Vertiefung Informatik" in lva_modulgruppe:
-				if "Pflichtmodul" in lva_modul:
-					lva_modulgruppe = u"Modulgruppe Vertiefung Informatik, Pflichtmodul"
-				if "Wahlmodul" in lva_modul:
-					lva_modulgruppe = u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)"
+			if "Pflichtmodul" not in lva_modul2 and "Wahlmodul" not in lva_modul2:
+				getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes) #TODO
+			elif "Vertiefung Informatik" in lva_modul1:
+				if "Pflichtmodul" in lva_modul2:
+					lva_modul1 = u"Modulgruppe Vertiefung Informatik, Pflichtmodul"
+				if "Wahlmodul" in lva_modul2:
+					lva_modul1 = u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)"
 					iswahlmodulgruppe = True
-				getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes, iswahlmodulgruppe)
-			#print("4: " + lva_modul + "<")
+				getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes, iswahlmodulgruppe)
+			#print("4: " + lva_modul2 + "<")
 		elif "chapter5" in f.attrib.get("class"): #modul bei vertiefungs-modulgruppe
-			#lva_modul2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0].strip()
-			lva_modul = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0]
-			#getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul2, createNonexistentNodes) #TODO
-			getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes) #TODO
-			#print("5: " + lva_modul2 + "<")
+			#lva_modul2_2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0].strip()
+			lva_modul2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0]
+			#getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2_2, createNonexistentNodes) #TODO
+			getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes) #TODO
+			#print("5: " + lva_modul2_2 + "<")
 		elif "vlvz_langtitel" in f.attrib.get("class"):
 			lva_key = f.text
 			#print(lva_num)
@@ -774,12 +779,12 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 				lva_fach_sws = ""
 				lva_fach_ects = ""
 			
-			if "Wahlmodul" in lva_modulgruppe or u"Freifächer" in lva_modulgruppe:
-				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+			if "Wahlmodul" in lva_modul1 or u"Freifächer" in lva_modul1:
+				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
 			else:
-				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
+				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
 			
-			addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, lva_professor, createNonexistentNodes=False)
+			addLva(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, lva_professor, createNonexistentNodes=False)
 			
 			#print("X: " + lva_key + "," + lva_type + "," + lva_semester + "<:>" + lva_title + " - " + lva_anchor + "<")
 		else:
@@ -837,28 +842,28 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 		if "nodeTable-level-0" in f.attrib.get("class"):
 			lva_stpl = f.text + f.xpath('span')[0].text
 			#lva_stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
-			lva_modulgruppe, lva_modul = "", ""
+			lva_modul1, lva_modul2 = "", ""
 			getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url, createNonexistentNodes=createNonexistentNodes)
 			#print("0: " + lva_stpl + "<>" + lva_stpl_version + "<")
 		elif "nodeTable-level-1" in f.attrib.get("class"):
-			lva_modulgruppe = f.xpath('span')[0].text
+			lva_modul1 = f.xpath('span')[0].text
 			"""
 			#strip unnecessary "Modul" or similar
-			if "Pflichtmodulgruppe" in lva_modulgruppe:
-				lva_modulgruppe = lva_modulgruppe.partition("Pflichtmodulgruppe")[2]
-			elif "Modulgruppe" in lva_modulgruppe:
-				lva_modulgruppe = lva_modulgruppe.partition("Modulgruppe")[2]
-			elif "Modul" in lva_modulgruppe:
-				lva_modulgruppe = lva_modulgruppe.partition("Modul")[2]
+			if "Pflichtmodulgruppe" in lva_modul1:
+				lva_modul1 = lva_modul1.partition("Pflichtmodulgruppe")[2]
+			elif "Modulgruppe" in lva_modul1:
+				lva_modul1 = lva_modul1.partition("Modulgruppe")[2]
+			elif "Modul" in lva_modul1:
+				lva_modul1 = lva_modul1.partition("Modul")[2]
 			"""
-			lva_modul = ""
+			lva_modul2 = ""
 			iswahlmodulgruppe = False
-			if "Wahlmodul" in lva_modulgruppe:
+			if "Wahlmodul" in lva_modul1:
 				iswahlmodulgruppe = True
-			getModulgruppe(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe, createNonexistentNodes, iswahlmodulgruppe)
-			#print("1: " + lva_modulgruppe + "<")
+			getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes, iswahlmodulgruppe)
+			#print("1: " + lva_modul1 + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			lva_modul = u"ICT-Infrastruktur für Bildungsaufgaben" #TODO
+			lva_modul2 = u"ICT-Infrastruktur für Bildungsaufgaben" #TODO
 			#lva_fach = f.text.partition(' ')[2]
 			#lva_fach_type = f.text.partition(' ')[0]
 			lva_fach = f.xpath('span')[0].text
@@ -868,15 +873,15 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
 			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
 
-			getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes) #could be leaved alone with the current createNonexistentNodes
-			getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
-			#print("2i " + lva_modul + "<")
+			getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes) #could be leaved alone with the current createNonexistentNodes
+			getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
+			#print("2i " + lva_modul2 + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
-			lva_modul = f.xpath('span')[0].text
-			if "Infomatik" in lva_modul:
-				lva_modul = lva_modul.replace("Infomatik","Informatik")
-			getModul(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul, createNonexistentNodes)
-			#print("2: " + lva_modul + "<")
+			lva_modul2 = f.xpath('span')[0].text
+			if "Infomatik" in lva_modul2:
+				lva_modul2 = lva_modul2.replace("Infomatik","Informatik")
+			getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes)
+			#print("2: " + lva_modul2 + "<")
 		elif "nodeTable-level-3" in f.attrib.get("class") and "item" in f.attrib.get("class"):
 			#lva_fach = f.text.partition(' ')[2]
 			lva_fach = f.xpath('span')[0].text
@@ -895,12 +900,12 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
 			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
 
-			if "Wahlmodul" in lva_modulgruppe:
+			if "Wahlmodul" in lva_modul1:
 				#if getLvas: #don't add Fach at all when getLvas=False as Wahlmodule can contain *any* Fach which isn't important for the structure
 				#problem with that: getFach does not work anymore
-				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
 			else:
-				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
+				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
 			#print("3: " + lva_fach + "<:>" + lva_fach_type + "<")
 		elif ("nodeTable-level-4" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-3" in f.attrib.get("class") and "course" in f.attrib.get("class")):
 			if getLvas:
@@ -918,7 +923,7 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 				lva_sws = f.xpath('../following-sibling::td')[2].text
 				lva_ects = f.xpath('../following-sibling::td')[3].text
 				
-				addLva(xml_root, lva_stpl,lva_stpl_version,lva_modulgruppe,lva_modul,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, createNonexistentNodes=False)
+				addLva(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, createNonexistentNodes=False)
 				#print("4: " + lva_key + "," + lva_type + "," + lva_semester + "<:>" + lva_title + " - " + lva_url + "<")
 		else:
 			raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
@@ -987,7 +992,7 @@ def getFile(xml_root, filename=legacyFile, universityName=tu):
 			lva_fach = u"Präsentation und Moderation"
 			lva_fach_type = "VU"
 
-		addLva(xml_root, lva_stpl=None,lva_stpl_version=None,lva_modulgruppe=None,lva_modul=None,lva_fach=lva_fach,lva_fach_type=lva_fach_type,lva_fach_sws=lva_fach_sws,lva_fach_ects=lva_fach_ects,lva_university=lva_university,lva_semester=lva_semester,lva_title=lva_title,lva_key=lva_key,lva_type=lva_type,lva_sws=lva_sws,lva_ects=lva_ects,lva_info=lva_info,lva_url=lva_url, lva_professor=lva_professor, createNonexistentNodes=False, searchMatchingFach=True)
+		addLva(xml_root, lva_stpl=None,lva_stpl_version=None,lva_modul1=None,lva_modul2=None,lva_fach=lva_fach,lva_fach_type=lva_fach_type,lva_fach_sws=lva_fach_sws,lva_fach_ects=lva_fach_ects,lva_university=lva_university,lva_semester=lva_semester,lva_title=lva_title,lva_key=lva_key,lva_type=lva_type,lva_sws=lva_sws,lva_ects=lva_ects,lva_info=lva_info,lva_url=lva_url, lva_professor=lva_professor, createNonexistentNodes=False, searchMatchingFach=True)
 
 	f.close()
 			

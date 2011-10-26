@@ -2,7 +2,7 @@
 
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-03-12
+Fabian Ehrentraud, 2011-10-24
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -218,13 +218,13 @@ h2, h3, h4, #meta .list-header {
 	margin-top: 0.8em;
 }
 
-.modulgruppe-body {
+.modul1-body {
 	border-left: 0.8em solid #3B3;
 	border-top: 1px solid #3B3;
 	padding-left: 0.5em;
 }
 
-.modul-body {
+.modul2-body {
 	border-left: 0.6em solid #5D5;
 	border-top: 1px solid #5D5;
 	padding-left: 0.5em;
@@ -253,7 +253,7 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 #content[data-hideheaders~="true"] h2, #content[data-hideheaders~="true"] h3, #content[data-hideheaders~="true"] h4, #content[data-hideheaders~="true"] [data-nolvas~="true"], #content[data-hideheaders~="true"] [data-nolvas_static~="true"] {
 	display: none !important;
 }
-#content[data-hideheaders~="true"] .modulgruppe-body, #content[data-hideheaders~="true"] .modul-body {
+#content[data-hideheaders~="true"] .modul1-body, #content[data-hideheaders~="true"] .modul2-body {
 	border: none;
 	padding-left: 0;
 }
@@ -447,7 +447,7 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 		font-weight: bolder;
 	}
 	
-	.modulgruppe-body, .modul-body {
+	.modul1-body, .modul2-body {
 		border: none;
 		padding-left: 0em;
 	}
@@ -481,7 +481,7 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 		page-break-inside: avoid;
 	}
 	
-	#content[data-hideheaders~="true"] [data-name~="wholemodulgruppe"]+[data-name~="wholemodulgruppe"] {
+	#content[data-hideheaders~="true"] [data-name~="wholemodul1"]+[data-name~="wholemodul1"] {
 		margin-top: 0.7em;
 		border-top: 2px #CCC solid;
 	}
