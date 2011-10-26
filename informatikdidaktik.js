@@ -377,6 +377,20 @@ function hideold(hide) {
 }
 
 /*
+assigngs a custom attribute to the ID "content"
+which hides/shows (according to the given parameter hide) by css all child elements which have got certain other attributes
+*/
+function hideuni(hide) {
+	if(hide){
+		document.getElementById("content").setAttribute("data-hideuni","true");
+	}else{
+		document.getElementById("content").setAttribute("data-hideuni","false");
+	}
+
+	propagateVisibility(false);
+}
+
+/*
 assigns a custom attribute to elements in the DOM hierarchy
 to indicate that they do/don't contain lvas
 used for hiding empty categories
@@ -413,7 +427,11 @@ function propagateVisibility(showeverything) {
 		} else {
 			var subrows = tables[i].firstChild.childNodes; //firstChild is tbody
 			for (var j=0; j < subrows.length; j++) {
-				if(subrows[j].hasChildNodes()  &&  subrows[j].getAttribute("data-hiderow_date") != "true" && subrows[j].getAttribute("data-hiderow_semester") != "true" && subrows[j].getAttribute("data-hiderow_university") != "true") {
+				if( subrows[j].hasChildNodes()  && 
+						subrows[j].getAttribute("data-hiderow_date") != "true" &&
+						subrows[j].getAttribute("data-hiderow_semester") != "true" &&
+						subrows[j].getAttribute("data-hiderow_university") != "true" &&
+						(document.getElementById("content").getAttribute("data-hideuni") != "true" || tables[i].parentNode.parentNode.getAttribute("data-multipleuniversities_static") != "true") ) {
 					//TODO parentNode method not very change-proof (XPath?)
 					tables[i].parentNode.setAttribute("data-nocontent","false"); /*fach*/
 					tables[i].parentNode.parentNode.setAttribute("data-nolvas","false"); /*wholefach*/
@@ -437,20 +455,6 @@ function hideempty(hide) {
 		document.getElementById("content").setAttribute("data-hideempty","true");
 	}else{
 		document.getElementById("content").setAttribute("data-hideempty","false");
-	}
-
-	redrawFix();
-}
-
-/*
-assigngs a custom attribute to the ID "content"
-which hides/shows (according to the given parameter hide) by css all child elements which have got certain other attributes
-*/
-function hideuni(hide) {
-	if(hide){
-		document.getElementById("content").setAttribute("data-hideuni","true");
-	}else{
-		document.getElementById("content").setAttribute("data-hideuni","false");
 	}
 
 	redrawFix();
