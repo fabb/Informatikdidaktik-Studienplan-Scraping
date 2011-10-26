@@ -117,7 +117,7 @@ TODO
 					</h1>
 				</div>
 				<div id="meta">
-					<p class="meta-nonprint" data-name="data-meta-nonprint" onclick="hideshowLiNoprint(null,'meta');" tabindex="0">
+					<p class="meta-nonprint" data-name="hider_nonprinter" data-hideshows="" data-nonprints="meta" tabindex="0">
 						<xsl:text>Diesen Abschnitt </xsl:text><span class="hideWhenNonprint">nicht</span><xsl:text> drucken</xsl:text>
 					</p>
 					<p class="info">Kombination der abgehaltenen LVAs der <em>Uni Wien</em> und der <em>TU Wien</em> der vergangenen und kommenden Semester</p>
@@ -137,7 +137,7 @@ TODO
 					</p>
 					<div id="quellen">
 						<ul>
-						<li class="list-header" onclick="hideshowLiNoprint('quelle','quellen');" tabindex="0">
+						<li class="list-header" data-name="hider_nonprinter" data-hideshows="quelle" data-nonprints="quellen" tabindex="0">
 							<xsl:text>Quellen</xsl:text>
 						</li>
 						<!--xsl:for-each select="stpl_collection/source"-->
@@ -183,7 +183,7 @@ TODO
 							<div>
 								<xsl:text>Nur LVAs der Uni anzeigen: </xsl:text>
 								<!--onchange does not fire in FF when changed with keyboard keys-->
-								<select name="universitySelect" size="1" onchange="showUniversity(this.form.universitySelect.selectedIndex==0, this.form.universitySelect.options[this.form.universitySelect.selectedIndex].value)">
+								<select name="universitySelect" size="1">
 									<option selected="selected">
 										<xsl:text>Alle zeigen</xsl:text>
 									</option>
@@ -208,7 +208,7 @@ TODO
 								</span>
 								<xsl:text>: </xsl:text>
 								<!--onchange does not fire in FF when changed with keyboard keys-->
-								<select name="semesterSelect" size="1" onchange="highlightDiv(this.form.semesterSelect.options[this.form.semesterSelect.selectedIndex].value);hideold(this.form.hideolderCheck.checked);">
+								<select name="semesterSelect" size="1">
 									<!-- this method has complexity of n*n, Muenchian method would need more wiriting but have complexity of n log n -->
 									<xsl:for-each select="$firstStpl//lva/semester[not (. = preceding::semester)]">
 										<xsl:sort select="." order="descending"/>
@@ -225,14 +225,14 @@ TODO
 								</select>
 							</div>
 							<div class="sidebyside">
-								<input name="hideolderCheck" type="checkbox" onclick="hideold(this.form.hideolderCheck.checked)"/>
+								<input name="hideolderCheck" type="checkbox" onclick=""/>
 								<xsl:text> Verstecke ältere LVAs</xsl:text>
 							</div>
 							<div class="sidebyside_linebreakdummy"></div>
 							<div class="sidebyside">
 								<xsl:text>Anzeigen hinzugefügter LVAs seit: </xsl:text>
 								<!--onchange does not fire in FF when changed with keyboard keys-->
-								<select name="dateSelect" size="1" onchange="showOldestDate(this.form.dateSelect.selectedIndex==0, this.form.dateSelect.options[this.form.dateSelect.selectedIndex].value)">
+								<select name="dateSelect" size="1">
 									<option selected="selected">
 										<xsl:text>Alle zeigen</xsl:text>
 									</option>
@@ -254,28 +254,28 @@ TODO
 							</div>
 							<div class="sidebyside_linebreakdummy"></div>
 							<div class="sidebyside">
-								<input name="hideheadersCheck" type="checkbox" onclick="hideheaders(this.form.hideheadersCheck.checked)"/>
+								<input name="hideheadersCheck" type="checkbox"/>
 								<xsl:text> Verstecke Überschriften</xsl:text>
 							</div>
 							<div class="sidebyside">
-								<input name="hideemptyCheck" type="checkbox" onclick="hideempty(this.form.hideemptyCheck.checked)"/>
+								<input name="hideemptyCheck" type="checkbox"/>
 								<xsl:text> Verstecke leere Kategorien</xsl:text>
 							</div>
 							<div>
-								<input name="hideuniCheck" type="checkbox" onclick="hideuni(this.form.hideuniCheck.checked)"/>
+								<input name="hideuniCheck" type="checkbox"/>
 								<xsl:text> Zeige nur Fächer, welche nur an </xsl:text><strong>einer</strong><xsl:text> Universität angeboten werden</xsl:text>
 							</div>
 							<div>
-								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{hideAllDiv('modul1');showAllDiv('modul2');showAllDiv('wahlmodul');showAllDiv('fach');}}">
+								<button name="modul1Button" type="button" value="">
 									<b>Zeige Modulgruppen</b>
 								</button>
-								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modul1');hideAllDiv('modul2');hideAllDiv('wahlmodul');showAllDiv('fach');}}">
+								<button name="modul2Button" type="button" value="">
 									<b>Zeige Module</b>
 								</button>
-								<button type="button" value="" onclick="if(!this.form.hideheadersCheck.checked){{showAllDiv('modul1');showAllDiv('modul2');hideAllDiv('wahlmodul');hideAllDiv('fach');}}">
+								<button name="fachButton" type="button" value="">
 									<b>Zeige Fächer</b>
 								</button>
-								<button type="button" value="" onclick="showAllDiv('modul1');showAllDiv('modul2');showAllDiv('wahlmodul');showAllDiv('fach');">
+								<button name="allButton" type="button" value="">
 									<b>Zeige alles</b>
 								</button>
 							</div>
@@ -333,7 +333,7 @@ TODO
 			</xsl:variable>
 			<xsl:variable name="hasInfo" select="count(info) &gt; 0"/>
 			<!-- warning: this way, no " and ' is allowed in the variable name -->
-			<h2 onclick="hideshowDiv('{$modul1ID}')" tabindex="0">
+			<h2 data-name="hider" data-hideshows="{$modul1ID}" tabindex="0">
 				<xsl:if test="$hasInfo">
 					<xsl:attribute name="data-tooltip">
 						<xsl:text>tooltip-trigger</xsl:text>
@@ -401,7 +401,7 @@ TODO
 				</xsl:call-template>
 			</xsl:variable>
 			<!-- warning: this way, no "and ' is allowed in the variable name -->
-			<h3 onclick="hideshowDiv('{$modul2ID}')" tabindex="0">
+			<h3 data-name="hider" data-hideshows="{$modul2ID}" tabindex="0">
 				<xsl:value-of select="title"/>
 				<xsl:if test="count(semester_suggestion) &gt; 0">
 					<span class="semester_suggestions">
@@ -509,7 +509,7 @@ TODO
 				<xsl:value-of select="type"/>
 			</xsl:variable>
 			<!-- warning: this way, no " and ' is allowed in the variable name -->
-			<h4 onclick="hideshowDiv('{$fachID}')" tabindex="0">
+			<h4 data-name="hider" data-hideshows="{$fachID}" tabindex="0">
 				<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
 			</h4>
 			<div class="lvas" data-name="fach">

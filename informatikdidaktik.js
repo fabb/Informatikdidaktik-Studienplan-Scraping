@@ -27,6 +27,8 @@ note that localStorage is only meant to work when the document is loaded from a 
 */
 function onLoad() {
 	document.controls.reset();
+	
+	init_controls();
 
 	writeDate();
 	
@@ -42,6 +44,139 @@ function onLoad() {
 	if(localStorage) localStorage.visitdate = date;
 	
 	hideshowLiNoprint('quelle','quellen');
+}
+
+// initializes control elements
+// not done in html code to separate code and content even more
+function init_controls() {
+	var nonprinters = document.querySelectorAll('*[data-name~="hider_nonprinter"]');
+	for(var i = nonprinters.length; i--; ) {
+		var handler = function(e){
+			hideshowLiNoprint(e.currentTarget.getAttribute("data-hideshows"), e.currentTarget.getAttribute("data-nonprints"));
+		};
+		nonprinters[i].addEventListener("click", handler, false);
+	}
+	
+	var hiders = document.querySelectorAll('*[data-name~="hider"]');
+	for(var i = hiders.length; i--; ) {
+		var handler = function(e){
+			hideshowDiv(e.currentTarget.getAttribute("data-hideshows"))
+		};
+		hiders[i].addEventListener("click", handler, false);
+	}
+	
+	var university_selects = document.querySelectorAll('*[name~="universitySelect"]');
+	for(var i = university_selects.length; i--; ) {
+		var handler = function(e){
+			showUniversity(e.currentTarget.selectedIndex==0, e.currentTarget.options[e.currentTarget.selectedIndex].value);
+		};
+		university_selects[i].addEventListener("change", handler, false);
+	}
+	
+	var semester_select = document.querySelectorAll('*[name~="semesterSelect"]');
+	for(var i = semester_select.length; i--; ) {
+		var handler = function(e){
+			highlightDiv(e.currentTarget.options[e.currentTarget.selectedIndex].value);
+			var hideolder_check = document.querySelectorAll('*[name~="hideolderCheck"]');
+			if(hideolder_check.length > 0){
+				hideold(hideolder_check[0].checked);
+			}
+		};
+		semester_select[i].addEventListener("change", handler, false);
+	}
+
+	var hideolder_check = document.querySelectorAll('*[name~="hideolderCheck"]');
+	for(var i = hideolder_check.length; i--; ) {
+		var handler = function(e){
+			hideold(e.currentTarget.checked)
+		};
+		hideolder_check[i].addEventListener("click", handler, false);
+	}
+	
+	var date_select = document.querySelectorAll('*[name~="dateSelect"]');
+	for(var i = date_select.length; i--; ) {
+		var handler = function(e){
+			showOldestDate(e.currentTarget.selectedIndex==0, e.currentTarget.options[e.currentTarget.selectedIndex].value);
+		};
+		date_select[i].addEventListener("change", handler, false);
+	}
+	
+	var hideheaders_check = document.querySelectorAll('*[name~="hideheadersCheck"]');
+	for(var i = hideheaders_check.length; i--; ) {
+		var handler = function(e){
+			hideheaders(e.currentTarget.checked)
+		};
+		hideheaders_check[i].addEventListener("click", handler, false);
+	}
+	
+	var hideempty_check = document.querySelectorAll('*[name~="hideemptyCheck"]');
+	for(var i = hideempty_check.length; i--; ) {
+		var handler = function(e){
+			hideempty(e.currentTarget.checked)
+		};
+		hideempty_check[i].addEventListener("click", handler, false);
+	}
+	
+	var hideuni_check = document.querySelectorAll('*[name~="hideuniCheck"]');
+	for(var i = hideuni_check.length; i--; ) {
+		var handler = function(e){
+			hideuni(e.currentTarget.checked)
+		};
+		hideuni_check[i].addEventListener("click", handler, false);
+	}
+	
+	var modul1_button = document.querySelectorAll('*[name~="modul1Button"]');
+	for(var i = modul1_button.length; i--; ) {
+		var handler = function(e){
+			var hideheaders_check = document.querySelectorAll('*[name~="hideheadersCheck"]');
+			if(hideheaders_check.length == 0 || !hideheaders_check[0].checked){
+				hideAllDiv('modul1');
+				showAllDiv('modul2');
+				showAllDiv('wahlmodul');
+				showAllDiv('fach');
+			}
+		};
+		modul1_button[i].addEventListener("click", handler, false);
+	}
+	
+	var modul2_button = document.querySelectorAll('*[name~="modul2Button"]');
+	for(var i = modul2_button.length; i--; ) {
+		var handler = function(e){
+			var hideheaders_check = document.querySelectorAll('*[name~="hideheadersCheck"]');
+			if(hideheaders_check.length == 0 || !hideheaders_check[0].checked){
+				showAllDiv('modul1');
+				hideAllDiv('modul2');
+				hideAllDiv('wahlmodul');
+				showAllDiv('fach');
+			}
+		};
+		modul2_button[i].addEventListener("click", handler, false);
+	}
+	
+	var fach_button = document.querySelectorAll('*[name~="fachButton"]');
+	for(var i = fach_button.length; i--; ) {
+		var handler = function(e){
+			var hideheaders_check = document.querySelectorAll('*[name~="hideheadersCheck"]');
+			if(hideheaders_check.length == 0 || !hideheaders_check[0].checked){
+				showAllDiv('modul1');
+				showAllDiv('modul2');
+				hideAllDiv('wahlmodul');
+				hideAllDiv('fach');
+			}
+		};
+		fach_button[i].addEventListener("click", handler, false);
+	}
+	
+	var all_button = document.querySelectorAll('*[name~="allButton"]');
+	for(var i = all_button.length; i--; ) {
+		var handler = function(e){
+			showAllDiv('modul1');
+			showAllDiv('modul2');
+			showAllDiv('wahlmodul');
+			showAllDiv('fach');
+		};
+		all_button[i].addEventListener("click", handler, false);
+	}
 }
 
 /*
