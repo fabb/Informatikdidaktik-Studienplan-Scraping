@@ -104,7 +104,7 @@ TODO
 				<meta name="keywords" content="TU Wien, Uni Wien, LVAs, Lehrveranstaltungen, Studienplan, Informatikdidaktik, 950, Zusammenfassung, XSLT, XML" />
 				<meta name="author" content="Fabian Ehrentraud" />
 			</head>
-			<body onload="document.controls.reset();onLoad();hideshowLiNoprint('quelle','quellen');">
+			<body>
 				<div id="header">
 					<h1>
 						<xsl:text>Studienplan </xsl:text>

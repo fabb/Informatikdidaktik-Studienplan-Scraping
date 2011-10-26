@@ -15,12 +15,19 @@ TODO
 	instead of unsafe .parentNode use something more robust
 */
 
+
+// initializations when window/body has been loaded
+window.addEventListener("load", onLoad, false);
+
+
 /*
 code that should be executed when the document is loaded/refreshed
 stores the current date in localStorage
 note that localStorage is only meant to work when the document is loaded from a domain and not a file - but only IE8 is strict enough to follow this
 */
 function onLoad() {
+	document.controls.reset();
+
 	writeDate();
 	
 	var today = new Date();
@@ -33,6 +40,8 @@ function onLoad() {
 	var date = year.concat("-").concat(month).concat("-").concat(day);
 	
 	if(localStorage) localStorage.visitdate = date;
+	
+	hideshowLiNoprint('quelle','quellen');
 }
 
 /*
