@@ -924,7 +924,7 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 				lva_title_url = f.xpath('div/a')[0]
 				#lva_canceled = f.xpath('div/span')[0].text if f.xpath('div/span') is not None else ""
 				lva_canceled = "abgesagt" if "canceled" in f.attrib.get("class").lower() else ""
-				lva_url = lva_title_url.attrib.get("href") #.replace('&','&amp;')
+				lva_url = sanitizeTUrl(lva_title_url.attrib.get("href")) #.replace('&','&amp;')
 				lva_title = lva_title_url.text
 				#lva_info = f.xpath('../following-sibling::*[contains(@class,"nodeTableInfoColumn")]/div')[0].text #can be None
 				lva_info = lva_canceled
@@ -938,7 +938,20 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 		else:
 			raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
 
-			
+def sanitizeTUrl(url):
+	urlparts = url.split("?")
+	if len(urlparts) == 1:
+		return url
+	if len(urlparts) == 2:
+		cleanurl = urlparts[0] + "?"
+		vars = urlparts[1].split("&")
+		for v in vars:
+			if not v.startswith(("windowId=")):
+				cleanurl += v + "&"
+		return cleanurl[:-1]
+	else:
+		raise Exception("Url has more than one ?: %s"%(url))
+
 """ parse legacy file """
 
 def wasUrlScraped(xml_root, url):
