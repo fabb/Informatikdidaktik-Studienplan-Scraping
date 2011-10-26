@@ -224,7 +224,7 @@ TODO
 									</option>
 								</select>
 							</div>
-							<div class="sidebyside">
+							<div class="sidebyside" data-name="hideolderCheck" data-clickable="true">
 								<input name="hideolderCheck" type="checkbox" onclick=""/>
 								<xsl:text> Verstecke ältere LVAs</xsl:text>
 							</div>
@@ -253,15 +253,15 @@ TODO
 								<span data-name="lastvisitdate"></span>
 							</div>
 							<div class="sidebyside_linebreakdummy"></div>
-							<div class="sidebyside">
+							<div class="sidebyside" data-name="hideheadersCheck" data-clickable="true">
 								<input name="hideheadersCheck" type="checkbox"/>
 								<xsl:text> Verstecke Überschriften</xsl:text>
 							</div>
-							<div class="sidebyside">
+							<div class="sidebyside" data-name="hideemptyCheck" data-clickable="true">
 								<input name="hideemptyCheck" type="checkbox"/>
 								<xsl:text> Verstecke leere Kategorien</xsl:text>
 							</div>
-							<div>
+							<div class="contentwide" data-name="hideuniCheck" data-clickable="true">
 								<input name="hideuniCheck" type="checkbox"/>
 								<xsl:text> Zeige nur Fächer, welche nur an </xsl:text><strong>einer</strong><xsl:text> Universität angeboten werden</xsl:text>
 							</div>

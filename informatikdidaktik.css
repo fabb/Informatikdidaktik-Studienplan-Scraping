@@ -218,6 +218,14 @@ h2, h3, h4, #meta .list-header {
 	margin-top: 0.8em;
 }
 
+#meta [data-clickable~="true"] {
+	cursor: pointer;	
+}
+
+.contentwide {
+	display: table;
+}
+
 .modul1-body {
 	border-left: 0.8em solid #3B3;
 	border-top: 1px solid #3B3;

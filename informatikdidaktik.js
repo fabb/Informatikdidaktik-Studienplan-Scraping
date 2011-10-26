@@ -85,10 +85,13 @@ function init_controls() {
 		semester_select[i].addEventListener("change", handler, false);
 	}
 
-	var hideolder_check = document.querySelectorAll('*[name~="hideolderCheck"]');
+	var hideolder_check = document.querySelectorAll('*[data-name~="hideolderCheck"]');
 	for(var i = hideolder_check.length; i--; ) {
 		var handler = function(e){
-			hideold(e.currentTarget.checked)
+			var input = e.currentTarget.querySelector('input');
+			if(!(e.target instanceof HTMLInputElement))
+				input.checked = !input.checked;
+			hideold(input.checked)
 		};
 		hideolder_check[i].addEventListener("click", handler, false);
 	}
@@ -101,26 +104,35 @@ function init_controls() {
 		date_select[i].addEventListener("change", handler, false);
 	}
 	
-	var hideheaders_check = document.querySelectorAll('*[name~="hideheadersCheck"]');
+	var hideheaders_check = document.querySelectorAll('*[data-name~="hideheadersCheck"]');
 	for(var i = hideheaders_check.length; i--; ) {
 		var handler = function(e){
-			hideheaders(e.currentTarget.checked)
+			var input = e.currentTarget.querySelector('input');
+			if(!(e.target instanceof HTMLInputElement))
+				input.checked = !input.checked;
+			hideheaders(input.checked)
 		};
 		hideheaders_check[i].addEventListener("click", handler, false);
 	}
 	
-	var hideempty_check = document.querySelectorAll('*[name~="hideemptyCheck"]');
+	var hideempty_check = document.querySelectorAll('*[data-name~="hideemptyCheck"]');
 	for(var i = hideempty_check.length; i--; ) {
 		var handler = function(e){
-			hideempty(e.currentTarget.checked)
+			var input = e.currentTarget.querySelector('input');
+			if(!(e.target instanceof HTMLInputElement))
+				input.checked = !input.checked;
+			hideempty(input.checked)
 		};
 		hideempty_check[i].addEventListener("click", handler, false);
 	}
 	
-	var hideuni_check = document.querySelectorAll('*[name~="hideuniCheck"]');
+	var hideuni_check = document.querySelectorAll('*[data-name~="hideuniCheck"]');
 	for(var i = hideuni_check.length; i--; ) {
 		var handler = function(e){
-			hideuni(e.currentTarget.checked)
+			var input = e.currentTarget.querySelector('input');
+			if(!(e.target instanceof HTMLInputElement))
+				input.checked = !input.checked;
+			hideuni(input.checked)
 		};
 		hideuni_check[i].addEventListener("click", handler, false);
 	}
