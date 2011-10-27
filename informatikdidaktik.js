@@ -1,5 +1,5 @@
 /*
-Fabian Ehrentraud, 2011-10-26
+Fabian Ehrentraud, 2011-10-27
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -27,22 +27,11 @@ note that localStorage is only meant to work when the document is loaded from a 
 */
 function onLoad() {
 	document.controls.reset();
-	
 	init_controls();
 
-	writeDate();
-	
-	var today = new Date();
-	var year = String(today.getFullYear());
-	var month = String("0").concat(String(today.getMonth()+1));
-	month = month.substr(month.length-2);
-	var day = String("0").concat(String(today.getDate()));
-	day = day.substr(day.length-2);
-	
-	var date = year.concat("-").concat(month).concat("-").concat(day);
-	
-	if(localStorage) localStorage.visitdate = date;
-	
+	writeLastVisitDate();
+	saveCurrentDate();
+
 	hideshowLiNoprint('quelle','quellen');
 }
 
@@ -202,13 +191,29 @@ function redrawFix() {
 /*
 writes the last visit date from localStorage to a div in the document
 */
-function writeDate() {
+function writeLastVisitDate() {
 	if(localStorage && localStorage.visitdate){
 		document.querySelector('*[data-name~="lastvisitdate_div"]').removeAttribute("hidden");
 		document.querySelector('*[data-name~="lastvisitdate"]').appendChild(document.createTextNode(localStorage.visitdate));
 	}
 
 	redrawFix();
+}
+
+/*
+saves current date to localStorage
+*/
+function saveCurrentDate() {
+	var today = new Date();
+	var year = String(today.getFullYear());
+	var month = String("0").concat(String(today.getMonth()+1));
+	month = month.substr(month.length-2);
+	var day = String("0").concat(String(today.getDate()));
+	day = day.substr(day.length-2);
+	
+	var date = year.concat("-").concat(month).concat("-").concat(day);
+	
+	if(localStorage) localStorage.visitdate = date;
 }
 
 /*
