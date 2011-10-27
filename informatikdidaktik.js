@@ -56,6 +56,10 @@ function init_controls() {
 	
 	var university_selects = document.querySelectorAll('*[name~="universitySelect"]');
 	for(var i = university_selects.length; i--; ) {
+		if(university_selects[i].length <= 3){
+			university_selects[i].setAttribute("size", university_selects[i].length);
+			university_selects[i].className += " multirow";
+		}
 		var handler = function(e){
 			showUniversity(e.currentTarget.selectedIndex==0, e.currentTarget.options[e.currentTarget.selectedIndex].value);
 		};
