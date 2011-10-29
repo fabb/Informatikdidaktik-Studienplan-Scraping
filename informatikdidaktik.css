@@ -417,7 +417,7 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 }
 
 @media print {
-	body, #meta, .info, h1, h2, h3, h4, .fach, .lvas, .currentlva {
+	body, #meta, .info, h1, h2, h3, h4, .fach, .lvas, .currentlva, .highlightSem {
 		background-color: white;
 	}
 
