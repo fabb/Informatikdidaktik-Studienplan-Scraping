@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-10-26
+Fabian Ehrentraud, 2011-10-29
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -137,7 +137,7 @@ TODO
 					</p>
 					<div id="quellen">
 						<ul>
-						<li class="list-header" data-name="hider_nonprinter" data-hideshows="quelle" data-nonprints="quellen" tabindex="0">
+						<li id="quelle_header" class="list-header" data-name="hider_nonprinter" data-hideshows="quelle" data-nonprints="quellen" tabindex="0">
 							<xsl:text>Quellen</xsl:text>
 						</li>
 						<!--xsl:for-each select="stpl_collection/source"-->
@@ -333,7 +333,7 @@ TODO
 			</xsl:variable>
 			<xsl:variable name="hasInfo" select="count(info) &gt; 0"/>
 			<!-- warning: this way, no " and ' is allowed in the variable name -->
-			<h2 data-name="hider" data-hideshows="{$modul1ID}" tabindex="0">
+			<h2 data-name="hider" data-hideshows="{$modul1ID}" data-hiderforname="modul1" tabindex="0">
 				<xsl:if test="$hasInfo">
 					<xsl:attribute name="data-tooltip">
 						<xsl:text>tooltip-trigger</xsl:text>
@@ -401,7 +401,13 @@ TODO
 				</xsl:call-template>
 			</xsl:variable>
 			<!-- warning: this way, no "and ' is allowed in the variable name -->
-			<h3 data-name="hider" data-hideshows="{$modul2ID}" tabindex="0">
+			<h3 data-name="hider" data-hideshows="{$modul2ID}" data-hiderforname="modul2" tabindex="0">
+				<xsl:if test="ancestor::modul1[@wahlmodulgruppe = true()]">
+					<!-- overwrite data-hiderforname -->
+					<xsl:attribute name="data-hiderforname">
+						<xsl:text>wahlmodul</xsl:text>
+					</xsl:attribute>
+				</xsl:if>
 				<xsl:value-of select="title"/>
 				<xsl:if test="count(semester_suggestion) &gt; 0">
 					<span class="semester_suggestions">
@@ -509,7 +515,7 @@ TODO
 				<xsl:value-of select="type"/>
 			</xsl:variable>
 			<!-- warning: this way, no " and ' is allowed in the variable name -->
-			<h4 data-name="hider" data-hideshows="{$fachID}" tabindex="0">
+			<h4 data-name="hider" data-hideshows="{$fachID}" data-hiderforname="fach" tabindex="0">
 				<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
 			</h4>
 			<div class="lvas" data-name="fach">

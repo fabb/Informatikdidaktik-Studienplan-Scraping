@@ -2,7 +2,7 @@
 
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-10-27
+Fabian Ehrentraud, 2011-10-29
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -74,10 +74,6 @@ h4 {
 	padding: 0.1em;
 	padding-left: 0.3em;
 	padding-bottom: 0.3em;
-}
-
-h4:before {
-	content: "* ";
 }
 
 a {
@@ -154,11 +150,13 @@ li {
 
 /*visual clue for collapseableness*/
 /*Firefox, Opera, Chrome and Safari display this fine, Internet Explorer 8 does not on XP SP2 but on Vista; test for unicode arrow display in browsers: http://www.alanwood.net/unicode/arrows.html*/
-h2:after, h3:after, h4:after, #meta .list-header:after {
-	content: " ⇩"; /*unicode arrow down*/
+/*http://unicode-search.net/unicode-namesearch.pl?term=triangle*/
+h2:before, h3:before, h4:before, #meta .list-header:before {
+	font-size: 80%;
+	content: "▼ "; /*unicode triangle arrow down*/
 }
-h2:hover:after, h3:hover:after, h4:hover:after, #meta .list-header:hover:after {
-	content: " ⇧"; /*unicode arrow up*/
+h2[data-hidecontent~="true"]:before, h3[data-hidecontent~="true"]:before, h4[data-hidecontent~="true"]:before, #meta .list-header[data-hidecontent~="true"]:before {
+	content: "▶ "; /*unicode triangle arrow right - up: ▲*/
 }
 h2, h3, h4, #meta .list-header {
 	cursor: pointer;
@@ -474,8 +472,13 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 	}
 	
 	/*don't display visual collapse clue*/
-	h2:after, h3:after, h4:after, #meta .list-header:after {
+	h2:before, h3:before, h4:before, #meta .list-header:before {
 		content: "";
+	}
+	
+	h4:before {
+		font-size: 100%;
+		content: "* ";
 	}
 	
 	*[data-no_print~="true"], #meta .meta-nonprint, #meta .controls, #footer {

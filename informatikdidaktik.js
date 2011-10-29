@@ -1,5 +1,5 @@
 /*
-Fabian Ehrentraud, 2011-10-27
+Fabian Ehrentraud, 2011-10-29
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -32,7 +32,7 @@ function onLoad() {
 	writeLastVisitDate();
 	saveCurrentDate();
 
-	hideshowLiNoprint('quelle','quellen');
+	hideshowLiNoprint(document.getElementById('quelle_header'),'quelle','quellen');
 }
 
 // initializes control elements
@@ -41,7 +41,7 @@ function init_controls() {
 	var nonprinters = document.querySelectorAll('*[data-name~="hider_nonprinter"]');
 	for(var i = nonprinters.length; i--; ) {
 		var handler = function(e){
-			hideshowLiNoprint(e.currentTarget.getAttribute("data-hideshows"), e.currentTarget.getAttribute("data-nonprints"));
+			hideshowLiNoprint(e.currentTarget, e.currentTarget.getAttribute("data-hideshows"), e.currentTarget.getAttribute("data-nonprints"));
 		};
 		nonprinters[i].addEventListener("click", handler, false);
 	}
@@ -49,7 +49,7 @@ function init_controls() {
 	var hiders = document.querySelectorAll('*[data-name~="hider"]');
 	for(var i = hiders.length; i--; ) {
 		var handler = function(e){
-			hideshowDiv(e.currentTarget.getAttribute("data-hideshows"))
+			hideshowDiv(e.currentTarget, e.currentTarget.getAttribute("data-hideshows"))
 		};
 		hiders[i].addEventListener("click", handler, false);
 	}
@@ -226,10 +226,16 @@ by assigning a custom attribute which is hidden by css
 inverts the current visibility
 element does not necessarily have to be a DIV
 */
-function hideshowDiv(id){
+function hideshowDiv(source,id){
 	if(document.getElementById(id).getAttribute("data-hide") == "true"){
+		if(source){
+			source.setAttribute("data-hidecontent","false");
+		}
 		document.getElementById(id).setAttribute("data-hide","false");
 	}else{
+		if(source){
+			source.setAttribute("data-hidecontent","true");
+		}
 		document.getElementById(id).setAttribute("data-hide","true");
 	}
 
@@ -243,13 +249,16 @@ inverts the current visibility
 also assigns an attribute to the second given ID
 which will then not be printed if the first element is hidden
 */
-function hideshowLiNoprint(name,idPrint){
+function hideshowLiNoprint(source,name,idPrint){
 	if(document.getElementById(idPrint).getAttribute("data-no_print") == "true"){
 		if(name){
 			var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
 			for (var i=0; i < elements.length; i++) {
 				elements[i].setAttribute("data-hide","false");
 			}
+		}
+		if(source){
+			source.setAttribute("data-hidecontent","false");
 		}
 		document.getElementById(idPrint).setAttribute("data-no_print","false");
 	}else{
@@ -259,6 +268,9 @@ function hideshowLiNoprint(name,idPrint){
 				elements[i].setAttribute("data-hide","true");
 			}
 		}
+		if(source){
+			source.setAttribute("data-hidecontent","true");
+		}
 		document.getElementById(idPrint).setAttribute("data-no_print","true");
 	}
 
@@ -266,28 +278,36 @@ function hideshowLiNoprint(name,idPrint){
 }
 
 /*
-hides all elements with the given NAME
+hides all elements associated with the given hider NAME
 by assigning a custom attribute which is hidden by css
 element does not necessarily have to be a DIV
 */
-function hideAllDiv(name){ /*name can be modul1, modul2 or fach*/
-	var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
+function hideAllDiv(hidername){ /*name can be modul1, modul2 or fach*/
+	var elements = document.querySelectorAll('*[data-hiderforname~="' + hidername + '"]');
 	for (var i=0; i < elements.length; i++) {
-		elements[i].setAttribute("data-hide","true");
+		elements[i].setAttribute("data-hidecontent","true");
+		var hideelement = document.getElementById(elements[i].getAttribute("data-hideshows"));
+		if(hideelement){
+			hideelement.setAttribute("data-hide","true");
+		}
 	}
 
 	redrawFix();
 }
 
 /*
-shows all elements with the given NAME
+shows all elements associated with the given hider NAME
 by assigning a custom attribute which is (not) hidden by css
 element does not necessarily have to be a DIV
 */
-function showAllDiv(name){
-	var elements = document.querySelectorAll('*[data-name~="' + name + '"]');
+function showAllDiv(hidername){
+	var elements = document.querySelectorAll('*[data-hiderforname~="' + hidername + '"]');
 	for (var i=0; i < elements.length; i++) {
-		elements[i].setAttribute("data-hide","false");
+		elements[i].setAttribute("data-hidecontent","false");
+		var hideelement = document.getElementById(elements[i].getAttribute("data-hideshows"));
+		if(hideelement){
+			hideelement.setAttribute("data-hide","false");
+		}
 	}
 
 	redrawFix();
