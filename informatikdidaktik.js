@@ -136,9 +136,9 @@ function init_controls() {
 			var hideheaders_check = document.querySelectorAll('*[name~="hideheadersCheck"]');
 			if(hideheaders_check.length == 0 || !hideheaders_check[0].checked){
 				hideAllDiv('modul1');
-				showAllDiv('modul2');
-				showAllDiv('wahlmodul');
-				showAllDiv('fach');
+				hideAllDiv('modul2');
+				hideAllDiv('wahlmodul');
+				hideAllDiv('fach');
 			}
 		};
 		modul1_button[i].addEventListener("click", handler, false);
@@ -152,7 +152,7 @@ function init_controls() {
 				showAllDiv('modul1');
 				hideAllDiv('modul2');
 				hideAllDiv('wahlmodul');
-				showAllDiv('fach');
+				hideAllDiv('fach');
 			}
 		};
 		modul2_button[i].addEventListener("click", handler, false);

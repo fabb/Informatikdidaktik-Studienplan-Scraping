@@ -365,6 +365,10 @@ TODO
 				<xsl:attribute name="id">
 					<xsl:value-of select="$modul1ID"/>
 				</xsl:attribute>
+				<xsl:apply-templates select="fach">
+					<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+					<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+				</xsl:apply-templates>
 				<xsl:apply-templates select="modul2">
 					<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
 					<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>

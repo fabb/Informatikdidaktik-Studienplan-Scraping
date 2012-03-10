@@ -105,9 +105,15 @@ Licensed under the Open Software License (OSL 3.0)
 				</rng:element>
 			</rng:optional>
 			
-			<rng:zeroOrMore>
-				<rng:ref name="modul2"/>
-			</rng:zeroOrMore>
+			<rng:choice>
+				<rng:zeroOrMore>
+					<rng:ref name="modul2"/>
+				</rng:zeroOrMore>
+
+				<rng:zeroOrMore>
+					<rng:ref name="fach"/>
+				</rng:zeroOrMore>
+			</rng:choice>
 
 		</rng:element>
 	</rng:define>
