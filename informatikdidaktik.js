@@ -1,5 +1,5 @@
 /*
-Fabian Ehrentraud, 2011-10-29
+Fabian Ehrentraud, 2012-03-10
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -137,6 +137,7 @@ function init_controls() {
 			if(hideheaders_check.length == 0 || !hideheaders_check[0].checked){
 				hideAllDiv('modul1');
 				hideAllDiv('modul2');
+				hideAllDiv('modul3');
 				hideAllDiv('wahlmodul');
 				hideAllDiv('fach');
 			}
@@ -151,11 +152,27 @@ function init_controls() {
 			if(hideheaders_check.length == 0 || !hideheaders_check[0].checked){
 				showAllDiv('modul1');
 				hideAllDiv('modul2');
+				hideAllDiv('modul3');
 				hideAllDiv('wahlmodul');
 				hideAllDiv('fach');
 			}
 		};
 		modul2_button[i].addEventListener("click", handler, false);
+	}
+	
+	var modul3_button = document.querySelectorAll('*[name~="modul3Button"]');
+	for(var i = modul3_button.length; i--; ) {
+		var handler = function(e){
+			var hideheaders_check = document.querySelectorAll('*[name~="hideheadersCheck"]');
+			if(hideheaders_check.length == 0 || !hideheaders_check[0].checked){
+				showAllDiv('modul1');
+				showAllDiv('modul2');
+				hideAllDiv('modul3');
+				hideAllDiv('wahlmodul');
+				hideAllDiv('fach');
+			}
+		};
+		modul3_button[i].addEventListener("click", handler, false);
 	}
 	
 	var fach_button = document.querySelectorAll('*[name~="fachButton"]');
@@ -165,6 +182,7 @@ function init_controls() {
 			if(hideheaders_check.length == 0 || !hideheaders_check[0].checked){
 				showAllDiv('modul1');
 				showAllDiv('modul2');
+				showAllDiv('modul3');
 				hideAllDiv('wahlmodul');
 				hideAllDiv('fach');
 			}
@@ -176,6 +194,7 @@ function init_controls() {
 	for(var i = all_button.length; i--; ) {
 		var handler = function(e){
 			showAllDiv('modul1');
+			showAllDiv('modul2');
 			showAllDiv('modul2');
 			showAllDiv('wahlmodul');
 			showAllDiv('fach');

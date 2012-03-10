@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Fabian Ehrentraud, 2011-10-24
+Fabian Ehrentraud, 2012-03-10
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -126,11 +126,44 @@ Licensed under the Open Software License (OSL 3.0)
 				<rng:data type="string"/>
 			</rng:element>
 			
+			<rng:optional>
+				<rng:element name="info">
+					<rng:data type="string"/>
+				</rng:element>
+			</rng:optional>
+			
 			<rng:zeroOrMore>
 				<rng:element name="semester_suggestion">
 					<rng:data type="integer"/>
 				</rng:element>
 			</rng:zeroOrMore>
+			
+			<rng:choice>
+				<rng:zeroOrMore>
+					<rng:ref name="modul3"/>
+				</rng:zeroOrMore>
+
+				<rng:zeroOrMore>
+					<rng:ref name="fach"/>
+				</rng:zeroOrMore>
+			</rng:choice>
+
+		</rng:element>
+	</rng:define>
+
+	
+	<rng:define name="modul3">
+		<rng:element name="modul3">
+		
+			<rng:element name="title">
+				<rng:data type="string"/>
+			</rng:element>
+			
+			<rng:optional>
+				<rng:element name="info">
+					<rng:data type="string"/>
+				</rng:element>
+			</rng:optional>
 			
 			<rng:zeroOrMore>
 				<rng:ref name="fach"/>
@@ -139,7 +172,7 @@ Licensed under the Open Software License (OSL 3.0)
 		</rng:element>
 	</rng:define>
 
-	
+
 	<rng:define name="fach">
 		<rng:element name="fach">
 		

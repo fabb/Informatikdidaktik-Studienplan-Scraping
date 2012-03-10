@@ -2,7 +2,7 @@
 
 /* informatikdidaktik.css */
 /*
-Fabian Ehrentraud, 2011-10-29
+Fabian Ehrentraud, 2012-03-10
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -67,6 +67,16 @@ h3 {
 }
 
 h4 {
+	color: white;
+	font-size: 1.15em;
+	background-color: #7F7;
+	margin: 0;
+	margin-top: 0.7em;
+	padding: 0.1em;
+	padding-left: 1.8em;
+}
+
+h5 {
 	color: #990;
 	font-size: 1.1em;
 	margin: 0.1em;
@@ -151,14 +161,14 @@ li {
 /*visual clue for collapseableness*/
 /*Firefox, Opera, Chrome and Safari display this fine, Internet Explorer 8 does not on XP SP2 but on Vista; test for unicode arrow display in browsers: http://www.alanwood.net/unicode/arrows.html*/
 /*http://unicode-search.net/unicode-namesearch.pl?term=triangle*/
-h2:before, h3:before, h4:before, #meta .list-header:before {
+h2:before, h3:before, h4:before, h5:before, #meta .list-header:before {
 	font-size: 80%;
 	content: "▼ "; /*unicode triangle arrow down*/
 }
-h2[data-hidecontent~="true"]:before, h3[data-hidecontent~="true"]:before, h4[data-hidecontent~="true"]:before, #meta .list-header[data-hidecontent~="true"]:before {
+h2[data-hidecontent~="true"]:before, h3[data-hidecontent~="true"]:before, h4[data-hidecontent~="true"]:before, h5[data-hidecontent~="true"]:before, #meta .list-header[data-hidecontent~="true"]:before {
 	content: "▶ "; /*unicode triangle arrow right - up: ▲*/
 }
-h2, h3, h4, #meta .list-header {
+h2, h3, h4, h5, #meta .list-header {
 	cursor: pointer;
 }
 
@@ -240,6 +250,12 @@ h2, h3, h4, #meta .list-header {
 	padding-left: 0.5em;
 }
 
+.modul3-body {
+	border-left: 0.4em solid #7F7;
+	border-top: 1px solid #7F7;
+	padding-left: 0.5em;
+}
+
 .semester_suggestions {
 	color: #DDD;
 	font-style: italic;
@@ -260,10 +276,10 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 	display: none !important;
 }
 
-#content[data-hideheaders~="true"] h2, #content[data-hideheaders~="true"] h3, #content[data-hideheaders~="true"] h4, #content[data-hideheaders~="true"] [data-nolvas~="true"], #content[data-hideheaders~="true"] [data-nolvas_static~="true"] {
+#content[data-hideheaders~="true"] h2, #content[data-hideheaders~="true"] h3, #content[data-hideheaders~="true"] h4, #content[data-hideheaders~="true"] h5, #content[data-hideheaders~="true"] [data-nolvas~="true"], #content[data-hideheaders~="true"] [data-nolvas_static~="true"] {
 	display: none !important;
 }
-#content[data-hideheaders~="true"] .modul1-body, #content[data-hideheaders~="true"] .modul2-body {
+#content[data-hideheaders~="true"] .modul1-body, #content[data-hideheaders~="true"] .modul2-body, #content[data-hideheaders~="true"] .modul3-body {
 	border: none;
 	padding-left: 0;
 }
@@ -417,7 +433,7 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 }
 
 @media print {
-	body, #meta, .info, h1, h2, h3, h4, .fach, .lvas, .currentlva, .highlightSem {
+	body, #meta, .info, h1, h2, h3, h4, h5, .fach, .lvas, .currentlva, .highlightSem {
 		background-color: white;
 	}
 
@@ -428,11 +444,11 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 		margin: 0;
 	}
 
-	.info, a, .lvas table td, .lvas table td a, h1, h2, h3, h4 {
+	.info, a, .lvas table td, .lvas table td a, h1, h2, h3, h4, h5 {
 		color: black;
 	}
 
-	h2, h3, h4, .lvas, .lvas table {
+	h2, h3, h4, h5, .lvas, .lvas table {
 		padding-left: 0em;
 		margin-left: 0em;
 	}
@@ -457,7 +473,7 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 		font-weight: bolder;
 	}
 	
-	.modul1-body, .modul2-body {
+	.modul1-body, .modul2-body, .modul3-body {
 		border: none;
 		padding-left: 0em;
 	}
@@ -472,11 +488,11 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 	}
 	
 	/*don't display visual collapse clue*/
-	h2:before, h3:before, h4:before, #meta .list-header:before {
+	h2:before, h3:before, h4:before, h5:before, #meta .list-header:before {
 		content: "";
 	}
 	
-	h4:before {
+	h5:before {
 		font-size: 100%;
 		content: "* ";
 	}
@@ -486,7 +502,7 @@ hidden is an html5 attribute that should not need css hiding, but it does not wo
 	}
 	
 	/*avoid unfortunately only supported by Opera and Internet Explorer 8, not by Firefox, Chrome or Safari*/
-	h2, h3, h4 {
+	h2, h3, h4, h5 {
 		/*page-break-before: avoid;*/
 		page-break-inside: avoid;
 		page-break-after: avoid;

@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2011-10-29
+Fabian Ehrentraud, 2012-03-10
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -272,6 +272,9 @@ TODO
 								<button name="modul2Button" type="button" value="">
 									<b>Zeige Module</b>
 								</button>
+								<button name="modul3Button" type="button" value="">
+									<b>Zeige Sub-Module</b>
+								</button>
 								<button name="fachButton" type="button" value="">
 									<b>Zeige Fächer</b>
 								</button>
@@ -448,6 +451,90 @@ TODO
 					<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
 					<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
 				</xsl:apply-templates>
+				<xsl:apply-templates select="modul3">
+					<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+					<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+				</xsl:apply-templates>
+
+			</div>
+		</div>
+	</xsl:template>
+	
+	
+	<xsl:template match="modul3" xmlns="http://www.w3.org/1999/xhtml">
+		<xsl:param name="highlightSemester"/>
+		<xsl:param name="yearBeforeHighlightSemester"/>
+		
+		<div data-name="wholemodul3">
+			<xsl:attribute name="data-nolvas_static">
+				<xsl:value-of select="count(.//lva)=0"/>
+			</xsl:attribute>
+			<xsl:choose>
+				<xsl:when test="@wahlmodulgruppe = true()">
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:attribute name="data-multipleuniversities_static">
+						<xsl:call-template name="multipleUniversities">
+							<xsl:with-param name="fachnodes" select="./fach"/>
+						</xsl:call-template>
+					</xsl:attribute>
+				</xsl:otherwise>
+			</xsl:choose>
+			<xsl:variable name="modul3ID">
+				<!-- remove ", ', spaces, comma, braces and + from variable name -->
+				<!--xsl:value-of select="translate(./title,concat($apos,'&quot; ,()+'),'_______')"/-->
+				<xsl:call-template name="removeSpecialChars">
+					<xsl:with-param name="inputstring" select="./title"/>
+				</xsl:call-template>
+			</xsl:variable>
+			<!-- warning: this way, no "and ' is allowed in the variable name -->
+			<h4 data-name="hider" data-hideshows="{$modul3ID}" data-hiderforname="modul3" tabindex="0">
+				<xsl:if test="ancestor::modul1[@wahlmodulgruppe = true()]">
+					<!-- overwrite data-hiderforname -->
+					<xsl:attribute name="data-hiderforname">
+						<xsl:text>wahlmodul</xsl:text>
+					</xsl:attribute>
+				</xsl:if>
+				<xsl:value-of select="title"/>
+				<xsl:if test="count(semester_suggestion) &gt; 0">
+					<span class="semester_suggestions">
+						<xsl:text> (</xsl:text>
+						<xsl:for-each select="semester_suggestion">
+							<xsl:sort select="." order="ascending"/>
+							<xsl:if test="not(position() = 1)">
+								<xsl:text> &amp; </xsl:text>
+							</xsl:if>
+							<xsl:value-of select="."/>
+							<xsl:text>.</xsl:text>
+						</xsl:for-each>
+						<xsl:text> Semester)</xsl:text>
+					</span>
+				</xsl:if>
+			</h4>
+			<div class="modul3-body" data-name="modul3">
+				<xsl:attribute name="id">
+					<xsl:value-of select="$modul3ID"/>
+				</xsl:attribute>
+				
+				<xsl:if test="ancestor::modul1[@wahlmodulgruppe = true()]">
+					<!-- overwrite data-name -->
+					<xsl:attribute name="data-name">
+						<xsl:text>wahlmodul</xsl:text>
+					</xsl:attribute>
+					
+					<xsl:if test="count(.//lva)=0">
+						<xsl:call-template name="empty_wahlmodul"/>
+					</xsl:if>
+				</xsl:if>
+				
+				<xsl:apply-templates select="fach">
+					<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+					<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+				</xsl:apply-templates>
+				<xsl:apply-templates select="modul3">
+					<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+					<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+				</xsl:apply-templates>
 
 			</div>
 		</div>
@@ -519,9 +606,9 @@ TODO
 				<xsl:value-of select="type"/>
 			</xsl:variable>
 			<!-- warning: this way, no " and ' is allowed in the variable name -->
-			<h4 data-name="hider" data-hideshows="{$fachID}" data-hiderforname="fach" tabindex="0">
+			<h5 data-name="hider" data-hideshows="{$fachID}" data-hiderforname="fach" tabindex="0">
 				<xsl:value-of select="title"/>, <xsl:value-of select="type"/>
-			</h4>
+			</h5>
 			<div class="lvas" data-name="fach">
 				<xsl:attribute name="id">
 					<xsl:value-of select="$fachID"/>
