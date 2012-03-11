@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2012-03-10
+Fabian Ehrentraud, 2012-03-11
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -442,7 +442,7 @@ TODO
 						<xsl:text>wahlmodul</xsl:text>
 					</xsl:attribute>
 					
-					<xsl:if test="count(.//lva)=0">
+					<xsl:if test="count(.//lva)=0 and count(.//modul3)=0">
 						<xsl:call-template name="empty_wahlmodul"/>
 					</xsl:if>
 				</xsl:if>
