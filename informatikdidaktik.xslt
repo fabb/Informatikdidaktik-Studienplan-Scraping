@@ -442,7 +442,7 @@ TODO
 						<xsl:text>wahlmodul</xsl:text>
 					</xsl:attribute>
 					
-					<xsl:if test="count(.//lva)=0 and count(.//modul3)=0">
+					<xsl:if test="count(.//fach)=0 and count(.//modul3)=0">
 						<xsl:call-template name="empty_wahlmodul"/>
 					</xsl:if>
 				</xsl:if>
@@ -522,7 +522,7 @@ TODO
 						<xsl:text>wahlmodul</xsl:text>
 					</xsl:attribute>
 					
-					<xsl:if test="count(.//lva)=0">
+					<xsl:if test="count(.//fach)=0">
 						<xsl:call-template name="empty_wahlmodul"/>
 					</xsl:if>
 				</xsl:if>
@@ -579,10 +579,30 @@ TODO
 			</div>
 			
 		</xsl:if>
+		
+		<!-- append fachs without lvas -->
+		<xsl:if test="count(.//lva) = 0">
+			<xsl:call-template name="onefach">
+				<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+				<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+			</xsl:call-template>
+		</xsl:if>
+		
 	</xsl:template>
 
 	
 	<xsl:template match="fach[ancestor::modul1[@wahlmodulgruppe = false()]]" xmlns="http://www.w3.org/1999/xhtml">
+		<xsl:param name="highlightSemester"/>
+		<xsl:param name="yearBeforeHighlightSemester"/>
+		
+		<xsl:call-template name="onefach">
+			<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+			<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+		</xsl:call-template>
+	</xsl:template>
+	
+	
+	<xsl:template name="onefach" xmlns="http://www.w3.org/1999/xhtml">
 		<xsl:param name="highlightSemester"/>
 		<xsl:param name="yearBeforeHighlightSemester"/>
 		
