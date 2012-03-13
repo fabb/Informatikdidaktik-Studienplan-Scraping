@@ -59,6 +59,80 @@ legacyFile = "http://www.unet.univie.ac.at/~a0725639/informatikdidaktik/informat
 newstuff = False
 
 
+""" Classes """
+
+class LVA:
+	stpl = None
+	stpl_version = None
+	stpl_url = None
+	modul1 = None
+	modul1_iswahlmodulgruppe = None
+	modul2 = None
+	modul3 = None
+	fach = None
+	fach_type = None
+	fach_sws = None
+	fach_ects = None
+	title = None
+	type = None
+	sws = None
+	ects = None
+	university = None
+	key = None
+	semester = None
+	url = None
+	professor = None
+	info = None
+	canceled = None # actually not stored, included in info
+	
+	def __str__(self):
+		return """LVA:
+	stpl:%s
+	stpl_version:%s
+	stpl_url:%s
+	modul1:%s
+	modul1_iswahlmodulgruppe:%s
+	modul2:%s
+	modul3:%s
+	fach:%s
+	fach_type:%s
+	fach_sws:%s
+	fach_ects:%s
+	title:%s
+	type:%s
+	sws:%s
+	ects:%s
+	university:%s
+	key:%s
+	semester:%s
+	url:%s
+	professor: %s
+	info:%s
+	canceled:%s"""%(\
+	self.stpl,\
+	self.stpl_version,\
+	self.stpl_url,\
+	self.modul1,\
+	self.modul1_iswahlmodulgruppe,\
+	self.modul2,\
+	self.modul3,\
+	self.fach,\
+	self.fach_type,\
+	self.fach_sws,\
+	self.fach_ects,\
+	self.title,\
+	self.type,\
+	self.sws,\
+	self.ects,\
+	self.university,\
+	self.key,\
+	self.semester,\
+	self.url,\
+	self.professor,\
+	self.info,\
+	self.canceled)
+
+
 """ logging """
 
 logger = logging.getLogger('informatikdidaktik')
@@ -100,18 +174,18 @@ def makeRoot(rootname=xmlRootname, schema=rng, comment=xmlcomment, xsltstyleshee
 
 	return root
 
-def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexistentNodes=False):
+def getStpl(xml_root, lva, createNonexistentNodes=False):
 	#gets the given stpl in the xml or creates it
 
 	#stpl_s = xml_root.xpath('stpl')
 	stpl_s = xml_root.findall("stpl")
 	for s in stpl_s:
 		#print(etree.tostring(s))
-		stplB = fuzzyEq(lva_stpl, s.find("title").text)
-		stpl_versionB = fuzzyEq(lva_stpl_version, s.find("version").text)
+		stplB = fuzzyEq(lva.stpl, s.find("title").text)
+		stpl_versionB = fuzzyEq(lva.stpl_version, s.find("version").text)
 
 		if(stplB and stpl_versionB):
-			if lva_stpl_url: #does not let through ""
+			if lva.stpl_url: #does not let through ""
 				#insert url after version (or title if it does not exist)
 				if s.find("url") is not None:
 					stpl_url_ = s.find("url")
@@ -119,7 +193,7 @@ def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexist
 					previous = s.find("version") if s.find("version") is not None else s.find("title")
 					stpl_url_ = etree.Element("url")
 					previous.addnext(stpl_url_)
-				stpl_url_.text = lva_stpl_url.strip()
+				stpl_url_.text = lva.stpl_url.strip()
 				
 				didChange()
 				
@@ -128,30 +202,30 @@ def getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexist
 	if createNonexistentNodes:
 		stpl = etree.SubElement(xml_root, "stpl")
 		stpl_title_ = etree.SubElement(stpl, "title")
-		stpl_title_.text = (lva_stpl or "").strip()
+		stpl_title_.text = (lva.stpl or "").strip()
 		stpl_version_ = etree.SubElement(stpl, "version")
-		stpl_version_.text = (lva_stpl_version or "").strip()
+		stpl_version_.text = (lva.stpl_version or "").strip()
 		stpl_url_ = etree.SubElement(stpl, "url")
-		stpl_url_.text = (lva_stpl_url or "").strip()
+		stpl_url_.text = (lva.stpl_url or "").strip()
 		
 		didChange()
 
 		return stpl
 	else:
-		raise Exception("STPL %s %s not found"%(lva_stpl,lva_stpl_version))
+		raise Exception("STPL %s %s not found"%(lva.stpl,lva.stpl_version))
 
-def getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes=False, iswahlmodulgruppe = False):
+def getModul1(xml_root, lva, createNonexistentNodes=False):
 	#gets the given modul1 in the xml or creates it
-	stpl = getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexistentNodes=createNonexistentNodes)
+	stpl = getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
 
 	#modul1_s = stpl.xpath('modul1')
 	modul1_s = stpl.findall("modul1")
 	for m in modul1_s:
 		#print(etree.tostring(m))
-		modul1B = fuzzyEq(lva_modul1, m.find("title").text)
+		modul1B = fuzzyEq(lva.modul1, m.find("title").text)
 
 		if(modul1B):
-			if iswahlmodulgruppe: #for inserting afterwards
+			if lva.modul1_iswahlmodulgruppe: #for inserting afterwards
 				m.set("wahlmodulgruppe", "true")
 				
 				didChange()
@@ -160,27 +234,27 @@ def getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentN
 			
 	if createNonexistentNodes:
 		modul1 = etree.SubElement(stpl, "modul1")
-		if iswahlmodulgruppe:
+		if lva.modul1_iswahlmodulgruppe:
 			modul1.set("wahlmodulgruppe", "true")
 		modul1_title_ = etree.SubElement(modul1, "title")
-		modul1_title_.text = (lva_modul1 or "").strip()
+		modul1_title_.text = (lva.modul1 or "").strip()
 		
 		didChange()
 	
 		return modul1
 	else:
-		#print("Modul1%s not found"%(lva_modul1))
-		raise Exception("Modul1 %s not found"%(lva_modul1))
+		#print("Modul1%s not found"%(lva.modul1))
+		raise Exception("Modul1 %s not found"%(lva.modul1))
 
-def getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes=False):
+def getModul2(xml_root, lva, createNonexistentNodes=False):
 	#gets the given modul2 in the xml or creates it
-	modul1 = getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes)
+	modul1 = getModul1(xml_root, lva, createNonexistentNodes)
 
 	#modul2_s = modul1.xpath('modul2')
 	modul2_s = modul1.findall("modul2")
 	for m in modul2_s:
 		#print(etree.tostring(m))
-		modul2B = fuzzyEq(lva_modul2, m.find("title").text)
+		modul2B = fuzzyEq(lva.modul2, m.find("title").text)
 
 		if(modul2B):
 			return m #return first matching
@@ -188,23 +262,23 @@ def getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createN
 	if createNonexistentNodes:
 		modul2 = etree.SubElement(modul1, "modul2")
 		modul2_title_ = etree.SubElement(modul2, "title")
-		modul2_title_.text = (lva_modul2 or "").strip()
+		modul2_title_.text = (lva.modul2 or "").strip()
 		
 		didChange()
 	
 		return modul2
 	else:
-		raise Exception("Modul2 %s not found"%(lva_modul2))
+		raise Exception("Modul2 %s not found"%(lva.modul2))
 
-def getModul3(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3, createNonexistentNodes=False):
+def getModul3(xml_root, lva, createNonexistentNodes=False):
 	#gets the given modul2 in the xml or creates it
-	modul2 = getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes)
+	modul2 = getModul2(xml_root, lva, createNonexistentNodes)
 
 	#modul3_s = modul2.xpath('modul3')
 	modul3_s = modul2.findall("modul3")
 	for m in modul3_s:
 		#print(etree.tostring(m))
-		modul3B = fuzzyEq(lva_modul3, m.find("title").text)
+		modul3B = fuzzyEq(lva.modul3, m.find("title").text)
 
 		if(modul3B):
 			return m #return first matching
@@ -212,45 +286,45 @@ def getModul3(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modu
 	if createNonexistentNodes:
 		modul3 = etree.SubElement(modul2, "modul3")
 		modul3_title_ = etree.SubElement(modul3, "title")
-		modul3_title_.text = (lva_modul3 or "").strip()
+		modul3_title_.text = (lva.modul3 or "").strip()
 		
 		didChange()
 	
 		return modul3
 	else:
-		raise Exception("Modul3 %s not found"%(lva_modul3))
+		raise Exception("Modul3 %s not found"%(lva.modul3))
 
-def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=False):
-	if lva_modul3:
-		modul = getModul3(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3, createNonexistentNodes)
-	elif lva_modul2:
-		modul = getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes)
-	elif lva_modul1:
-		modul = getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes)
+def getFach(xml_root, lva, createNonexistentNodes=False):
+	if lva.modul3:
+		modul = getModul3(xml_root, lva, createNonexistentNodes)
+	elif lva.modul2:
+		modul = getModul2(xml_root, lva, createNonexistentNodes)
+	elif lva.modul1:
+		modul = getModul1(xml_root, lva, createNonexistentNodes)
 	else:
-		raise Exception("No Modul for Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
+		raise Exception("No Modul for Fach %s %s (%s %s) not found"%(lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects))
 
 	#fach_s = modul.xpath('fach')
 	fach_s = modul.findall("fach")
 	for f in fach_s:
 		#print(etree.tostring(f))
-		fachB = fuzzyEq(lva_fach, f.find("title").text, substringmatch=False)
-		fach_typeB = fuzzyEq(lva_fach_type, f.find("type").text)
-		fach_swsB = fuzzyEq(lva_fach_sws, f.find("sws").text)
-		#fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
+		fachB = fuzzyEq(lva.fach, f.find("title").text, substringmatch=False)
+		fach_typeB = fuzzyEq(lva.fach_type, f.find("type").text)
+		fach_swsB = fuzzyEq(lva.fach_sws, f.find("sws").text)
+		#fach_ectsB = fuzzyEq(lva.fach_ects, f.find("ects").text)
 
 		if(fachB and fach_typeB and fach_swsB): #ignore ects
 		
 			#update type, ects and sws - they must already exist
 			fach_type_ = f.find("type")
 			old_fach_type = fach_type_.text
-			fach_type_.text = (lva_fach_type or "").strip()
+			fach_type_.text = (lva.fach_type or "").strip()
 			if fach_type_.text is None or fach_type_.text == "":
 				fach_type_.text = old_fach_type #don't delete already existing content
 			
 			fach_sws_ = f.find("sws")
 			old_fach_sws = fach_sws_.text
-			fach_sws_.text = (lva_fach_sws or "").strip().replace(",",".")
+			fach_sws_.text = (lva.fach_sws or "").strip().replace(",",".")
 			if len(fach_sws_.text) == 1:
 				fach_sws_.text += ".0"
 			if fach_sws_.text is None or fach_sws_.text == "":
@@ -258,7 +332,7 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3
 			
 			fach_ects_ = f.find("ects")
 			old_fach_ects = fach_ects_.text
-			fach_ects_.text = (lva_fach_ects or "").strip().replace(",",".")
+			fach_ects_.text = (lva.fach_ects or "").strip().replace(",",".")
 			if len(fach_ects_.text) == 1:
 				fach_ects_.text += ".0"
 			if fach_ects_.text is None or fach_ects_.text == "":
@@ -274,15 +348,15 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3
 	if createNonexistentNodes:
 		fach = etree.SubElement(modul, "fach")
 		fach_title_ = etree.SubElement(fach, "title")
-		fach_title_.text = (lva_fach or "").strip()
+		fach_title_.text = (lva.fach or "").strip()
 		fach_type_ = etree.SubElement(fach, "type")
-		fach_type_.text = (lva_fach_type or "").strip()
+		fach_type_.text = (lva.fach_type or "").strip()
 		fach_sws_ = etree.SubElement(fach, "sws")
-		fach_sws_.text = (lva_fach_sws or "").strip().replace(",",".")
+		fach_sws_.text = (lva.fach_sws or "").strip().replace(",",".")
 		if len(fach_sws_.text) == 1:
 			fach_sws_.text += ".0"
 		fach_ects_ = etree.SubElement(fach, "ects")
-		fach_ects_.text = (lva_fach_ects or "").strip().replace(",",".")
+		fach_ects_.text = (lva.fach_ects or "").strip().replace(",",".")
 		if len(fach_ects_.text) == 1:
 			fach_ects_.text += ".0"
 
@@ -292,25 +366,25 @@ def getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3
 
 		return fach
 	else:
-		raise Exception("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
+		raise Exception("Fach %s %s (%s %s) not found"%(lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects))
 
 
-def getMatchingFach(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects):
+def getMatchingFach(xml_root, lva):
 	#searches a matching fach anywhere in the given xml
-	#for legacy files, no need to provide lva_stpl,lva_stpl_version,lva_modul1,lva_modul2
+	#for legacy files, no need to provide lva.stpl,lva.stpl_version,lva.modul1,lva.modul2
 	
 	fach_s = xml_root.xpath('//fach')
 	for f in fach_s:
 		#print(etree.tostring(f))
-		fachB = fuzzyEq(lva_fach, f.find("title").text, substringmatch=False)
-		fach_typeB = fuzzyEq(lva_fach_type, f.find("type").text, threshold=1.0)
-		fach_swsB = fuzzyEq(lva_fach_sws, f.find("sws").text)
-		#fach_ectsB = fuzzyEq(lva_fach_ects, f.find("ects").text)
+		fachB = fuzzyEq(lva.fach, f.find("title").text, substringmatch=False)
+		fach_typeB = fuzzyEq(lva.fach_type, f.find("type").text, threshold=1.0)
+		fach_swsB = fuzzyEq(lva.fach_sws, f.find("sws").text)
+		#fach_ectsB = fuzzyEq(lva.fach_ects, f.find("ects").text)
 
 		if(fachB and fach_typeB and fach_swsB): #ignore ects
 			return f #return first matching
 
-	raise Exception("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
+	raise Exception("Fach %s %s (%s %s) not found"%(lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects))
 
 def createWahlFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects):
 	xpath = "stpl"
@@ -402,77 +476,77 @@ def createMediaLegacyModul(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_mo
 
 	raise Exception("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
 
-def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, lva_professor=None, createNonexistentNodes=False, searchMatchingFach=False):
+def addLva(xml_root, lva, createNonexistentNodes=False, searchMatchingFach=False):
 	""" adds an lva to the given xml """
 	
 	if searchMatchingFach:
-		fach = getMatchingFach(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		fach = getMatchingFach(xml_root, lva) # TODO clear unneeded info for safety
 	else:
-		fach = getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
+		fach = getFach(xml_root, lva, createNonexistentNodes) # TODO clear unneeded info for safety
 	
-	#for non-given lva_ects, search from fach
-	lva_ects = lva_ects or fach.find("ects").text
+	#for non-given lva.ects, search from fach
+	lva.ects = lva.ects or fach.find("ects").text
 
 	found_lva = None
 	#lva_s = fach.xpath('lva')
 	lva_s = fach.findall("lva")
 	for l in lva_s:
 		#print(etree.tostring(f))
-		universityB = fuzzyEq(lva_university, l.find("university").text)
-		semesterB = fuzzyEq(lva_semester, l.find("semester").text)
-		titleB = fuzzyEq(lva_title, l.find("title").text, substringmatch=False)
-		keyB = fuzzyEq(lva_key, l.find("key").text)
-		typeB = fuzzyEq(lva_type, l.find("type").text, threshold=1.0)
-		#swsB = fuzzyEq(lva_sws, l.find("sws").text, threshold=0.0)
-		#ectsB = fuzzyEq(lva_ects, l.find("ects").text, threshold=0.0)
-		#infoB = fuzzyEq(lva_info, l.find("info").text, threshold=0.0)
-		#urlB = fuzzyEq(lva_url, l.find("url").text, threshold=0.0)
-		#professorB = fuzzyEq(lva_professor, l.find("professor").text, threshold=0.0)
+		universityB = fuzzyEq(lva.university, l.find("university").text)
+		semesterB = fuzzyEq(lva.semester, l.find("semester").text)
+		titleB = fuzzyEq(lva.title, l.find("title").text, substringmatch=False)
+		keyB = fuzzyEq(lva.key, l.find("key").text)
+		typeB = fuzzyEq(lva.type, l.find("type").text, threshold=1.0)
+		#swsB = fuzzyEq(lva.sws, l.find("sws").text, threshold=0.0)
+		#ectsB = fuzzyEq(lva.ects, l.find("ects").text, threshold=0.0)
+		#infoB = fuzzyEq(lva.info, l.find("info").text, threshold=0.0)
+		#urlB = fuzzyEq(lva.url, l.find("url").text, threshold=0.0)
+		#professorB = fuzzyEq(lva.professor, l.find("professor").text, threshold=0.0)
 		if(universityB and semesterB and titleB and keyB and typeB): # ignore sws, ects, info, url and prof
 			found_lva = l
 			break #return first matching
 			#return l
 
-	#lva = found_lva or etree.SubElement(fach, "lva") #or: update existing lva #__nonzero__ will be changed in ElementTree
-	lva = found_lva if found_lva is not None else etree.SubElement(fach, "lva") #or: update existing lva #__nonzero__ will be changed in ElementTree
-	#lva_university_ = lva.find("university") or etree.SubElement(lva, "university") #or: update existing subelement #__nonzero__ will be changed in ElementTree
-	lva_university_ = lva.find("university") if lva.find("university") is not None else etree.SubElement(lva, "university")
-	lva_university_.text = (lva_university or "").strip()
-	lva_semester_ = lva.find("semester") if lva.find("semester") is not None else etree.SubElement(lva, "semester")
-	lva_semester_.text = (lva_semester or "").strip()
-	lva_title_ = lva.find("title") if lva.find("title") is not None else etree.SubElement(lva, "title")
-	lva_title_.text = (lva_title or "").strip()
-	lva_key_ = lva.find("key") if lva.find("key") is not None else etree.SubElement(lva, "key")
-	lva_key_.text = (lva_key or "").strip()
-	lva_type_ = lva.find("type") if lva.find("type") is not None else etree.SubElement(lva, "type")
-	lva_type_.text = (lva_type or "").strip()
-	lva_sws_ = lva.find("sws") if lva.find("sws") is not None else etree.SubElement(lva, "sws")
+	#lva_e = found_lva or etree.SubElement(fach, "lva") #or: update existing lva #__nonzero__ will be changed in ElementTree
+	lva_e = found_lva if found_lva is not None else etree.SubElement(fach, "lva") #or: update existing lva #__nonzero__ will be changed in ElementTree
+	#lva_university_ = lva_e.find("university") or etree.SubElement(lva_e, "university") #or: update existing subelement #__nonzero__ will be changed in ElementTree
+	lva_university_ = lva_e.find("university") if lva_e.find("university") is not None else etree.SubElement(lva_e, "university")
+	lva_university_.text = (lva.university or "").strip()
+	lva_semester_ = lva_e.find("semester") if lva_e.find("semester") is not None else etree.SubElement(lva_e, "semester")
+	lva_semester_.text = (lva.semester or "").strip()
+	lva_title_ = lva_e.find("title") if lva_e.find("title") is not None else etree.SubElement(lva_e, "title")
+	lva_title_.text = (lva.title or "").strip()
+	lva_key_ = lva_e.find("key") if lva_e.find("key") is not None else etree.SubElement(lva_e, "key")
+	lva_key_.text = (lva.key or "").strip()
+	lva_type_ = lva_e.find("type") if lva_e.find("type") is not None else etree.SubElement(lva_e, "type")
+	lva_type_.text = (lva.type or "").strip()
+	lva_sws_ = lva_e.find("sws") if lva_e.find("sws") is not None else etree.SubElement(lva_e, "sws")
 	old_lva_sws = lva_sws_.text
-	lva_sws_.text = (lva_sws or "").strip().replace(",",".")
+	lva_sws_.text = (lva.sws or "").strip().replace(",",".")
 	if len(lva_sws_.text) == 1:
 		lva_sws_.text += ".0"
-	lva_ects_ = lva.find("ects") if lva.find("ects") is not None else etree.SubElement(lva, "ects")
+	lva_ects_ = lva_e.find("ects") if lva_e.find("ects") is not None else etree.SubElement(lva_e, "ects")
 	old_lva_ects = lva_ects_.text
-	lva_ects_.text = (lva_ects or "").strip().replace(",",".")
+	lva_ects_.text = (lva.ects or "").strip().replace(",",".")
 	if len(lva_ects_.text) == 1:
 		lva_ects_.text += ".0"
-	lva_info_ = lva.find("info") if lva.find("info") is not None else etree.SubElement(lva, "info")
+	lva_info_ = lva_e.find("info") if lva_e.find("info") is not None else etree.SubElement(lva_e, "info")
 	if "manuell" in (lva_info_.text or ""):
 		logger.info("Manually registered LVA overwritten")
 		found_lva = None #to print out LVA details in the end of the function and update the query date
-	if (lva_info_.text or "") != "" and (lva_info or "").strip() != "":
+	if (lva_info_.text or "") != "" and (lva.info or "").strip() != "":
 		logger.info(u"Existing Info will be lost for Fach %s %s: %s", lva_title_.text, lva_type_.text, lva_info_.text)
-		lva_info_.text = (lva_info or "").strip()
+		lva_info_.text = (lva.info or "").strip()
 		logger.info(u"New Info: %s", lva_info_.text)
 		didChange()
-	lva_url_ = lva.find("url") if lva.find("url") is not None else etree.SubElement(lva, "url")
-	lva_url_.text = (lva_url or "").strip()
-	lva_professor_ = lva.find("professor") if lva.find("professor") is not None else etree.SubElement(lva, "professor")
-	lva_professor_.text = (lva_professor or "").strip()
+	lva_url_ = lva_e.find("url") if lva_e.find("url") is not None else etree.SubElement(lva_e, "url")
+	lva_url_.text = (lva.url or "").strip()
+	lva_professor_ = lva_e.find("professor") if lva_e.find("professor") is not None else etree.SubElement(lva_e, "professor")
+	lva_professor_.text = (lva.professor or "").strip()
 	
 	#TODO this does not update the query date if some fields of an existing lva are updated. but would that be wanted?
-	if found_lva is None or lva.find("query_date") is None:
-		lva_query_date_ = lva.find("query_date") if lva.find("query_date") is not None else etree.SubElement(lva, "query_date")
+	if found_lva is None or lva_e.find("query_date") is None:
+		lva_query_date_ = lva_e.find("query_date") if lva_e.find("query_date") is not None else etree.SubElement(lva_e, "query_date")
 		lva_query_date_.text = datetime.datetime.now().isoformat()
 	
 	if found_lva is None:
@@ -486,7 +560,7 @@ def addLva(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,
 		raise Exception("Existing LVA: %s"%(lva_university_.text + " " + lva_semester_.text + " " + lva_title_.text + " " + lva_key_.text + " " + lva_type_.text + " " + lva_sws_.text + " " + lva_ects_.text + " " + lva_info_.text + " " + lva_professor_.text))
 	"""
 
-	return lva
+	return lva_e
 
 def addSource(xml_root, url, query_date, referring_url=None):
 	#adds an url source entry in the given xml
@@ -790,7 +864,9 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 
 	#print(etree.tostring(doc))
 	
-	lva_university = universityName
+	lva = LVA()
+	
+	lva.university = universityName
 	
 	founds = doc.xpath('//h3[contains(@class,"chapter")] | //div[contains(@class,"vlvz_langtitel")]')
 
@@ -801,128 +877,125 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 
 	#print(founds)
 	
-	lva_semester = semester[0] + semester[1]
-	#print(lva_sem)
+	lva.semester = semester[0] + semester[1]
+	#print(lva.semester)
 	
 	for f in founds:
 		#print(etree.tostring(f))
 		if "chapter2" in f.attrib.get("class"): #studium
-			lva_stpl = f.text.strip().partition(' ')[2].strip().partition(' ')[2]
-			lva_stpl_version = "2009U.0" #TODO
-			lva_modul1, lva_modul2, lva_anchor, lva_modul2_2 = None, None, None, None
-			getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url="", createNonexistentNodes=createNonexistentNodes)
-			#print("2: " + lva_stpl + " " + lva_stpl_version + "<")
+			lva.stpl = f.text.strip().partition(' ')[2].strip().partition(' ')[2]
+			lva.stpl_version = "2009U.0" #TODO
+			lva.modul1, lva.modul2, lva_anchor = None, None, None
+			getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
+			#print("2: " + lva.stpl + " " + lva.stpl_version + "<")
 		elif "chapter3" in f.attrib.get("class"): #modul1
 			#.strip().partition(' ')[2]
-			lva_modul1 = f.text.strip().partition(' ')[2].strip().partition('(')[0]
-			lva_modul2, lva_anchor, lva_modul2_2 = None, None, None
+			lva.modul1 = f.text.strip().partition(' ')[2].strip().partition('(')[0]
+			lva.modul2, lva_anchor = None, None
 			"""
 			#remove unnecessary words
-			if "Pflichtmodulgruppe" in lva_modul1:
-				lva_modul1 = lva_modul1.partition("Pflichtmodulgruppe")[2]
-			elif "Modulgruppe" in lva_modul1:
-				lva_modul1 = lva_modul1.partition("Modulgruppe")[2]
+			if "Pflichtmodulgruppe" in lva.modul1:
+				lva.modul1 = lva.modul1.partition("Pflichtmodulgruppe")[2]
+			elif "Modulgruppe" in lva.modul1:
+				lva.modul1 = lva.modul1.partition("Modulgruppe")[2]
 			"""
 			#Vertiefung Informatik, Wahlmodule (2 sind zu wählen)
-			if "Vertiefung Informatik" not in lva_modul1: #TODO
-				getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes)
-			if u"Freifächer" in lva_modul1: #TODO restructure xml to allow lvas directly under modulgruppe
-				lva_modul2 = u"Freifächer"
-				getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, True) #TODO
-			#print("3: " + lva_modul1 + "<")
+			if "Vertiefung Informatik" not in lva.modul1: #TODO
+				getModul1(xml_root, lva, createNonexistentNodes)
+			if u"Freifächer" in lva.modul1: #TODO restructure to allow lvas directly under modul1
+				lva.modul2 = u"Freifächer"
+				getModul2(xml_root, lva, True) #TODO
+			#print("3: " + lva.modul1 + "<")
 		elif "chapter4" in f.attrib.get("class"): #modul2
-			lva_modul2 = f.text.strip().partition(' ')[2]
-			if "ECTS" in lva_modul2:
-				if "(" in lva_modul2:
-					lva_modul2 = lva_modul2.strip().partition('(')[0]
+			lva.modul2 = f.text.strip().partition(' ')[2]
+			if "ECTS" in lva.modul2:
+				if "(" in lva.modul2:
+					lva.modul2 = lva.modul2.strip().partition('(')[0]
 				else:
-					lva_modul2 = lva_modul2.strip().rpartition(',')[0]
-			lva_modul2_2 = None
+					lva.modul2 = lva.modul2.strip().rpartition(',')[0]
 			#remove unnecessary words
-			if "Modul" in lva_modul1:
-				lva_modul1 = lva_modul1.partition("Modul")[2]
-			lva_url = f.base + "#" + f.attrib.get("id")
+			if "Modul" in lva.modul1:
+				lva.modul1 = lva.modul1.partition("Modul")[2]
+			lva.url = f.base + "#" + f.attrib.get("id")
 			#print(lva_anchor)
 			#http://online.univie.ac.at/vlvz?kapitel=510&semester=S2011#510_3
 			#<h3 class="chapter4" id="510_3">Modul...
-			iswahlmodulgruppe = False
-			if "Pflichtmodul" not in lva_modul2 and "Wahlmodul" not in lva_modul2:
-				getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes) #TODO
-			elif "Vertiefung Informatik" in lva_modul1:
-				if "Pflichtmodul" in lva_modul2:
-					lva_modul1 = u"Modulgruppe Vertiefung Informatik, Pflichtmodul"
-				if "Wahlmodul" in lva_modul2:
-					lva_modul1 = u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)"
-					iswahlmodulgruppe = True
-				getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes, iswahlmodulgruppe)
-			#print("4: " + lva_modul2 + "<")
+			lva.modul1_iswahlmodulgruppe = False
+			if "Pflichtmodul" not in lva.modul2 and "Wahlmodul" not in lva.modul2:
+				getModul2(xml_root, lva, createNonexistentNodes) #TODO
+			elif "Vertiefung Informatik" in lva.modul1:
+				if "Pflichtmodul" in lva.modul2:
+					lva.modul1 = u"Modulgruppe Vertiefung Informatik, Pflichtmodul"
+				if "Wahlmodul" in lva.modul2:
+					lva.modul1 = u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)"
+					lva.modul1_iswahlmodulgruppe = True
+				getModul1(xml_root, lva, createNonexistentNodes)
+			#print("4: " + lva.modul2 + "<")
 		elif "chapter5" in f.attrib.get("class"): #modul bei vertiefungs-modulgruppe
-			#lva_modul2_2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0].strip()
-			lva_modul2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0]
+			lva.modul2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0]
 			
-			if u"ICT-Infrastruktur für Bildungsaufgaben" in lva_modul2:
-				lva_modul2 = None
+			if u"ICT-Infrastruktur für Bildungsaufgaben" in lva.modul2:
+				lva.modul2 = None
 			else:
-				#getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2_2, createNonexistentNodes) #TODO
-				getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes) #TODO
-			#print("5: " + lva_modul2_2 + "<")
+				getModul2(xml_root, lva, createNonexistentNodes) #TODO
+			#print("5: " + lva.modul2 + "<")
 		elif "vlvz_langtitel" in f.attrib.get("class"):
-			lva_key = f.text
-			#print(lva_num)
+			lva.key = f.text
+			#print(lva.key)
 			
-			lva_type = f.xpath('abbr')[0].text
-			#print(lva_type)
+			lva.type = f.xpath('abbr')[0].text
+			#print(lva.type)
 			
-			lva_title = f.xpath('span')[0].text
+			lva.title = f.xpath('span')[0].text
 			
 			#clean title from stuff like "PI.WI1.GK.VU"
-			if "." in lva_title.strip().partition(" ")[0]:
-				lva_title = lva_title.strip().partition(" ")[2]
+			if "." in lva.title.strip().partition(" ")[0]:
+				lva.title = lva.title.strip().partition(" ")[2]
 			#and "PAED - "
-			if "PAED -" in lva_title:
-				lva_title = lva_title.partition("PAED -")[2]
-			if "AMT" in lva_title:
-				lva_title = lva_title.partition("AMT")[2]
+			if "PAED -" in lva.title:
+				lva.title = lva.title.partition("PAED -")[2]
+			if "AMT" in lva.title:
+				lva.title = lva.title.partition("AMT")[2]
 			
-			lva_sws = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].text
-			#print(lva_sws)
+			lva.sws = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].text
+			#print(lva.sws)
 
-			lva_ects = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].getchildren()[0].tail.strip().partition(' ')[2]
-			#print(lva_ects)
+			lva.ects = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].getchildren()[0].tail.strip().partition(' ')[2]
+			#print(lva.ects)
 
 			lva_professors = map(lambda e: e.text, f.xpath('../div[contains(@class,"vlvz_vortragende")]/a'))
-			lva_professor = ', '.join([x.strip() for x in lva_professors])
-			#print(lva_professor)
+			lva.professor = ', '.join([x.strip() for x in lva_professors])
+			#print(lva.professor)
 
-			lva_info = "" #FIXME
+			lva.info = "" #FIXME
 			
-			#print(lva_title)
-			lva_fach = lva_title #TODO
-			lva_fach_type = lva_type #TODO
-			lva_fach_sws = lva_sws #TODO
-			lva_fach_ects = lva_ects #TODO
+			#print(lva.title)
+			lva.fach = lva.title #TODO
+			lva.fach_type = lva.type #TODO
+			lva.fach_sws = lva.sws #TODO
+			lva.fach_ects = lva.ects #TODO
 			
-			if "Theorie und Praxis des Lehrens und Lernens" in lva_fach: #problem: non-matching type SE, replace it
-				lva_fach = u"Theorie und Praxis des Lehrens und Lernens"
-				lva_fach_type = "VU"
-			elif "Studieneingangsphase" in lva_fach:
-				lva_fach = u"Einführung in professionalisiertes pädagogisches Handeln"
-			elif u"Computerunterstütztes Lernen" in lva_fach or "Vernetztes Lernen" in lva_fach:
-				lva_fach_ects = "3.0"
-			elif "Unterrichtspraktikum Informatikdidaktik" in lva_fach: #at Uni, this course is split into two semesters
-				lva_fach_sws = ""
-				lva_fach_ects = ""
+			if "Theorie und Praxis des Lehrens und Lernens" in lva.fach: #problem: non-matching type SE, replace it
+				lva.fach = u"Theorie und Praxis des Lehrens und Lernens"
+				lva.fach_type = "VU"
+			elif "Studieneingangsphase" in lva.fach:
+				lva.fach = u"Einführung in professionalisiertes pädagogisches Handeln"
+			elif u"Computerunterstütztes Lernen" in lva.fach or "Vernetztes Lernen" in lva.fach:
+				lva.fach_ects = "3.0"
+			elif "Unterrichtspraktikum Informatikdidaktik" in lva.fach: #at Uni, this course is split into two semesters
+				lva.fach_sws = ""
+				lva.fach_ects = ""
 			
-			if "Wahlmodul" in lva_modul1 or u"Freifächer" in lva_modul1:
-				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,None,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
-			elif u"Modulgruppe Vertiefung Informatik, Pflichtmodul" in lva_modul1:
-				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,None,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+			if "Wahlmodul" in lva.modul1 or u"Freifächer" in lva.modul1:
+				getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+			elif u"Modulgruppe Vertiefung Informatik, Pflichtmodul" in lva.modul1:
+				getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
 			else:
-				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,None,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
+				getFach(xml_root, lva, createNonexistentNodes)
 			
-			addLva(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,None,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, lva_professor, createNonexistentNodes=False)
+			addLva(xml_root, lva, createNonexistentNodes=False)
 			
-			#print("X: " + lva_key + "," + lva_type + "," + lva_semester + "<:>" + lva_title + " - " + lva_anchor + "<")
+			#print("X: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva_anchor + "<")
 		else:
 			raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
 
@@ -947,6 +1020,8 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 	#gets lvas from given url (Tiss) and writes to xml
 	
 	logger.info("Scraping %s", url)
+	
+	lva = LVA()
 
 	#doc = html.parse(url).getroot()
 
@@ -959,7 +1034,7 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 	
 	#print(etree.tostring(doc))
 
-	lva_university = universityName
+	lva.university = universityName
 	
 	founds = doc.xpath('//div[contains(@class,"nodeTable-level")]')
 
@@ -968,7 +1043,7 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 
 	addSource(xml_root, url, datetime.datetime.now().isoformat())
 	
-	lva_stpl_url = doc.xpath('//a[contains(@id,"legalTextLink")]')[0].attrib.get("href")
+	lva.stpl_url = doc.xpath('//a[contains(@id,"legalTextLink")]')[0].attrib.get("href")
 	#print(stpl_link)
 
 	#print(founds)
@@ -976,116 +1051,116 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 	for f in founds:
 		#print(etree.tostring(f))
 		if "nodeTable-level-0" in f.attrib.get("class"):
-			lva_modul1, lva_modul2, lva_modul3 = None, None, None
+			lva.modul1, lva.modul2, lva.modul3 = None, None, None
 
-			lva_stpl = f.text + f.xpath('span')[0].text
-			#lva_stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
-			getStpl(xml_root, lva_stpl,lva_stpl_version, lva_stpl_url, createNonexistentNodes=createNonexistentNodes)
-			#print("0: " + lva_stpl + "<>" + lva_stpl_version + "<")
+			lva.stpl = f.text + f.xpath('span')[0].text
+			#lva.stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
+			getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
+			#print("0: " + lva.stpl + "<>" + lva.stpl_version + "<")
 		elif "nodeTable-level-1" in f.attrib.get("class"):
-			lva_modul2, lva_modul3 = None, None
+			lva.modul2, lva.modul3 = None, None
 			
-			iswahlmodulgruppe = False
+			lva.modul1_iswahlmodulgruppe = False
 
-			lva_modul1 = f.xpath('span')[0].text
+			lva.modul1 = f.xpath('span')[0].text
 			"""
 			#strip unnecessary "Modul" or similar
-			if "Pflichtmodulgruppe" in lva_modul1:
-				lva_modul1 = lva_modul1.partition("Pflichtmodulgruppe")[2]
-			elif "Modulgruppe" in lva_modul1:
-				lva_modul1 = lva_modul1.partition("Modulgruppe")[2]
-			elif "Modul" in lva_modul1:
-				lva_modul1 = lva_modul1.partition("Modul")[2]
+			if "Pflichtmodulgruppe" in lva.modul1:
+				lva.modul1 = lva.modul1.partition("Pflichtmodulgruppe")[2]
+			elif "Modulgruppe" in lva.modul1:
+				lva.modul1 = lva.modul1.partition("Modulgruppe")[2]
+			elif "Modul" in lva.modul1:
+				lva.modul1 = lva.modul1.partition("Modul")[2]
 			"""
-			if "Wahlmodul" in lva_modul1:
-				iswahlmodulgruppe = True
-			getModul1(xml_root, lva_stpl,lva_stpl_version,lva_modul1, createNonexistentNodes, iswahlmodulgruppe)
-			#print("1: " + lva_modul1 + "<")
+			if "Wahlmodul" in lva.modul1:
+				lva.modul1_iswahlmodulgruppe = True
+			getModul1(xml_root, lva, createNonexistentNodes)
+			#print("1: " + lva.modul1 + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			lva_modul2, lva_modul3 = None, None
+			lva.modul2, lva.modul3 = None, None
 
-			#lva_fach = f.text.partition(' ')[2]
-			#lva_fach_type = f.text.partition(' ')[0]
-			lva_fach = f.xpath('span')[0].text
-			lva_fach_type = f.text
-			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-			#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
-			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
+			#lva.fach = f.text.partition(' ')[2]
+			#lva.fach_type = f.text.partition(' ')[0]
+			lva.fach = f.xpath('span')[0].text
+			lva.fach_type = f.text
+			#lva.fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+			#lva.fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+			lva.fach_sws = f.xpath('../following-sibling::td')[2].text
+			lva.fach_ects = f.xpath('../following-sibling::td')[3].text
 
-			getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
-			#getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, True) #TODO
-			#print("2i " + lva_modul2 + "<")
+			getFach(xml_root, lva, createNonexistentNodes)
+			#getFach(xml_root, lva, True) #TODO
+			#print("2i " + lva.modul2 + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
-			lva_modul3 = None
+			lva.modul3 = None
 			
-			lva_modul2 = f.xpath('span')[0].text
-			if "Infomatik" in lva_modul2:
-				lva_modul2 = lva_modul2.replace("Infomatik","Informatik")
-			getModul2(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2, createNonexistentNodes)
-			#print("2: " + lva_modul2 + "<")
+			lva.modul2 = f.xpath('span')[0].text
+			if "Infomatik" in lva.modul2:
+				lva.modul2 = lva.modul2.replace("Infomatik","Informatik")
+			getModul2(xml_root, lva, createNonexistentNodes)
+			#print("2: " + lva.modul2 + "<")
 		elif "nodeTable-level-3" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			#lva_fach = f.text.partition(' ')[2]
-			lva_fach = f.xpath('span')[0].text
-			lva_fach_type = f.text
+			#lva.fach = f.text.partition(' ')[2]
+			lva.fach = f.xpath('span')[0].text
+			lva.fach_type = f.text
 
-			if '"Seminar aus Knowledge Management"' not in lva_fach:
-				lva_modul3 = None
+			if '"Seminar aus Knowledge Management"' not in lva.fach:
+				lva.modul3 = None
 			
-			if '"Grundl.u.Praxis d.eLearning" od. "eTutoring, Moderation von e-Learning"' in lva_fach:
-				lva_fach = '"Grundlagen und Praxis des eLearning" oder "eTutoring, Moderation von e-Learning"'
-			elif "Erwachsenenbildung und Lebenslanges Lernen" in lva_fach: #deprecated
-				lva_fach = u'"Theorie und Praxis des Lehrens und Lernens" oder "Erwachsenenbildung und Lebenslanges Lernen"'
-			elif u"(4) Experiment. Gestaltung von MM-Anwend. + Präsentationsstrategien 1" in lva_fach:
-				lva_fach = u"(4) Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1"
-			elif u"Grundlagen der Kommunikations- und Medientheorie" in lva_fach: #wrongly assigned in TISS
-				lva_fach = u'"Medienpädagogik" oder "Grundlagen der Kommunikations- und Medientheorie"'
-				lva_fach_type = "VO"
-			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-			#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
-			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
+			if '"Grundl.u.Praxis d.eLearning" od. "eTutoring, Moderation von e-Learning"' in lva.fach:
+				lva.fach = '"Grundlagen und Praxis des eLearning" oder "eTutoring, Moderation von e-Learning"'
+			elif "Erwachsenenbildung und Lebenslanges Lernen" in lva.fach: #deprecated
+				lva.fach = u'"Theorie und Praxis des Lehrens und Lernens" oder "Erwachsenenbildung und Lebenslanges Lernen"'
+			elif u"(4) Experiment. Gestaltung von MM-Anwend. + Präsentationsstrategien 1" in lva.fach:
+				lva.fach = u"(4) Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1"
+			elif u"Grundlagen der Kommunikations- und Medientheorie" in lva.fach: #wrongly assigned in TISS
+				lva.fach = u'"Medienpädagogik" oder "Grundlagen der Kommunikations- und Medientheorie"'
+				lva.fach_type = "VO"
+			#lva.fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+			#lva.fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+			lva.fach_sws = f.xpath('../following-sibling::td')[2].text
+			lva.fach_ects = f.xpath('../following-sibling::td')[3].text
 
-			if "Wahlmodul" in lva_modul1 or "Media Technologies" in lva_modul2:
+			if "Wahlmodul" in lva.modul1 or "Media Technologies" in lva.modul2:
 				#if getLvas: #don't add Fach at all when getLvas=False as Wahlmodule can contain *any* Fach which isn't important for the structure
 				#problem with that: getFach does not work anymore
-				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+				getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
 			else:
-				getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
-			#print("3: " + lva_fach + "<:>" + lva_fach_type + "<")
+				getFach(xml_root, lva, createNonexistentNodes)
+			#print("3: " + lva.fach + "<:>" + lva.fach_type + "<")
 		elif "nodeTable-level-3" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
-			lva_modul3 = f.xpath('span')[0].text
-			getModul3(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3, createNonexistentNodes)
-			#m3 = getModul3(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3, True) #TODO
+			lva.modul3 = f.xpath('span')[0].text
+			getModul3(xml_root, lva, createNonexistentNodes)
+			#m3 = getModul3(xml_root, lva, True) #TODO
 			#logger.info("modul 3 found/created: %s",etree.tostring(m3)) #TODO
 			#raise Exception("level 3 non-item in url %s: %s"%(url,etree.tostring(f)))
 		elif "nodeTable-level-4" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			lva_fach = f.xpath('span')[0].text
-			lva_fach_type = f.text
-			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
-			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
+			lva.fach = f.xpath('span')[0].text
+			lva.fach_type = f.text
+			lva.fach_sws = f.xpath('../following-sibling::td')[2].text
+			lva.fach_ects = f.xpath('../following-sibling::td')[3].text
 			
-			getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, createNonexistentNodes)
-			#getFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects, True) #TODO
+			getFach(xml_root, lva, createNonexistentNodes)
+			#getFach(xml_root, lva, True) #TODO
 			#raise Exception("level 4 item in url %s: %s"%(url,etree.tostring(f)))
 		elif ("nodeTable-level-5" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-4" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-3" in f.attrib.get("class") and "course" in f.attrib.get("class")):
 			if getLvas:
 				lva_key_type_sem = f.xpath('div')[0].text
-				lva_key, lva_type, lva_semester = lva_key_type_sem.strip().split(' ')
+				lva.key, lva.type, lva.semester = lva_key_type_sem.strip().split(' ')
 				lva_title_url = f.xpath('div/a')[0]
-				#lva_canceled = f.xpath('div/span')[0].text if f.xpath('div/span') is not None else ""
-				lva_canceled = "abgesagt" if "canceled" in f.attrib.get("class").lower() else ""
-				lva_url = sanitizeTUrl(lva_title_url.attrib.get("href")) #.replace('&','&amp;')
-				lva_title = lva_title_url.text
-				#lva_info = f.xpath('../following-sibling::*[contains(@class,"nodeTableInfoColumn")]/div')[0].text #can be None
-				lva_info = lva_canceled
-				#lva_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-				#lva_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-				lva_sws = f.xpath('../following-sibling::td')[2].text
-				lva_ects = f.xpath('../following-sibling::td')[3].text
+				#lva.canceled = f.xpath('div/span')[0].text if f.xpath('div/span') is not None else ""
+				lva.canceled = "abgesagt" if "canceled" in f.attrib.get("class").lower() else ""
+				lva.url = sanitizeTUrl(lva_title_url.attrib.get("href")) #.replace('&','&amp;')
+				lva.title = lva_title_url.text
+				#lva.info = f.xpath('../following-sibling::*[contains(@class,"nodeTableInfoColumn")]/div')[0].text #can be None
+				lva.info = lva.canceled
+				#lva.sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+				#lva.ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+				lva.sws = f.xpath('../following-sibling::td')[2].text
+				lva.ects = f.xpath('../following-sibling::td')[3].text
 				
-				addLva(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3,lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects,lva_university,lva_semester,lva_title,lva_key,lva_type,lva_sws,lva_ects,lva_info,lva_url, createNonexistentNodes=False)
-				#print("4: " + lva_key + "," + lva_type + "," + lva_semester + "<:>" + lva_title + " - " + lva_url + "<")
+				addLva(xml_root, lva, createNonexistentNodes=False)
+				#print("4: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva.url + "<")
 		else:
 			raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
 
@@ -1129,6 +1204,8 @@ def getFile(xml_root, filename=legacyFile, universityName=tu):
 	
 	#lines = f.readlines() deprecated
 	
+	lva = LVA()
+	
 	addSource(xml_root, filename, datetime.datetime.now().isoformat()) #TODO external filename
 	
 	for l in f:
@@ -1136,79 +1213,79 @@ def getFile(xml_root, filename=legacyFile, universityName=tu):
 		
 		#print(cells)
 		
-		lva_university = universityName
-		lva_semester = cells[4].strip()
-		lva_title = unicode(cells[3].strip(), "utf-8")
-		lva_key = cells[0].strip()
-		lva_type = cells[1].strip()
-		lva_sws = cells[5].strip()
-		lva_ects=""
-		lva_info=""
-		lva_url = ""
-		lva_professor = unicode(cells[6].strip().capitalize(), "utf-8")
+		lva.university = universityName
+		lva.semester = cells[4].strip()
+		lva.title = unicode(cells[3].strip(), "utf-8")
+		lva.key = cells[0].strip()
+		lva.type = cells[1].strip()
+		lva.sws = cells[5].strip()
+		lva.ects=""
+		lva.info=""
+		lva.url = ""
+		lva.professor = unicode(cells[6].strip().capitalize(), "utf-8")
 		
-		lva_fach = lva_title
-		lva_fach_type = lva_type
-		lva_fach_sws = lva_sws
-		lva_fach_ects = lva_ects
+		lva.fach = lva.title
+		lva.fach_type = lva.type
+		lva.fach_sws = lva.sws
+		lva.fach_ects = lva.ects
 		
-		#print(lva_fach)
+		#print(lva.fach)
 		#print(cells[3])
 		
-		if "Theorie und Praxis des Lehrens und Lernens" in lva_fach: #problem: non-matching type SE
-			#lva_fach = u"Theorie und Praxis des Lehrens und Lernens"
-			lva_fach_type = "VU"
-		elif "Vernetztes Lernen" in lva_fach:
-			lva_fach_type = "VU"
-		elif "Spezielle Kapitel der Schulinformatik" in lva_fach:
-			lva_fach = "Kernthemen der Fachdidaktik Informatik"
-		elif u"Kommunikation und Präsentation" in lva_fach:
-			lva_fach = u"Präsentation und Moderation"
-			lva_fach_type = "VU"
-		elif u"Analyse von Algorithmen" in lva_fach:
-			lva_fach = u"Analysis of Algorithms"
-		elif u"Advanced Software Engineering" in lva_fach:
-			createWahlFachHelper(xml_root,"Advanced Software Engineering",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Mobile and Pervasive Computing" in lva_fach:
-			createWahlFachHelper(xml_root,"Distributed und Mobile Computing",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Advanced Internet Security" in lva_fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Entwurfsmethoden für verteilte Systeme" in lva_fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Distributed Systems Technologies" in lva_fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Advanced Distributed Systems" in lva_fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Programmiersprachen" in lva_fach:
-			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Fortgeschrittene logikorientierte Programmierung" in lva_fach:
-			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Fortgeschrittene funktionale Programmierung" in lva_fach:
-			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Seminar aus Visualisierung" in lva_fach:
-			createWahlFachHelper(xml_root,"Informationsvisualisierung",'entweder aus Modul "Visualisierung Vertiefung"', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" in lva_fach:
-			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Algorithmische Geometrie" in lva_fach:
-			lva_fach = u"Algorithmic Geometry"
-		elif u"Effiziente Algorithmen" in lva_fach:
-			lva_fach = u"Efficient Algorithms"
-		elif u"Algorithmen auf Graphen" in lva_fach:
-			createWahlFachHelper(xml_root,"Algorithmen",'Algorithmik', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Seminar aus Computergraphik" in lva_fach:
-			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Computergraphik 2" in lva_fach:
-			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Multimedia Produktion 2: Interaktionsdesign" in lva_fach:
-			createMediaFachHelper(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Interdisziplinäres Praktikum: Interaktionsdesign" in lva_fach:
-			createMediaFachHelper(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Online Communities und E-Commerce" in lva_fach:
-			createWahlFachHelper(xml_root,"e-Business",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Knowledge Management" in lva_fach:
-			createWahlFachHelper(xml_root,"Knowledge Engineering",'oder aus Modul "Knowledge Management"', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		if "Theorie und Praxis des Lehrens und Lernens" in lva.fach: #problem: non-matching type SE
+			#lva.fach = u"Theorie und Praxis des Lehrens und Lernens"
+			lva.fach_type = "VU"
+		elif "Vernetztes Lernen" in lva.fach:
+			lva.fach_type = "VU"
+		elif "Spezielle Kapitel der Schulinformatik" in lva.fach:
+			lva.fach = "Kernthemen der Fachdidaktik Informatik"
+		elif u"Kommunikation und Präsentation" in lva.fach:
+			lva.fach = u"Präsentation und Moderation"
+			lva.fach_type = "VU"
+		elif u"Analyse von Algorithmen" in lva.fach:
+			lva.fach = u"Analysis of Algorithms"
+		elif u"Advanced Software Engineering" in lva.fach:
+			createWahlFachHelper(xml_root,"Advanced Software Engineering",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Mobile and Pervasive Computing" in lva.fach:
+			createWahlFachHelper(xml_root,"Distributed und Mobile Computing",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Advanced Internet Security" in lva.fach:
+			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Entwurfsmethoden für verteilte Systeme" in lva.fach:
+			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Distributed Systems Technologies" in lva.fach:
+			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Advanced Distributed Systems" in lva.fach:
+			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Programmiersprachen" in lva.fach:
+			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Fortgeschrittene logikorientierte Programmierung" in lva.fach:
+			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Fortgeschrittene funktionale Programmierung" in lva.fach:
+			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Seminar aus Visualisierung" in lva.fach:
+			createWahlFachHelper(xml_root,"Informationsvisualisierung",'entweder aus Modul "Visualisierung Vertiefung"', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" in lva.fach:
+			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Algorithmische Geometrie" in lva.fach:
+			lva.fach = u"Algorithmic Geometry"
+		elif u"Effiziente Algorithmen" in lva.fach:
+			lva.fach = u"Efficient Algorithms"
+		elif u"Algorithmen auf Graphen" in lva.fach:
+			createWahlFachHelper(xml_root,"Algorithmen",'Algorithmik', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Seminar aus Computergraphik" in lva.fach:
+			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Computergraphik 2" in lva.fach:
+			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Multimedia Produktion 2: Interaktionsdesign" in lva.fach:
+			createMediaFachHelper(xml_root, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Interdisziplinäres Praktikum: Interaktionsdesign" in lva.fach:
+			createMediaFachHelper(xml_root, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Online Communities und E-Commerce" in lva.fach:
+			createWahlFachHelper(xml_root,"e-Business",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		elif u"Knowledge Management" in lva.fach:
+			createWahlFachHelper(xml_root,"Knowledge Engineering",'oder aus Modul "Knowledge Management"', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
 
-		addLva(xml_root, lva_stpl=None,lva_stpl_version=None,lva_modul1=None,lva_modul2=None,lva_modul3=None,lva_fach=lva_fach,lva_fach_type=lva_fach_type,lva_fach_sws=lva_fach_sws,lva_fach_ects=lva_fach_ects,lva_university=lva_university,lva_semester=lva_semester,lva_title=lva_title,lva_key=lva_key,lva_type=lva_type,lva_sws=lva_sws,lva_ects=lva_ects,lva_info=lva_info,lva_url=lva_url, lva_professor=lva_professor, createNonexistentNodes=False, searchMatchingFach=True)
+		addLva(xml_root, lva, createNonexistentNodes=False, searchMatchingFach=True)
 
 	f.close()
 
