@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions" exclude-result-prefixes="xs fn">
 
 <!--
-Fabian Ehrentraud, 2012-03-11
+Fabian Ehrentraud, 2012-03-14
 e0725639@mail.student.tuwien.ac.at
 https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 Licensed under the Open Software License (OSL 3.0)
@@ -694,17 +694,15 @@ TODO
 								<xsl:choose>
 									<xsl:when test="count($similarLvaSet/semester) &gt; ($showmax + 1)">
 										<span data-tooltip="tooltip-trigger" tabindex="0">
-											<span class="highlightSem">
-												<xsl:call-template name="semesters">
-													<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
-													<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
-													<xsl:with-param name="newestSemester" select="$newestSemester"/>
-													<xsl:with-param name="lvas" select="$similarLvaSet"/>
-													<xsl:with-param name="showall" select="false()"/>
-													<xsl:with-param name="showmax" select="$showmax"/>
-												</xsl:call-template>
-												<xsl:text> ...</xsl:text>
-											</span>
+											<xsl:call-template name="semesters">
+												<xsl:with-param name="highlightSemester" select="$highlightSemester"/>
+												<xsl:with-param name="yearBeforeHighlightSemester" select="$yearBeforeHighlightSemester"/>
+												<xsl:with-param name="newestSemester" select="$newestSemester"/>
+												<xsl:with-param name="lvas" select="$similarLvaSet"/>
+												<xsl:with-param name="showall" select="false()"/>
+												<xsl:with-param name="showmax" select="$showmax"/>
+											</xsl:call-template>
+											<xsl:text> ...</xsl:text>
 											<span data-tooltip="tooltip-pre"> - </span>
 											<span data-tooltip="tooltip">
 												<xsl:call-template name="semesters">
