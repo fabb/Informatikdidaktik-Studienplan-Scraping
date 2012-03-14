@@ -87,28 +87,28 @@ class LVA:
 	
 	def __str__(self):
 		return """LVA:
-	stpl:%s
-	stpl_version:%s
-	stpl_url:%s
-	modul1:%s
-	modul1_iswahlmodulgruppe:%s
-	modul2:%s
-	modul3:%s
-	fach:%s
-	fach_type:%s
-	fach_sws:%s
-	fach_ects:%s
-	title:%s
-	type:%s
-	sws:%s
-	ects:%s
-	university:%s
-	key:%s
-	semester:%s
-	url:%s
+	stpl: %s
+	stpl_version: %s
+	stpl_url: %s
+	modul1: %s
+	modul1_iswahlmodulgruppe: %s
+	modul2: %s
+	modul3: %s
+	fach: %s
+	fach_type: %s
+	fach_sws: %s
+	fach_ects: %s
+	title: %s
+	type: %s
+	sws: %s
+	ects: %s
+	university: %s
+	key: %s
+	semester: %s
+	url: %s
 	professor: %s
-	info:%s
-	canceled:%s"""%(\
+	info: %s
+	canceled: %s"""%(\
 	self.stpl,\
 	self.stpl_version,\
 	self.stpl_url,\
@@ -131,6 +131,12 @@ class LVA:
 	self.professor,\
 	self.info,\
 	self.canceled)
+
+class PathElementNotFoundException(Exception):
+	def __init__(self, value):
+		self.value = value
+	def __str__(self):
+		return repr(self.value)
 
 
 """ logging """
@@ -212,7 +218,7 @@ def getStpl(xml_root, lva, createNonexistentNodes=False):
 
 		return stpl
 	else:
-		raise Exception("STPL %s %s not found"%(lva.stpl,lva.stpl_version))
+		raise PathElementNotFoundException("STPL %s %s not found"%(lva.stpl,lva.stpl_version))
 
 def getModul1(xml_root, lva, createNonexistentNodes=False):
 	#gets the given modul1 in the xml or creates it
@@ -244,7 +250,7 @@ def getModul1(xml_root, lva, createNonexistentNodes=False):
 		return modul1
 	else:
 		#print("Modul1%s not found"%(lva.modul1))
-		raise Exception("Modul1 %s not found"%(lva.modul1))
+		raise PathElementNotFoundException("Modul1 %s not found"%(lva.modul1))
 
 def getModul2(xml_root, lva, createNonexistentNodes=False):
 	#gets the given modul2 in the xml or creates it
@@ -268,7 +274,7 @@ def getModul2(xml_root, lva, createNonexistentNodes=False):
 	
 		return modul2
 	else:
-		raise Exception("Modul2 %s not found"%(lva.modul2))
+		raise PathElementNotFoundException("Modul2 %s not found"%(lva.modul2))
 
 def getModul3(xml_root, lva, createNonexistentNodes=False):
 	#gets the given modul2 in the xml or creates it
@@ -292,17 +298,20 @@ def getModul3(xml_root, lva, createNonexistentNodes=False):
 	
 		return modul3
 	else:
-		raise Exception("Modul3 %s not found"%(lva.modul3))
+		raise PathElementNotFoundException("Modul3 %s not found"%(lva.modul3))
 
-def getFach(xml_root, lva, createNonexistentNodes=False):
+def getModulX(xml_root, lva, createNonexistentNodes=False):
 	if lva.modul3:
-		modul = getModul3(xml_root, lva, createNonexistentNodes)
+		return getModul3(xml_root, lva, createNonexistentNodes)
 	elif lva.modul2:
-		modul = getModul2(xml_root, lva, createNonexistentNodes)
+		return getModul2(xml_root, lva, createNonexistentNodes)
 	elif lva.modul1:
-		modul = getModul1(xml_root, lva, createNonexistentNodes)
+		return getModul1(xml_root, lva, createNonexistentNodes)
 	else:
 		raise Exception("No Modul for Fach %s %s (%s %s) not found"%(lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects))
+
+def getFach(xml_root, lva, createNonexistentNodes=False):
+	modul = getModulX(xml_root, lva, createNonexistentNodes)
 
 	#fach_s = modul.xpath('fach')
 	fach_s = modul.findall("fach")
@@ -366,7 +375,7 @@ def getFach(xml_root, lva, createNonexistentNodes=False):
 
 		return fach
 	else:
-		raise Exception("Fach %s %s (%s %s) not found"%(lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects))
+		raise PathElementNotFoundException("Fach %s %s (%s %s) not found"%(lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects))
 
 
 def getMatchingFach(xml_root, lva):
@@ -384,7 +393,7 @@ def getMatchingFach(xml_root, lva):
 		if(fachB and fach_typeB and fach_swsB): #ignore ects
 			return f #return first matching
 
-	raise Exception("Fach %s %s (%s %s) not found"%(lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects))
+	raise PathElementNotFoundException("Fach %s %s (%s %s) not found"%(lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects))
 
 def createWahlFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects):
 	xpath = "stpl"
@@ -441,7 +450,7 @@ def createWahlFach(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva
 
 		return fach
 
-	raise Exception("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
+	raise PathElementNotFoundException("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
 
 def createMediaLegacyModul(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_modul2,lva_modul3):
 	xpath = "stpl"
@@ -474,7 +483,7 @@ def createMediaLegacyModul(xml_root, lva_stpl,lva_stpl_version,lva_modul1,lva_mo
 
 		return modul3
 
-	raise Exception("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
+	raise PathElementNotFoundException("Fach %s %s (%s %s) not found"%(lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects))
 
 def addLva(xml_root, lva, createNonexistentNodes=False, searchMatchingFach=False):
 	""" adds an lva to the given xml """
@@ -1016,7 +1025,7 @@ def getUni(xml_root, createNonexistentNodes=False):
 
 """ TU scraping """
 
-def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLvas=True, lva_stpl_version="2009U.0"):
+def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLvas=True, lva_stpl_version="2009U.0", reorderFach=False):
 	#gets lvas from given url (Tiss) and writes to xml
 	
 	logger.info("Scraping %s", url)
@@ -1055,7 +1064,9 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 
 			lva.stpl = f.text + f.xpath('span')[0].text
 			#lva.stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
-			getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
+			
+			if not reorderFach:
+				getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
 			#print("0: " + lva.stpl + "<>" + lva.stpl_version + "<")
 		elif "nodeTable-level-1" in f.attrib.get("class"):
 			lva.modul2, lva.modul3 = None, None
@@ -1074,7 +1085,9 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			"""
 			if "Wahlmodul" in lva.modul1:
 				lva.modul1_iswahlmodulgruppe = True
-			getModul1(xml_root, lva, createNonexistentNodes)
+			
+			if not reorderFach:
+				getModul1(xml_root, lva, createNonexistentNodes)
 			#print("1: " + lva.modul1 + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" in f.attrib.get("class"):
 			lva.modul2, lva.modul3 = None, None
@@ -1088,7 +1101,12 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			lva.fach_sws = f.xpath('../following-sibling::td')[2].text
 			lva.fach_ects = f.xpath('../following-sibling::td')[3].text
 
-			getFach(xml_root, lva, createNonexistentNodes)
+			
+			if not reorderFach:
+				getFach(xml_root, lva, createNonexistentNodes)
+			else:
+				checkAndMoveFach(xml_root, lva)
+				
 			#getFach(xml_root, lva, True) #TODO
 			#print("2i " + lva.modul2 + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
@@ -1097,7 +1115,9 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			lva.modul2 = f.xpath('span')[0].text
 			if "Infomatik" in lva.modul2:
 				lva.modul2 = lva.modul2.replace("Infomatik","Informatik")
-			getModul2(xml_root, lva, createNonexistentNodes)
+			
+			if not reorderFach:
+				getModul2(xml_root, lva, createNonexistentNodes)
 			#print("2: " + lva.modul2 + "<")
 		elif "nodeTable-level-3" in f.attrib.get("class") and "item" in f.attrib.get("class"):
 			#lva.fach = f.text.partition(' ')[2]
@@ -1121,16 +1141,25 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			lva.fach_sws = f.xpath('../following-sibling::td')[2].text
 			lva.fach_ects = f.xpath('../following-sibling::td')[3].text
 
-			if "Wahlmodul" in lva.modul1 or "Media Technologies" in lva.modul2:
-				#if getLvas: #don't add Fach at all when getLvas=False as Wahlmodule can contain *any* Fach which isn't important for the structure
-				#problem with that: getFach does not work anymore
-				getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+			if not reorderFach:
+				if lva.modul1_iswahlmodulgruppe or "Media Technologies" in lva.modul2:
+					#if getLvas: #don't add Fach at all when getLvas=False as Wahlmodule can contain *any* Fach which isn't important for the structure
+					#problem with that: getFach does not work anymore
+					getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+				else:
+					getFach(xml_root, lva, createNonexistentNodes)
 			else:
-				getFach(xml_root, lva, createNonexistentNodes)
+				checkAndMoveFach(xml_root, lva)
+
 			#print("3: " + lva.fach + "<:>" + lva.fach_type + "<")
 		elif "nodeTable-level-3" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
 			lva.modul3 = f.xpath('span')[0].text
-			getModul3(xml_root, lva, createNonexistentNodes)
+			
+			if not reorderFach:
+				if lva.modul1_iswahlmodulgruppe or "Media Understanding" in lva.modul3:
+					getModul3(xml_root, lva, createNonexistentNodes=True)
+				else:
+					getModul3(xml_root, lva, createNonexistentNodes)
 			#m3 = getModul3(xml_root, lva, True) #TODO
 			#logger.info("modul 3 found/created: %s",etree.tostring(m3)) #TODO
 			#raise Exception("level 3 non-item in url %s: %s"%(url,etree.tostring(f)))
@@ -1140,11 +1169,18 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			lva.fach_sws = f.xpath('../following-sibling::td')[2].text
 			lva.fach_ects = f.xpath('../following-sibling::td')[3].text
 			
-			getFach(xml_root, lva, createNonexistentNodes)
+			if not reorderFach:
+				if lva.modul1_iswahlmodulgruppe or "Media Understanding" in lva.modul3:
+					getFach(xml_root, lva, createNonexistentNodes=True)
+				else:
+					getFach(xml_root, lva, createNonexistentNodes)
+			else:
+				checkAndMoveFach(xml_root, lva)
+			
 			#getFach(xml_root, lva, True) #TODO
 			#raise Exception("level 4 item in url %s: %s"%(url,etree.tostring(f)))
 		elif ("nodeTable-level-5" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-4" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-3" in f.attrib.get("class") and "course" in f.attrib.get("class")):
-			if getLvas:
+			if getLvas and not reorderFach:
 				lva_key_type_sem = f.xpath('div')[0].text
 				lva.key, lva.type, lva.semester = lva_key_type_sem.strip().split(' ')
 				lva_title_url = f.xpath('div/a')[0]
@@ -1163,6 +1199,51 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 				#print("4: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva.url + "<")
 		else:
 			raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
+
+def checkAndMoveFach(xml_root, lva):
+	if existsFachAtPath(xml_root, lva):
+		return
+	
+	if not existsFachAnywhere(xml_root, lva):
+		#print("ignoring fach as it does not yet exists")
+		return
+	
+	fach = getMatchingFach(xml_root, lva)
+	logger.info("Moving Fach: %s %s %s %s", lva.fach, lva.fach_type, lva.fach_sws, lva.fach_ects)
+
+	oldparent = fach.getparent()
+	oldparent.remove(fach)
+
+	newparent = getModulX(xml_root, lva, True)
+	newparent.append(fach)
+
+	removeparent = oldparent
+	while True:
+		children = removeparent.xpath(".//modul1 | .//modul2 | .//modul3 | .//fach")
+		print("\nchildren:\n%s"%(children))
+		if len(children) == 0:
+			logger.info("Removing Empty Modul: %s", (removeparent.xpath("title")[0].text))
+			removeelem = removeparent
+			removeparent = removeparent.getparent()
+			removeparent.remove(removeelem)
+		else:
+			break
+		if removeparent is None:
+			break
+
+def existsFachAtPath(xml_root, lva):
+	try:
+		getFach(xml_root, lva, False)
+		return True
+	except PathElementNotFoundException as e:
+		return False
+
+def existsFachAnywhere(xml_root, lva):
+	try:
+		getMatchingFach(xml_root, lva)
+		return True
+	except PathElementNotFoundException as e:
+		return False
 
 def sanitizeTUrl(url):
 	urlparts = url.split("?")
@@ -1316,6 +1397,8 @@ xml_root = loadXml(xmlfilename, loadExisting=True, checkXmlSchema=True) #TODO lo
 #get structure
 if isFreshXml(xml_root):
 	getTU(xml_root, tiss, createNonexistentNodes=True, getLvas=False)
+
+#getTU(xml_root, tiss, createNonexistentNodes=False, getLvas=False, reorderFach=True)
 
 #get legacy lvas before adding other lvas
 getFile(xml_root)
