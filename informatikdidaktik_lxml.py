@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2012-03-11
+# Fabian Ehrentraud, 2012-03-15
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -901,6 +901,7 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 			#.strip().partition(' ')[2]
 			lva.modul1 = f.text.strip().partition(' ')[2].strip().partition('(')[0]
 			lva.modul2, lva_anchor = None, None
+			lva.modul1_iswahlmodulgruppe = False
 			"""
 			#remove unnecessary words
 			if "Pflichtmodulgruppe" in lva.modul1:
