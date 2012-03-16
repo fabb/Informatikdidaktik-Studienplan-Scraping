@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2012-03-15
+# Fabian Ehrentraud, 2012-03-16
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -84,6 +84,45 @@ class LVA:
 	professor = None
 	info = None
 	canceled = None # actually not stored, included in info
+	
+	def setStplAndForgetLowerHierarchy(self, stpl=None, stpl_version=None, stpl_url=None):
+		self.setModul1AndForgetLowerHierarchy()
+		self.stpl = stpl
+		self.stpl_version = stpl_version
+		self.stpl_url = stpl_url
+	
+	def setModul1AndForgetLowerHierarchy(self, modul1=None, modul1_iswahlmodulgruppe=None):
+		self.setModul2AndForgetLowerHierarchy()
+		self.modul1 = modul1
+		self.modul1_iswahlmodulgruppe = modul1_iswahlmodulgruppe
+	
+	def setModul2AndForgetLowerHierarchy(self, modul2=None):
+		self.setModul3AndForgetLowerHierarchy()
+		self.modul2 = modul2
+	
+	def setModul3AndForgetLowerHierarchy(self, modul3=None):
+		self.setFachAndForgetLowerHierarchy()
+		self.modul3 = modul3
+	
+	def setFachAndForgetLowerHierarchy(self, fach=None, fach_type=None, fach_sws=None, fach_ects=None):
+		self.setLvaAndForgetLowerHierarchy()
+		self.fach = fach
+		self.fach_type = fach_type
+		self.fach_sws = fach_sws
+		self.fach_ects = fach_ects
+	
+	def setLvaAndForgetLowerHierarchy(self, title=None, type=None, sws=None, ects=None, university=None, key=None, semester=None, url=None, professor=None, info=None, canceled=None):
+		self.title = title
+		self.type = type
+		self.sws = sws
+		self.ects = ects
+		self.university = university
+		self.key = key
+		self.semester = semester
+		self.url = url
+		self.professor = professor
+		self.info = info
+		self.canceled = canceled
 	
 	def __str__(self):
 		return """LVA:
@@ -875,7 +914,7 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 	
 	lva = LVA()
 	
-	lva.university = universityName
+	lva_university = universityName
 	
 	founds = doc.xpath('//h3[contains(@class,"chapter")] | //div[contains(@class,"vlvz_langtitel")]')
 
@@ -886,22 +925,24 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 
 	#print(founds)
 	
-	lva.semester = semester[0] + semester[1]
+	lva_semester = semester[0] + semester[1]
 	#print(lva.semester)
 	
 	for f in founds:
 		#print(etree.tostring(f))
 		if "chapter2" in f.attrib.get("class"): #studium
-			lva.stpl = f.text.strip().partition(' ')[2].strip().partition(' ')[2]
-			lva.stpl_version = "2009U.0" #TODO
-			lva.modul1, lva.modul2, lva_anchor = None, None, None
+			lva_stpl = f.text.strip().partition(' ')[2].strip().partition(' ')[2]
+			lva_stpl_version = "2009U.0" #TODO
+			lva.setStplAndForgetLowerHierarchy(stpl=lva_stpl, stpl_version=lva_stpl_version, stpl_url=None)
 			getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
 			#print("2: " + lva.stpl + " " + lva.stpl_version + "<")
 		elif "chapter3" in f.attrib.get("class"): #modul1
 			#.strip().partition(' ')[2]
-			lva.modul1 = f.text.strip().partition(' ')[2].strip().partition('(')[0]
-			lva.modul2, lva_anchor = None, None
-			lva.modul1_iswahlmodulgruppe = False
+			lva_modul1 = f.text.strip().partition(' ')[2].strip().partition('(')[0]
+			#remove unnecessary words
+			if "Modul" in lva_modul1:
+				lva_modul1 = lva_modul1.partition("Modul")[2]
+			lva.setModul1AndForgetLowerHierarchy(modul1=lva_modul1, modul1_iswahlmodulgruppe=False)
 			"""
 			#remove unnecessary words
 			if "Pflichtmodulgruppe" in lva.modul1:
@@ -912,22 +953,17 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 			#Vertiefung Informatik, Wahlmodule (2 sind zu wählen)
 			if "Vertiefung Informatik" not in lva.modul1: #TODO
 				getModul1(xml_root, lva, createNonexistentNodes)
-			if u"Freifächer" in lva.modul1: #TODO restructure to allow lvas directly under modul1
-				lva.modul2 = u"Freifächer"
-				getModul2(xml_root, lva, True) #TODO
 			#print("3: " + lva.modul1 + "<")
 		elif "chapter4" in f.attrib.get("class"): #modul2
-			lva.modul2 = f.text.strip().partition(' ')[2]
-			if "ECTS" in lva.modul2:
-				if "(" in lva.modul2:
-					lva.modul2 = lva.modul2.strip().partition('(')[0]
+			lva_modul2 = f.text.strip().partition(' ')[2]
+			if "ECTS" in lva_modul2:
+				if "(" in lva_modul2:
+					lva_modul2 = lva_modul2.strip().partition('(')[0]
 				else:
-					lva.modul2 = lva.modul2.strip().rpartition(',')[0]
-			#remove unnecessary words
-			if "Modul" in lva.modul1:
-				lva.modul1 = lva.modul1.partition("Modul")[2]
-			lva.url = f.base + "#" + f.attrib.get("id")
-			#print(lva_anchor)
+					lva_modul2 = lva_modul2.strip().rpartition(',')[0]
+			lva.setModul2AndForgetLowerHierarchy(modul2=lva_modul2)
+			lva_url = f.base + "#" + f.attrib.get("id")
+			#print(lva_url)
 			#http://online.univie.ac.at/vlvz?kapitel=510&semester=S2011#510_3
 			#<h3 class="chapter4" id="510_3">Modul...
 			lva.modul1_iswahlmodulgruppe = False
@@ -935,66 +971,69 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 				getModul2(xml_root, lva, createNonexistentNodes) #TODO
 			elif "Vertiefung Informatik" in lva.modul1:
 				if "Pflichtmodul" in lva.modul2:
-					lva.modul1 = u"Modulgruppe Vertiefung Informatik, Pflichtmodul"
-				if "Wahlmodul" in lva.modul2:
-					lva.modul1 = u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)"
-					lva.modul1_iswahlmodulgruppe = True
+					lva.setModul1AndForgetLowerHierarchy(modul1=u"Modulgruppe Vertiefung Informatik, Pflichtmodul", modul1_iswahlmodulgruppe=False)
+				elif "Wahlmodul" in lva.modul2:
+					lva.setModul1AndForgetLowerHierarchy(modul1=u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)", modul1_iswahlmodulgruppe=True)
 				getModul1(xml_root, lva, createNonexistentNodes)
 			#print("4: " + lva.modul2 + "<")
 		elif "chapter5" in f.attrib.get("class"): #modul bei vertiefungs-modulgruppe
-			lva.modul2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0]
+			lva_modul2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0]
 			
-			if u"ICT-Infrastruktur für Bildungsaufgaben" in lva.modul2:
-				lva.modul2 = None
+			if u"ICT-Infrastruktur für Bildungsaufgaben" in lva_modul2:
+				lva.setModul2AndForgetLowerHierarchy(modul2=None)
 			else:
+				lva.setModul2AndForgetLowerHierarchy(modul2=lva_modul2)
 				getModul2(xml_root, lva, createNonexistentNodes) #TODO
 			#print("5: " + lva.modul2 + "<")
 		elif "vlvz_langtitel" in f.attrib.get("class"):
-			lva.key = f.text
+			lva_key = f.text
 			#print(lva.key)
 			
-			lva.type = f.xpath('abbr')[0].text
+			lva_type = f.xpath('abbr')[0].text
 			#print(lva.type)
 			
-			lva.title = f.xpath('span')[0].text
+			lva_title = f.xpath('span')[0].text
 			
 			#clean title from stuff like "PI.WI1.GK.VU"
-			if "." in lva.title.strip().partition(" ")[0]:
-				lva.title = lva.title.strip().partition(" ")[2]
+			if "." in lva_title.strip().partition(" ")[0]:
+				lva_title = lva_title.strip().partition(" ")[2]
 			#and "PAED - "
-			if "PAED -" in lva.title:
-				lva.title = lva.title.partition("PAED -")[2]
-			if "AMT" in lva.title:
-				lva.title = lva.title.partition("AMT")[2]
+			if "PAED -" in lva_title:
+				lva_title = lva_title.partition("PAED -")[2]
+			if "AMT" in lva_title:
+				lva_title = lva_title.partition("AMT")[2]
 			
-			lva.sws = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].text
+			lva_sws = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].text
 			#print(lva.sws)
 
-			lva.ects = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].getchildren()[0].tail.strip().partition(' ')[2]
+			lva_ects = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].getchildren()[0].tail.strip().partition(' ')[2]
 			#print(lva.ects)
 
 			lva_professors = map(lambda e: e.text, f.xpath('../div[contains(@class,"vlvz_vortragende")]/a'))
-			lva.professor = ', '.join([x.strip() for x in lva_professors])
+			lva_professor = ', '.join([x.strip() for x in lva_professors])
 			#print(lva.professor)
 
-			lva.info = "" #FIXME
+			lva_info = "" #FIXME
 			
 			#print(lva.title)
-			lva.fach = lva.title #TODO
-			lva.fach_type = lva.type #TODO
-			lva.fach_sws = lva.sws #TODO
-			lva.fach_ects = lva.ects #TODO
+			lva_fach = lva_title #TODO
+			lva_fach_type = lva_type #TODO
+			lva_fach_sws = lva_sws #TODO
+			lva_fach_ects = lva_ects #TODO
 			
-			if "Theorie und Praxis des Lehrens und Lernens" in lva.fach: #problem: non-matching type SE, replace it
-				lva.fach = u"Theorie und Praxis des Lehrens und Lernens"
-				lva.fach_type = "VU"
-			elif "Studieneingangsphase" in lva.fach:
-				lva.fach = u"Einführung in professionalisiertes pädagogisches Handeln"
-			elif u"Computerunterstütztes Lernen" in lva.fach or "Vernetztes Lernen" in lva.fach:
-				lva.fach_ects = "3.0"
-			elif "Unterrichtspraktikum Informatikdidaktik" in lva.fach: #at Uni, this course is split into two semesters
-				lva.fach_sws = ""
-				lva.fach_ects = ""
+			if "Theorie und Praxis des Lehrens und Lernens" in lva_fach: #problem: non-matching type SE, replace it
+				lva_fach = u"Theorie und Praxis des Lehrens und Lernens"
+				lva_fach_type = "VU"
+			elif "Studieneingangsphase" in lva_fach:
+				lva_fach = u"Einführung in professionalisiertes pädagogisches Handeln"
+			elif u"Computerunterstütztes Lernen" in lva_fach or "Vernetztes Lernen" in lva_fach:
+				lva_fach_ects = "3.0"
+			elif "Unterrichtspraktikum Informatikdidaktik" in lva_fach: #at Uni, this course is split into two semesters
+				lva_fach_sws = ""
+				lva_fach_ects = ""
+			
+			lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
+			lva.setLvaAndForgetLowerHierarchy(title=lva_title, type=lva_type, sws=lva_sws, ects=lva_ects, university=lva_university, key=lva_key, semester=lva_semester, url=lva_url, professor=lva_professor, info=lva_info, canceled=None)
 			
 			if "Wahlmodul" in lva.modul1 or u"Freifächer" in lva.modul1:
 				getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
@@ -1005,7 +1044,7 @@ def uniExtract(xml_root, semester,url, referring_url, universityName=uni, create
 			
 			addLva(xml_root, lva, createNonexistentNodes=False)
 			
-			#print("X: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva_anchor + "<")
+			#print("X: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva_url + "<")
 		else:
 			raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
 
@@ -1044,7 +1083,7 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 	
 	#print(etree.tostring(doc))
 
-	lva.university = universityName
+	lva_university = universityName
 	
 	founds = doc.xpath('//div[contains(@class,"nodeTable-level")]')
 
@@ -1053,7 +1092,7 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 
 	addSource(xml_root, url, datetime.datetime.now().isoformat())
 	
-	lva.stpl_url = doc.xpath('//a[contains(@id,"legalTextLink")]')[0].attrib.get("href")
+	lva_stpl_url = doc.xpath('//a[contains(@id,"legalTextLink")]')[0].attrib.get("href")
 	#print(stpl_link)
 
 	#print(founds)
@@ -1061,20 +1100,17 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 	for f in founds:
 		#print(etree.tostring(f))
 		if "nodeTable-level-0" in f.attrib.get("class"):
-			lva.modul1, lva.modul2, lva.modul3 = None, None, None
-
-			lva.stpl = f.text + f.xpath('span')[0].text
-			#lva.stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
+			lva_stpl = f.text + f.xpath('span')[0].text
+			#lva_stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
+			lva.setStplAndForgetLowerHierarchy(stpl=lva_stpl, stpl_version=None, stpl_url=lva_stpl_url)
 			
 			if not reorderFach:
 				getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
 			#print("0: " + lva.stpl + "<>" + lva.stpl_version + "<")
 		elif "nodeTable-level-1" in f.attrib.get("class"):
-			lva.modul2, lva.modul3 = None, None
-			
-			lva.modul1_iswahlmodulgruppe = False
+			lva_modul1_iswahlmodulgruppe = False
 
-			lva.modul1 = f.xpath('span')[0].text
+			lva_modul1 = f.xpath('span')[0].text
 			"""
 			#strip unnecessary "Modul" or similar
 			if "Pflichtmodulgruppe" in lva.modul1:
@@ -1084,24 +1120,27 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			elif "Modul" in lva.modul1:
 				lva.modul1 = lva.modul1.partition("Modul")[2]
 			"""
-			if "Wahlmodul" in lva.modul1:
-				lva.modul1_iswahlmodulgruppe = True
+			if "Wahlmodul" in lva_modul1:
+				lva_modul1_iswahlmodulgruppe = True
+			
+			lva.setModul1AndForgetLowerHierarchy(modul1=lva_modul1, modul1_iswahlmodulgruppe=lva_modul1_iswahlmodulgruppe)
 			
 			if not reorderFach:
 				getModul1(xml_root, lva, createNonexistentNodes)
 			#print("1: " + lva.modul1 + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			lva.modul2, lva.modul3 = None, None
+			lva.setModul2AndForgetLowerHierarchy() #clear modul2 and below
 
 			#lva.fach = f.text.partition(' ')[2]
 			#lva.fach_type = f.text.partition(' ')[0]
-			lva.fach = f.xpath('span')[0].text
-			lva.fach_type = f.text
+			lva_fach = f.xpath('span')[0].text
+			lva_fach_type = f.text
 			#lva.fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
 			#lva.fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-			lva.fach_sws = f.xpath('../following-sibling::td')[2].text
-			lva.fach_ects = f.xpath('../following-sibling::td')[3].text
-
+			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
+			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
+			
+			lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
 			
 			if not reorderFach:
 				getFach(xml_root, lva, createNonexistentNodes)
@@ -1111,36 +1150,38 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			#getFach(xml_root, lva, True) #TODO
 			#print("2i " + lva.modul2 + "<")
 		elif "nodeTable-level-2" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
-			lva.modul3 = None
+			lva_modul2 = f.xpath('span')[0].text
+			if "Infomatik" in lva_modul2:
+				lva_modul2 = lva_modul2.replace("Infomatik","Informatik")
 			
-			lva.modul2 = f.xpath('span')[0].text
-			if "Infomatik" in lva.modul2:
-				lva.modul2 = lva.modul2.replace("Infomatik","Informatik")
+			lva.setModul2AndForgetLowerHierarchy(modul2=lva_modul2)
 			
 			if not reorderFach:
 				getModul2(xml_root, lva, createNonexistentNodes)
 			#print("2: " + lva.modul2 + "<")
 		elif "nodeTable-level-3" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			#lva.fach = f.text.partition(' ')[2]
-			lva.fach = f.xpath('span')[0].text
-			lva.fach_type = f.text
+			#lva_fach = f.text.partition(' ')[2]
+			lva_fach = f.xpath('span')[0].text
+			lva_fach_type = f.text
 
-			if '"Seminar aus Knowledge Management"' not in lva.fach:
-				lva.modul3 = None
+			if "Seminar aus Knowledge Management" not in lva_fach: #this fach is on level-3 instead of level-4
+				lva.setModul3AndForgetLowerHierarchy() #clear modul3 and below
 			
-			if '"Grundl.u.Praxis d.eLearning" od. "eTutoring, Moderation von e-Learning"' in lva.fach:
-				lva.fach = '"Grundlagen und Praxis des eLearning" oder "eTutoring, Moderation von e-Learning"'
-			elif "Erwachsenenbildung und Lebenslanges Lernen" in lva.fach: #deprecated
-				lva.fach = u'"Theorie und Praxis des Lehrens und Lernens" oder "Erwachsenenbildung und Lebenslanges Lernen"'
-			elif u"(4) Experiment. Gestaltung von MM-Anwend. + Präsentationsstrategien 1" in lva.fach:
-				lva.fach = u"(4) Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1"
-			elif u"Grundlagen der Kommunikations- und Medientheorie" in lva.fach: #wrongly assigned in TISS
-				lva.fach = u'"Medienpädagogik" oder "Grundlagen der Kommunikations- und Medientheorie"'
-				lva.fach_type = "VO"
-			#lva.fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-			#lva.fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-			lva.fach_sws = f.xpath('../following-sibling::td')[2].text
-			lva.fach_ects = f.xpath('../following-sibling::td')[3].text
+			if '"Grundl.u.Praxis d.eLearning" od. "eTutoring, Moderation von e-Learning"' in lva_fach:
+				lva_fach = '"Grundlagen und Praxis des eLearning" oder "eTutoring, Moderation von e-Learning"'
+			elif "Erwachsenenbildung und Lebenslanges Lernen" in lva_fach: #deprecated
+				lva_fach = u'"Theorie und Praxis des Lehrens und Lernens" oder "Erwachsenenbildung und Lebenslanges Lernen"'
+			elif u"(4) Experiment. Gestaltung von MM-Anwend. + Präsentationsstrategien 1" in lva_fach:
+				lva_fach = u"(4) Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1"
+			elif u"Grundlagen der Kommunikations- und Medientheorie" in lva_fach: #wrongly assigned in TISS
+				lva_fach = u'"Medienpädagogik" oder "Grundlagen der Kommunikations- und Medientheorie"'
+				lva_fach_type = "VO"
+			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+			#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
+			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
+			
+			lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
 
 			if not reorderFach:
 				if lva.modul1_iswahlmodulgruppe or "Media Technologies" in lva.modul2:
@@ -1154,8 +1195,10 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 
 			#print("3: " + lva.fach + "<:>" + lva.fach_type + "<")
 		elif "nodeTable-level-3" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
-			lva.modul3 = f.xpath('span')[0].text
+			lva_modul3 = f.xpath('span')[0].text
 			
+			lva.setModul3AndForgetLowerHierarchy(modul3=lva_modul3)
+
 			if not reorderFach:
 				if lva.modul1_iswahlmodulgruppe or "Media Understanding" in lva.modul3:
 					getModul3(xml_root, lva, createNonexistentNodes=True)
@@ -1165,11 +1208,13 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 			#logger.info("modul 3 found/created: %s",etree.tostring(m3)) #TODO
 			#raise Exception("level 3 non-item in url %s: %s"%(url,etree.tostring(f)))
 		elif "nodeTable-level-4" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			lva.fach = f.xpath('span')[0].text
-			lva.fach_type = f.text
-			lva.fach_sws = f.xpath('../following-sibling::td')[2].text
-			lva.fach_ects = f.xpath('../following-sibling::td')[3].text
+			lva_fach = f.xpath('span')[0].text
+			lva_fach_type = f.text
+			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
+			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
 			
+			lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
+
 			if not reorderFach:
 				if lva.modul1_iswahlmodulgruppe or "Media Understanding" in lva.modul3:
 					getFach(xml_root, lva, createNonexistentNodes=True)
@@ -1183,19 +1228,21 @@ def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLva
 		elif ("nodeTable-level-5" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-4" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-3" in f.attrib.get("class") and "course" in f.attrib.get("class")):
 			if getLvas and not reorderFach:
 				lva_key_type_sem = f.xpath('div')[0].text
-				lva.key, lva.type, lva.semester = lva_key_type_sem.strip().split(' ')
+				lva_key, lva_type, lva_semester = lva_key_type_sem.strip().split(' ')
 				lva_title_url = f.xpath('div/a')[0]
 				#lva.canceled = f.xpath('div/span')[0].text if f.xpath('div/span') is not None else ""
-				lva.canceled = "abgesagt" if "canceled" in f.attrib.get("class").lower() else ""
-				lva.url = sanitizeTUrl(lva_title_url.attrib.get("href")) #.replace('&','&amp;')
-				lva.title = lva_title_url.text
+				lva_canceled = "abgesagt" if "canceled" in f.attrib.get("class").lower() else ""
+				lva_url = sanitizeTUrl(lva_title_url.attrib.get("href")) #.replace('&','&amp;')
+				lva_title = lva_title_url.text
 				#lva.info = f.xpath('../following-sibling::*[contains(@class,"nodeTableInfoColumn")]/div')[0].text #can be None
-				lva.info = lva.canceled
+				lva_info = lva_canceled
 				#lva.sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
 				#lva.ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-				lva.sws = f.xpath('../following-sibling::td')[2].text
-				lva.ects = f.xpath('../following-sibling::td')[3].text
+				lva_sws = f.xpath('../following-sibling::td')[2].text
+				lva_ects = f.xpath('../following-sibling::td')[3].text
 				
+				lva.setLvaAndForgetLowerHierarchy(title=lva_title, type=lva_type, sws=lva_sws, ects=lva_ects, university=lva_university, key=lva_key, semester=lva_semester, url=lva_url, professor=None, info=lva_info, canceled=lva_canceled)
+
 				addLva(xml_root, lva, createNonexistentNodes=False)
 				#print("4: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva.url + "<")
 		else:
@@ -1295,77 +1342,80 @@ def getFile(xml_root, filename=legacyFile, universityName=tu):
 		
 		#print(cells)
 		
-		lva.university = universityName
-		lva.semester = cells[4].strip()
-		lva.title = unicode(cells[3].strip(), "utf-8")
-		lva.key = cells[0].strip()
-		lva.type = cells[1].strip()
-		lva.sws = cells[5].strip()
-		lva.ects=""
-		lva.info=""
-		lva.url = ""
-		lva.professor = unicode(cells[6].strip().capitalize(), "utf-8")
+		lva_university = universityName
+		lva_semester = cells[4].strip()
+		lva_title = unicode(cells[3].strip(), "utf-8")
+		lva_key = cells[0].strip()
+		lva_type = cells[1].strip()
+		lva_sws = cells[5].strip()
+		lva_ects=""
+		lva_info=""
+		lva_url = ""
+		lva_professor = unicode(cells[6].strip().capitalize(), "utf-8")
 		
-		lva.fach = lva.title
-		lva.fach_type = lva.type
-		lva.fach_sws = lva.sws
-		lva.fach_ects = lva.ects
+		lva_fach = lva_title
+		lva_fach_type = lva_type
+		lva_fach_sws = lva_sws
+		lva_fach_ects = lva_ects
 		
 		#print(lva.fach)
 		#print(cells[3])
 		
-		if "Theorie und Praxis des Lehrens und Lernens" in lva.fach: #problem: non-matching type SE
-			#lva.fach = u"Theorie und Praxis des Lehrens und Lernens"
-			lva.fach_type = "VU"
-		elif "Vernetztes Lernen" in lva.fach:
-			lva.fach_type = "VU"
-		elif "Spezielle Kapitel der Schulinformatik" in lva.fach:
-			lva.fach = "Kernthemen der Fachdidaktik Informatik"
-		elif u"Kommunikation und Präsentation" in lva.fach:
-			lva.fach = u"Präsentation und Moderation"
-			lva.fach_type = "VU"
-		elif u"Analyse von Algorithmen" in lva.fach:
-			lva.fach = u"Analysis of Algorithms"
-		elif u"Advanced Software Engineering" in lva.fach:
-			createWahlFachHelper(xml_root,"Advanced Software Engineering",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Mobile and Pervasive Computing" in lva.fach:
-			createWahlFachHelper(xml_root,"Distributed und Mobile Computing",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Advanced Internet Security" in lva.fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Entwurfsmethoden für verteilte Systeme" in lva.fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Distributed Systems Technologies" in lva.fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Advanced Distributed Systems" in lva.fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Programmiersprachen" in lva.fach:
-			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Fortgeschrittene logikorientierte Programmierung" in lva.fach:
-			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Fortgeschrittene funktionale Programmierung" in lva.fach:
-			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Seminar aus Visualisierung" in lva.fach:
-			createWahlFachHelper(xml_root,"Informationsvisualisierung",'entweder aus Modul "Visualisierung Vertiefung"', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" in lva.fach:
-			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Algorithmische Geometrie" in lva.fach:
-			lva.fach = u"Algorithmic Geometry"
-		elif u"Effiziente Algorithmen" in lva.fach:
-			lva.fach = u"Efficient Algorithms"
-		elif u"Algorithmen auf Graphen" in lva.fach:
-			createWahlFachHelper(xml_root,"Algorithmen",'Algorithmik', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Seminar aus Computergraphik" in lva.fach:
-			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Computergraphik 2" in lva.fach:
-			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Multimedia Produktion 2: Interaktionsdesign" in lva.fach:
-			createMediaFachHelper(xml_root, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Interdisziplinäres Praktikum: Interaktionsdesign" in lva.fach:
-			createMediaFachHelper(xml_root, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Online Communities und E-Commerce" in lva.fach:
-			createWahlFachHelper(xml_root,"e-Business",None, lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
-		elif u"Knowledge Management" in lva.fach:
-			createWahlFachHelper(xml_root,"Knowledge Engineering",'oder aus Modul "Knowledge Management"', lva.fach,lva.fach_type,lva.fach_sws,lva.fach_ects)
+		if "Theorie und Praxis des Lehrens und Lernens" in lva_fach: #problem: non-matching type SE
+			#lva_fach = u"Theorie und Praxis des Lehrens und Lernens"
+			lva_fach_type = "VU"
+		elif "Vernetztes Lernen" in lva_fach:
+			lva_fach_type = "VU"
+		elif "Spezielle Kapitel der Schulinformatik" in lva_fach:
+			lva_fach = "Kernthemen der Fachdidaktik Informatik"
+		elif u"Kommunikation und Präsentation" in lva_fach:
+			lva_fach = u"Präsentation und Moderation"
+			lva_fach_type = "VU"
+		elif u"Analyse von Algorithmen" in lva_fach:
+			lva_fach = u"Analysis of Algorithms"
+		elif u"Advanced Software Engineering" in lva_fach:
+			createWahlFachHelper(xml_root,"Advanced Software Engineering",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Mobile and Pervasive Computing" in lva_fach:
+			createWahlFachHelper(xml_root,"Distributed und Mobile Computing",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Advanced Internet Security" in lva_fach:
+			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Entwurfsmethoden für verteilte Systeme" in lva_fach:
+			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Distributed Systems Technologies" in lva_fach:
+			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Advanced Distributed Systems" in lva_fach:
+			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Programmiersprachen" in lva_fach:
+			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Fortgeschrittene logikorientierte Programmierung" in lva_fach:
+			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Fortgeschrittene funktionale Programmierung" in lva_fach:
+			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Seminar aus Visualisierung" in lva_fach:
+			createWahlFachHelper(xml_root,"Informationsvisualisierung",'entweder aus Modul "Visualisierung Vertiefung"', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" in lva_fach:
+			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Algorithmische Geometrie" in lva_fach:
+			lva_fach = u"Algorithmic Geometry"
+		elif u"Effiziente Algorithmen" in lva_fach:
+			lva_fach = u"Efficient Algorithms"
+		elif u"Algorithmen auf Graphen" in lva_fach:
+			createWahlFachHelper(xml_root,"Algorithmen",'Algorithmik', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Seminar aus Computergraphik" in lva_fach:
+			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Computergraphik 2" in lva_fach:
+			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Multimedia Produktion 2: Interaktionsdesign" in lva_fach:
+			createMediaFachHelper(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Interdisziplinäres Praktikum: Interaktionsdesign" in lva_fach:
+			createMediaFachHelper(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Online Communities und E-Commerce" in lva_fach:
+			createWahlFachHelper(xml_root,"e-Business",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+		elif u"Knowledge Management" in lva_fach:
+			createWahlFachHelper(xml_root,"Knowledge Engineering",'oder aus Modul "Knowledge Management"', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			
+		lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
+		lva.setLvaAndForgetLowerHierarchy(title=lva_title, type=lva_type, sws=lva_sws, ects=lva_ects, university=lva_university, key=lva_key, semester=lva_semester, url=lva_url, professor=lva_professor, info=lva_info, canceled=None)
 
 		addLva(xml_root, lva, createNonexistentNodes=False, searchMatchingFach=True)
 
