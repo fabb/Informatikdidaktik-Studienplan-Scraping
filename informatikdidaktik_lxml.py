@@ -200,12 +200,248 @@ class Scraper():
 	def scrape(self):
 		raise Exception("Abstract Function")
 
+
 class TUScraper(Scraper):
-	def __init__(self):
-		pass
+	logger_ = None
+	universityName_ = None
+
+	def __init__(self, logger=logger, universityName=tu):
+		self.logger_ = logger
+		self.universityName_ = universityName
 	
-	def scrape(self):
-		raise Exception("Abstract Function")
+	def scrape(self, xml_root, url, createNonexistentNodes=False, getLvas=True, lva_stpl_version="2009U.0", reorderFach=False):
+		#gets lvas from given url (Tiss) and writes to xml
+		self.logger_.info("Scraping %s", url)
+		lva = LVA()
+		#doc = html.parse(url).getroot()
+
+		#stupid workaround necessary
+		html_ = urllib.urlopen(url)
+		#xml = html.read()
+		#doc = etree.fromstring(xml, base_url=url)
+		doc = html.parse(html_).getroot()
+		doc.make_links_absolute(url)
+		
+		#print(etree.tostring(doc))
+		lva_university = self.universityName_
+		founds = doc.xpath('//div[contains(@class,"nodeTable-level")]')
+
+		if len(founds) == 0:
+			raise Exception("No elements found in %s"%(url))
+
+		addSource(xml_root, url, datetime.datetime.now().isoformat())
+		lva_stpl_url = doc.xpath('//a[contains(@id,"legalTextLink")]')[0].attrib.get("href")
+
+		for f in founds:
+			#print(etree.tostring(f))
+			if "nodeTable-level-0" in f.attrib.get("class"):
+				lva_stpl = f.text + f.xpath('span')[0].text
+				#lva_stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
+				lva.setStplAndForgetLowerHierarchy(stpl=lva_stpl, stpl_version=None, stpl_url=lva_stpl_url)
+				
+				if not reorderFach:
+					getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
+				#print("0: " + lva.stpl + "<>" + lva.stpl_version + "<")
+			elif "nodeTable-level-1" in f.attrib.get("class"):
+				lva_modul1_iswahlmodulgruppe = False
+
+				lva_modul1 = f.xpath('span')[0].text
+				"""
+				#strip unnecessary "Modul" or similar
+				if "Pflichtmodulgruppe" in lva.modul1:
+					lva.modul1 = lva.modul1.partition("Pflichtmodulgruppe")[2]
+				elif "Modulgruppe" in lva.modul1:
+					lva.modul1 = lva.modul1.partition("Modulgruppe")[2]
+				elif "Modul" in lva.modul1:
+					lva.modul1 = lva.modul1.partition("Modul")[2]
+				"""
+				if "Wahlmodul" in lva_modul1:
+					lva_modul1_iswahlmodulgruppe = True
+				
+				lva.setModul1AndForgetLowerHierarchy(modul1=lva_modul1, modul1_iswahlmodulgruppe=lva_modul1_iswahlmodulgruppe)
+				
+				if not reorderFach:
+					getModul1(xml_root, lva, createNonexistentNodes)
+				#print("1: " + lva.modul1 + "<")
+			elif "nodeTable-level-2" in f.attrib.get("class") and "item" in f.attrib.get("class"):
+				lva.setModul2AndForgetLowerHierarchy() #clear modul2 and below
+
+				#lva.fach = f.text.partition(' ')[2]
+				#lva.fach_type = f.text.partition(' ')[0]
+				lva_fach = f.xpath('span')[0].text
+				lva_fach_type = f.text
+				#lva.fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+				#lva.fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+				lva_fach_sws = f.xpath('../following-sibling::td')[2].text
+				lva_fach_ects = f.xpath('../following-sibling::td')[3].text
+				
+				lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
+				
+				if not reorderFach:
+					getFach(xml_root, lva, createNonexistentNodes)
+				else:
+					self.checkAndMoveFach_(xml_root, lva)
+					
+				#getFach(xml_root, lva, True) #TODO
+				#print("2i " + lva.modul2 + "<")
+			elif "nodeTable-level-2" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
+				lva_modul2 = f.xpath('span')[0].text
+				if "Infomatik" in lva_modul2:
+					lva_modul2 = lva_modul2.replace("Infomatik","Informatik")
+				
+				lva.setModul2AndForgetLowerHierarchy(modul2=lva_modul2)
+				
+				if not reorderFach:
+					getModul2(xml_root, lva, createNonexistentNodes)
+				#print("2: " + lva.modul2 + "<")
+			elif "nodeTable-level-3" in f.attrib.get("class") and "item" in f.attrib.get("class"):
+				#lva_fach = f.text.partition(' ')[2]
+				lva_fach = f.xpath('span')[0].text
+				lva_fach_type = f.text
+
+				if "Seminar aus Knowledge Management" not in lva_fach: #this fach is on level-3 instead of level-4
+					lva.setModul3AndForgetLowerHierarchy() #clear modul3 and below
+				
+				if '"Grundl.u.Praxis d.eLearning" od. "eTutoring, Moderation von e-Learning"' in lva_fach:
+					lva_fach = '"Grundlagen und Praxis des eLearning" oder "eTutoring, Moderation von e-Learning"'
+				elif "Erwachsenenbildung und Lebenslanges Lernen" in lva_fach: #deprecated
+					lva_fach = u'"Theorie und Praxis des Lehrens und Lernens" oder "Erwachsenenbildung und Lebenslanges Lernen"'
+				elif u"(4) Experiment. Gestaltung von MM-Anwend. + Präsentationsstrategien 1" in lva_fach:
+					lva_fach = u"(4) Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1"
+				elif u"Grundlagen der Kommunikations- und Medientheorie" in lva_fach: #wrongly assigned in TISS
+					lva_fach = u'"Medienpädagogik" oder "Grundlagen der Kommunikations- und Medientheorie"'
+					lva_fach_type = "VO"
+				#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+				#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+				lva_fach_sws = f.xpath('../following-sibling::td')[2].text
+				lva_fach_ects = f.xpath('../following-sibling::td')[3].text
+				
+				lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
+
+				if not reorderFach:
+					if lva.modul1_iswahlmodulgruppe or "Media Technologies" in lva.modul2:
+						#if getLvas: #don't add Fach at all when getLvas=False as Wahlmodule can contain *any* Fach which isn't important for the structure
+						#problem with that: getFach does not work anymore
+						getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+					else:
+						getFach(xml_root, lva, createNonexistentNodes)
+				else:
+					self.checkAndMoveFach_(xml_root, lva)
+
+				#print("3: " + lva.fach + "<:>" + lva.fach_type + "<")
+			elif "nodeTable-level-3" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
+				lva_modul3 = f.xpath('span')[0].text
+				
+				lva.setModul3AndForgetLowerHierarchy(modul3=lva_modul3)
+
+				if not reorderFach:
+					if lva.modul1_iswahlmodulgruppe or "Media Understanding" in lva.modul3:
+						getModul3(xml_root, lva, createNonexistentNodes=True)
+					else:
+						getModul3(xml_root, lva, createNonexistentNodes)
+				#m3 = getModul3(xml_root, lva, True) #TODO
+				#self.logger_.info("modul 3 found/created: %s",etree.tostring(m3)) #TODO
+				#raise Exception("level 3 non-item in url %s: %s"%(url,etree.tostring(f)))
+			elif "nodeTable-level-4" in f.attrib.get("class") and "item" in f.attrib.get("class"):
+				lva_fach = f.xpath('span')[0].text
+				lva_fach_type = f.text
+				lva_fach_sws = f.xpath('../following-sibling::td')[2].text
+				lva_fach_ects = f.xpath('../following-sibling::td')[3].text
+				
+				lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
+
+				if not reorderFach:
+					if lva.modul1_iswahlmodulgruppe or "Media Understanding" in lva.modul3:
+						getFach(xml_root, lva, createNonexistentNodes=True)
+					else:
+						getFach(xml_root, lva, createNonexistentNodes)
+				else:
+					self.checkAndMoveFach_(xml_root, lva)
+				
+				#getFach(xml_root, lva, True) #TODO
+				#raise Exception("level 4 item in url %s: %s"%(url,etree.tostring(f)))
+			elif ("nodeTable-level-5" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-4" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-3" in f.attrib.get("class") and "course" in f.attrib.get("class")):
+				if getLvas and not reorderFach:
+					lva_key_type_sem = f.xpath('div')[0].text
+					lva_key, lva_type, lva_semester = lva_key_type_sem.strip().split(' ')
+					lva_title_url = f.xpath('div/a')[0]
+					#lva.canceled = f.xpath('div/span')[0].text if f.xpath('div/span') is not None else ""
+					lva_canceled = "abgesagt" if "canceled" in f.attrib.get("class").lower() else ""
+					lva_url = self.sanitizeTUrl_(lva_title_url.attrib.get("href")) #.replace('&','&amp;')
+					lva_title = lva_title_url.text
+					#lva.info = f.xpath('../following-sibling::*[contains(@class,"nodeTableInfoColumn")]/div')[0].text #can be None
+					lva_info = lva_canceled
+					#lva.sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
+					#lva.ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
+					lva_sws = f.xpath('../following-sibling::td')[2].text
+					lva_ects = f.xpath('../following-sibling::td')[3].text
+					
+					lva.setLvaAndForgetLowerHierarchy(title=lva_title, type=lva_type, sws=lva_sws, ects=lva_ects, university=lva_university, key=lva_key, semester=lva_semester, url=lva_url, professor=None, info=lva_info, canceled=lva_canceled)
+
+					addLva(xml_root, lva, createNonexistentNodes=False)
+					#print("4: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva.url + "<")
+			else:
+				raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
+
+	def checkAndMoveFach_(self, xml_root, lva):
+		if self.existsFachAtPath_(xml_root, lva):
+			return
+		
+		if not self.existsFachAnywhere_(xml_root, lva):
+			#print("ignoring fach as it does not yet exists")
+			return
+		
+		fach = getMatchingFach(xml_root, lva)
+		self.logger_.info("Moving Fach: %s %s %s %s", lva.fach, lva.fach_type, lva.fach_sws, lva.fach_ects)
+
+		oldparent = fach.getparent()
+		oldparent.remove(fach)
+
+		newparent = getModulX(xml_root, lva, True)
+		newparent.append(fach)
+
+		removeparent = oldparent
+		while True:
+			children = removeparent.xpath(".//modul1 | .//modul2 | .//modul3 | .//fach")
+			print("\nchildren:\n%s"%(children))
+			if len(children) == 0:
+				self.logger_.info("Removing Empty Modul: %s", (removeparent.xpath("title")[0].text))
+				removeelem = removeparent
+				removeparent = removeparent.getparent()
+				removeparent.remove(removeelem)
+			else:
+				break
+			if removeparent is None:
+				break
+
+	def existsFachAtPath_(self, xml_root, lva):
+		try:
+			getFach(xml_root, lva, False)
+			return True
+		except PathElementNotFoundException as e:
+			return False
+
+	def existsFachAnywhere_(self, xml_root, lva):
+		try:
+			getMatchingFach(xml_root, lva)
+			return True
+		except PathElementNotFoundException as e:
+			return False
+
+	def sanitizeTUrl_(self, url):
+		urlparts = url.split("?")
+		if len(urlparts) == 1:
+			return url
+		if len(urlparts) == 2:
+			cleanurl = urlparts[0] + "?"
+			vars = urlparts[1].split("&")
+			for v in vars:
+				if not v.startswith(("windowId=")):
+					cleanurl += v + "&"
+			return cleanurl[:-1]
+		else:
+			raise Exception("Url has more than one ?: %s"%(url))
+
 
 class TULegacyScraper(Scraper):
 	def __init__(self):
@@ -213,6 +449,7 @@ class TULegacyScraper(Scraper):
 	
 	def scrape(self):
 		raise Exception("Abstract Function")
+
 
 class UniScraper(Scraper):
 	logger_ = None
@@ -1082,252 +1319,6 @@ def fuzzyEq(wantedStr, compStr, threshold=0.89, substringmatch=True): #FIXME thr
 	return False
 
 
-
-
-""" TU scraping """
-
-def getTU(xml_root, url, universityName=tu, createNonexistentNodes=False, getLvas=True, lva_stpl_version="2009U.0", reorderFach=False):
-	#gets lvas from given url (Tiss) and writes to xml
-	
-	logger.info("Scraping %s", url)
-	
-	lva = LVA()
-
-	#doc = html.parse(url).getroot()
-
-	#stupid workaround necessary
-	html_ = urllib.urlopen(url)
-	#xml = html.read()
-	#doc = etree.fromstring(xml, base_url=url)
-	doc = html.parse(html_).getroot()
-	doc.make_links_absolute(url)
-	
-	#print(etree.tostring(doc))
-
-	lva_university = universityName
-	
-	founds = doc.xpath('//div[contains(@class,"nodeTable-level")]')
-
-	if len(founds) == 0:
-		raise Exception("No elements found in %s"%(url))
-
-	addSource(xml_root, url, datetime.datetime.now().isoformat())
-	
-	lva_stpl_url = doc.xpath('//a[contains(@id,"legalTextLink")]')[0].attrib.get("href")
-	#print(stpl_link)
-
-	#print(founds)
-
-	for f in founds:
-		#print(etree.tostring(f))
-		if "nodeTable-level-0" in f.attrib.get("class"):
-			lva_stpl = f.text + f.xpath('span')[0].text
-			#lva_stpl_version = f.text.strip().partition(' ')[2] #TODO no more on website
-			lva.setStplAndForgetLowerHierarchy(stpl=lva_stpl, stpl_version=None, stpl_url=lva_stpl_url)
-			
-			if not reorderFach:
-				getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
-			#print("0: " + lva.stpl + "<>" + lva.stpl_version + "<")
-		elif "nodeTable-level-1" in f.attrib.get("class"):
-			lva_modul1_iswahlmodulgruppe = False
-
-			lva_modul1 = f.xpath('span')[0].text
-			"""
-			#strip unnecessary "Modul" or similar
-			if "Pflichtmodulgruppe" in lva.modul1:
-				lva.modul1 = lva.modul1.partition("Pflichtmodulgruppe")[2]
-			elif "Modulgruppe" in lva.modul1:
-				lva.modul1 = lva.modul1.partition("Modulgruppe")[2]
-			elif "Modul" in lva.modul1:
-				lva.modul1 = lva.modul1.partition("Modul")[2]
-			"""
-			if "Wahlmodul" in lva_modul1:
-				lva_modul1_iswahlmodulgruppe = True
-			
-			lva.setModul1AndForgetLowerHierarchy(modul1=lva_modul1, modul1_iswahlmodulgruppe=lva_modul1_iswahlmodulgruppe)
-			
-			if not reorderFach:
-				getModul1(xml_root, lva, createNonexistentNodes)
-			#print("1: " + lva.modul1 + "<")
-		elif "nodeTable-level-2" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			lva.setModul2AndForgetLowerHierarchy() #clear modul2 and below
-
-			#lva.fach = f.text.partition(' ')[2]
-			#lva.fach_type = f.text.partition(' ')[0]
-			lva_fach = f.xpath('span')[0].text
-			lva_fach_type = f.text
-			#lva.fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-			#lva.fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
-			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
-			
-			lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
-			
-			if not reorderFach:
-				getFach(xml_root, lva, createNonexistentNodes)
-			else:
-				checkAndMoveFach(xml_root, lva)
-				
-			#getFach(xml_root, lva, True) #TODO
-			#print("2i " + lva.modul2 + "<")
-		elif "nodeTable-level-2" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
-			lva_modul2 = f.xpath('span')[0].text
-			if "Infomatik" in lva_modul2:
-				lva_modul2 = lva_modul2.replace("Infomatik","Informatik")
-			
-			lva.setModul2AndForgetLowerHierarchy(modul2=lva_modul2)
-			
-			if not reorderFach:
-				getModul2(xml_root, lva, createNonexistentNodes)
-			#print("2: " + lva.modul2 + "<")
-		elif "nodeTable-level-3" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			#lva_fach = f.text.partition(' ')[2]
-			lva_fach = f.xpath('span')[0].text
-			lva_fach_type = f.text
-
-			if "Seminar aus Knowledge Management" not in lva_fach: #this fach is on level-3 instead of level-4
-				lva.setModul3AndForgetLowerHierarchy() #clear modul3 and below
-			
-			if '"Grundl.u.Praxis d.eLearning" od. "eTutoring, Moderation von e-Learning"' in lva_fach:
-				lva_fach = '"Grundlagen und Praxis des eLearning" oder "eTutoring, Moderation von e-Learning"'
-			elif "Erwachsenenbildung und Lebenslanges Lernen" in lva_fach: #deprecated
-				lva_fach = u'"Theorie und Praxis des Lehrens und Lernens" oder "Erwachsenenbildung und Lebenslanges Lernen"'
-			elif u"(4) Experiment. Gestaltung von MM-Anwend. + Präsentationsstrategien 1" in lva_fach:
-				lva_fach = u"(4) Experimentelle Gestaltung von MM-Anwendungen + Präsentationsstrategien 1"
-			elif u"Grundlagen der Kommunikations- und Medientheorie" in lva_fach: #wrongly assigned in TISS
-				lva_fach = u'"Medienpädagogik" oder "Grundlagen der Kommunikations- und Medientheorie"'
-				lva_fach_type = "VO"
-			#lva_fach_sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-			#lva_fach_ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
-			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
-			
-			lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
-
-			if not reorderFach:
-				if lva.modul1_iswahlmodulgruppe or "Media Technologies" in lva.modul2:
-					#if getLvas: #don't add Fach at all when getLvas=False as Wahlmodule can contain *any* Fach which isn't important for the structure
-					#problem with that: getFach does not work anymore
-					getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
-				else:
-					getFach(xml_root, lva, createNonexistentNodes)
-			else:
-				checkAndMoveFach(xml_root, lva)
-
-			#print("3: " + lva.fach + "<:>" + lva.fach_type + "<")
-		elif "nodeTable-level-3" in f.attrib.get("class") and "item" not in f.attrib.get("class"):
-			lva_modul3 = f.xpath('span')[0].text
-			
-			lva.setModul3AndForgetLowerHierarchy(modul3=lva_modul3)
-
-			if not reorderFach:
-				if lva.modul1_iswahlmodulgruppe or "Media Understanding" in lva.modul3:
-					getModul3(xml_root, lva, createNonexistentNodes=True)
-				else:
-					getModul3(xml_root, lva, createNonexistentNodes)
-			#m3 = getModul3(xml_root, lva, True) #TODO
-			#logger.info("modul 3 found/created: %s",etree.tostring(m3)) #TODO
-			#raise Exception("level 3 non-item in url %s: %s"%(url,etree.tostring(f)))
-		elif "nodeTable-level-4" in f.attrib.get("class") and "item" in f.attrib.get("class"):
-			lva_fach = f.xpath('span')[0].text
-			lva_fach_type = f.text
-			lva_fach_sws = f.xpath('../following-sibling::td')[2].text
-			lva_fach_ects = f.xpath('../following-sibling::td')[3].text
-			
-			lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
-
-			if not reorderFach:
-				if lva.modul1_iswahlmodulgruppe or "Media Understanding" in lva.modul3:
-					getFach(xml_root, lva, createNonexistentNodes=True)
-				else:
-					getFach(xml_root, lva, createNonexistentNodes)
-			else:
-				checkAndMoveFach(xml_root, lva)
-			
-			#getFach(xml_root, lva, True) #TODO
-			#raise Exception("level 4 item in url %s: %s"%(url,etree.tostring(f)))
-		elif ("nodeTable-level-5" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-4" in f.attrib.get("class") and "course" in f.attrib.get("class")) or ("nodeTable-level-3" in f.attrib.get("class") and "course" in f.attrib.get("class")):
-			if getLvas and not reorderFach:
-				lva_key_type_sem = f.xpath('div')[0].text
-				lva_key, lva_type, lva_semester = lva_key_type_sem.strip().split(' ')
-				lva_title_url = f.xpath('div/a')[0]
-				#lva.canceled = f.xpath('div/span')[0].text if f.xpath('div/span') is not None else ""
-				lva_canceled = "abgesagt" if "canceled" in f.attrib.get("class").lower() else ""
-				lva_url = sanitizeTUrl(lva_title_url.attrib.get("href")) #.replace('&','&amp;')
-				lva_title = lva_title_url.text
-				#lva.info = f.xpath('../following-sibling::*[contains(@class,"nodeTableInfoColumn")]/div')[0].text #can be None
-				lva_info = lva_canceled
-				#lva.sws = f.xpath('../following-sibling::*[contains(@class,"nodeTableHoursColumn")]')[0].text
-				#lva.ects = f.xpath('../following-sibling::*[contains(@class,"nodeTableEctsColumn")]')[0].text
-				lva_sws = f.xpath('../following-sibling::td')[2].text
-				lva_ects = f.xpath('../following-sibling::td')[3].text
-				
-				lva.setLvaAndForgetLowerHierarchy(title=lva_title, type=lva_type, sws=lva_sws, ects=lva_ects, university=lva_university, key=lva_key, semester=lva_semester, url=lva_url, professor=None, info=lva_info, canceled=lva_canceled)
-
-				addLva(xml_root, lva, createNonexistentNodes=False)
-				#print("4: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva.url + "<")
-		else:
-			raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
-
-def checkAndMoveFach(xml_root, lva):
-	if existsFachAtPath(xml_root, lva):
-		return
-	
-	if not existsFachAnywhere(xml_root, lva):
-		#print("ignoring fach as it does not yet exists")
-		return
-	
-	fach = getMatchingFach(xml_root, lva)
-	logger.info("Moving Fach: %s %s %s %s", lva.fach, lva.fach_type, lva.fach_sws, lva.fach_ects)
-
-	oldparent = fach.getparent()
-	oldparent.remove(fach)
-
-	newparent = getModulX(xml_root, lva, True)
-	newparent.append(fach)
-
-	removeparent = oldparent
-	while True:
-		children = removeparent.xpath(".//modul1 | .//modul2 | .//modul3 | .//fach")
-		print("\nchildren:\n%s"%(children))
-		if len(children) == 0:
-			logger.info("Removing Empty Modul: %s", (removeparent.xpath("title")[0].text))
-			removeelem = removeparent
-			removeparent = removeparent.getparent()
-			removeparent.remove(removeelem)
-		else:
-			break
-		if removeparent is None:
-			break
-
-def existsFachAtPath(xml_root, lva):
-	try:
-		getFach(xml_root, lva, False)
-		return True
-	except PathElementNotFoundException as e:
-		return False
-
-def existsFachAnywhere(xml_root, lva):
-	try:
-		getMatchingFach(xml_root, lva)
-		return True
-	except PathElementNotFoundException as e:
-		return False
-
-def sanitizeTUrl(url):
-	urlparts = url.split("?")
-	if len(urlparts) == 1:
-		return url
-	if len(urlparts) == 2:
-		cleanurl = urlparts[0] + "?"
-		vars = urlparts[1].split("&")
-		for v in vars:
-			if not v.startswith(("windowId=")):
-				cleanurl += v + "&"
-		return cleanurl[:-1]
-	else:
-		raise Exception("Url has more than one ?: %s"%(url))
-
 """ parse legacy file """
 
 def wasUrlScraped(xml_root, url):
@@ -1472,7 +1463,7 @@ xml_root = loadXml(xmlfilename, loadExisting=True, checkXmlSchema=True) #TODO lo
 
 #get structure
 if isFreshXml(xml_root):
-	getTU(xml_root, tiss, createNonexistentNodes=True, getLvas=False)
+	tuScraper.scrape(xml_root, tiss, createNonexistentNodes=True, getLvas=False)
 
 #getTU(xml_root, tiss, createNonexistentNodes=False, getLvas=False, reorderFach=True)
 
@@ -1480,8 +1471,8 @@ if isFreshXml(xml_root):
 getFile(xml_root)
 
 #get lvas from TU
-#getTU(xml_root, tiss, createNonexistentNodes=False)
-#getTU(xml_root, tiss_next, createNonexistentNodes=False)
+tuScraper.scrape(xml_root, tiss, createNonexistentNodes=False)
+tuScraper.scrape(xml_root, tiss_next, createNonexistentNodes=False)
 
 #get lvas from Uni
 uniScraper.scrape(xml_root, createNonexistentNodes=False)
