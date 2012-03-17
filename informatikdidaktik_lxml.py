@@ -444,11 +444,132 @@ class TUScraper(Scraper):
 
 
 class TULegacyScraper(Scraper):
-	def __init__(self):
-		pass
-	
-	def scrape(self):
-		raise Exception("Abstract Function")
+	logger_ = None
+	filename_ = None
+	universityName_ = None
+
+	def __init__(self, logger=logger, filename=legacyFile, universityName=tu):
+		self.logger_ = logger
+		self.filename_ = filename
+		self.universityName_ = universityName
+		
+	def scrape(self, xml_root):
+		#retrieves lvas from old python script output file and writes to xml
+		
+		if self.wasUrlScraped_(xml_root, self.filename_):
+			return #nothing to do
+		
+		self.logger_.info("Scraping %s", self.filename_)
+		
+		if self.filename_.startswith("http"):
+			f = urllib.urlopen(self.filename_)
+		else:
+			f = open(self.filename_, 'r')
+		
+		#lines = f.readlines() deprecated
+		
+		lva = LVA()
+		addSource(xml_root, self.filename_, datetime.datetime.now().isoformat()) #TODO external filename
+		
+		for l in f:
+			cells = l.split(" - ")
+			
+			#print(cells)
+			
+			lva_university = self.universityName_
+			lva_semester = cells[4].strip()
+			lva_title = unicode(cells[3].strip(), "utf-8")
+			lva_key = cells[0].strip()
+			lva_type = cells[1].strip()
+			lva_sws = cells[5].strip()
+			lva_ects=""
+			lva_info=""
+			lva_url = ""
+			lva_professor = unicode(cells[6].strip().capitalize(), "utf-8")
+			
+			lva_fach = lva_title
+			lva_fach_type = lva_type
+			lva_fach_sws = lva_sws
+			lva_fach_ects = lva_ects
+			
+			#print(lva.fach)
+			#print(cells[3])
+			
+			if "Theorie und Praxis des Lehrens und Lernens" in lva_fach: #problem: non-matching type SE
+				#lva_fach = u"Theorie und Praxis des Lehrens und Lernens"
+				lva_fach_type = "VU"
+			elif "Vernetztes Lernen" in lva_fach:
+				lva_fach_type = "VU"
+			elif "Spezielle Kapitel der Schulinformatik" in lva_fach:
+				lva_fach = "Kernthemen der Fachdidaktik Informatik"
+			elif u"Kommunikation und Präsentation" in lva_fach:
+				lva_fach = u"Präsentation und Moderation"
+				lva_fach_type = "VU"
+			elif u"Analyse von Algorithmen" in lva_fach:
+				lva_fach = u"Analysis of Algorithms"
+			elif u"Advanced Software Engineering" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Advanced Software Engineering",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Mobile and Pervasive Computing" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Distributed und Mobile Computing",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Advanced Internet Security" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Entwurfsmethoden für verteilte Systeme" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Distributed Systems Technologies" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Advanced Distributed Systems" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Programmiersprachen" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Fortgeschrittene logikorientierte Programmierung" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Fortgeschrittene funktionale Programmierung" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Seminar aus Visualisierung" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Informationsvisualisierung",'entweder aus Modul "Visualisierung Vertiefung"', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Algorithmische Geometrie" in lva_fach:
+				lva_fach = u"Algorithmic Geometry"
+			elif u"Effiziente Algorithmen" in lva_fach:
+				lva_fach = u"Efficient Algorithms"
+			elif u"Algorithmen auf Graphen" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Algorithmen",'Algorithmik', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Seminar aus Computergraphik" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Computergraphik 2" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Multimedia Produktion 2: Interaktionsdesign" in lva_fach:
+				self.createMediaFachHelper_(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Interdisziplinäres Praktikum: Interaktionsdesign" in lva_fach:
+				self.createMediaFachHelper_(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Online Communities und E-Commerce" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"e-Business",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+			elif u"Knowledge Management" in lva_fach:
+				self.createWahlFachHelper_(xml_root,"Knowledge Engineering",'oder aus Modul "Knowledge Management"', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
+				
+			lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
+			lva.setLvaAndForgetLowerHierarchy(title=lva_title, type=lva_type, sws=lva_sws, ects=lva_ects, university=lva_university, key=lva_key, semester=lva_semester, url=lva_url, professor=lva_professor, info=lva_info, canceled=None)
+
+			addLva(xml_root, lva, createNonexistentNodes=False, searchMatchingFach=True)
+
+		f.close()
+
+	def wasUrlScraped_(self, xml_root, url):
+		#checks whether given url was somewhen scraped already
+		sources = xml_root.findall("source")
+		for s in sources:
+			url_ = s.find("url")
+			if url_ is not None and url_.text == url:
+				return True #could also check whether query_date elements exists, but is not necessary
+		return False
+
+	def createWahlFachHelper_(self, xml_root,lva_modul2,lva_modul3, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects):
+		createWahlFach(xml_root,lva_stpl=None,lva_stpl_version=None,lva_modul1=u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)",lva_modul2=lva_modul2,lva_modul3=lva_modul3, lva_fach=lva_fach,lva_fach_type=lva_fach_type,lva_fach_sws=lva_fach_sws,lva_fach_ects=lva_fach_ects)
+
+	def createMediaFachHelper_(self, xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects):
+		createMediaLegacyModul(xml_root, lva_stpl=None,lva_stpl_version=None,lva_modul1=u"Pflichtmodulgruppe Informationstechnologien zur Wissensvermittlung",lva_modul2=u"Media Technologies - Eine der Varianten (1-4) ist zu wählen",lva_modul3=u"früheres Modul (2)")
+		createWahlFach(xml_root,lva_stpl=None,lva_stpl_version=None,lva_modul1=u"Pflichtmodulgruppe Informationstechnologien zur Wissensvermittlung",lva_modul2=u"Media Technologies - Eine der Varianten (1-4) ist zu wählen",lva_modul3=u"früheres Modul (2)", lva_fach=lva_fach,lva_fach_type=lva_fach_type,lva_fach_sws=lva_fach_sws,lva_fach_ects=lva_fach_ects)
 
 
 class UniScraper(Scraper):
@@ -1318,128 +1439,6 @@ def fuzzyEq(wantedStr, compStr, threshold=0.89, substringmatch=True): #FIXME thr
 	
 	return False
 
-
-""" parse legacy file """
-
-def wasUrlScraped(xml_root, url):
-	#checks whether given url was somewhen scraped already
-	sources = xml_root.findall("source")
-	for s in sources:
-		url_ = s.find("url")
-		if url_ is not None and url_.text == url:
-			return True #could also check whether query_date elements exists, but is not necessary
-	return False
-
-def getFile(xml_root, filename=legacyFile, universityName=tu):
-	#retrieves lvas from old python script output file and writes to xml
-	
-	if wasUrlScraped(xml_root, filename):
-		return #nothing to do
-	
-	logger.info("Scraping %s", filename)
-	
-	if filename.startswith("http"):
-		f = urllib.urlopen(filename)
-	else:
-		f = open(filename, 'r')
-	
-	#lines = f.readlines() deprecated
-	
-	lva = LVA()
-	
-	addSource(xml_root, filename, datetime.datetime.now().isoformat()) #TODO external filename
-	
-	for l in f:
-		cells = l.split(" - ")
-		
-		#print(cells)
-		
-		lva_university = universityName
-		lva_semester = cells[4].strip()
-		lva_title = unicode(cells[3].strip(), "utf-8")
-		lva_key = cells[0].strip()
-		lva_type = cells[1].strip()
-		lva_sws = cells[5].strip()
-		lva_ects=""
-		lva_info=""
-		lva_url = ""
-		lva_professor = unicode(cells[6].strip().capitalize(), "utf-8")
-		
-		lva_fach = lva_title
-		lva_fach_type = lva_type
-		lva_fach_sws = lva_sws
-		lva_fach_ects = lva_ects
-		
-		#print(lva.fach)
-		#print(cells[3])
-		
-		if "Theorie und Praxis des Lehrens und Lernens" in lva_fach: #problem: non-matching type SE
-			#lva_fach = u"Theorie und Praxis des Lehrens und Lernens"
-			lva_fach_type = "VU"
-		elif "Vernetztes Lernen" in lva_fach:
-			lva_fach_type = "VU"
-		elif "Spezielle Kapitel der Schulinformatik" in lva_fach:
-			lva_fach = "Kernthemen der Fachdidaktik Informatik"
-		elif u"Kommunikation und Präsentation" in lva_fach:
-			lva_fach = u"Präsentation und Moderation"
-			lva_fach_type = "VU"
-		elif u"Analyse von Algorithmen" in lva_fach:
-			lva_fach = u"Analysis of Algorithms"
-		elif u"Advanced Software Engineering" in lva_fach:
-			createWahlFachHelper(xml_root,"Advanced Software Engineering",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Mobile and Pervasive Computing" in lva_fach:
-			createWahlFachHelper(xml_root,"Distributed und Mobile Computing",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Advanced Internet Security" in lva_fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Entwurfsmethoden für verteilte Systeme" in lva_fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Distributed Systems Technologies" in lva_fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Advanced Distributed Systems" in lva_fach:
-			createWahlFachHelper(xml_root,"Netzwerke und Security",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Programmiersprachen" in lva_fach:
-			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Fortgeschrittene logikorientierte Programmierung" in lva_fach:
-			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Fortgeschrittene funktionale Programmierung" in lva_fach:
-			createWahlFachHelper(xml_root,"Programmiersprachen","Computersprachen und Programmierung", lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Seminar aus Visualisierung" in lva_fach:
-			createWahlFachHelper(xml_root,"Informationsvisualisierung",'entweder aus Modul "Visualisierung Vertiefung"', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Forschungsseminar aus Computergraphik und digitaler Bildverarbeitung" in lva_fach:
-			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Algorithmische Geometrie" in lva_fach:
-			lva_fach = u"Algorithmic Geometry"
-		elif u"Effiziente Algorithmen" in lva_fach:
-			lva_fach = u"Efficient Algorithms"
-		elif u"Algorithmen auf Graphen" in lva_fach:
-			createWahlFachHelper(xml_root,"Algorithmen",'Algorithmik', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Seminar aus Computergraphik" in lva_fach:
-			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Computergraphik 2" in lva_fach:
-			createWahlFachHelper(xml_root,"Computergrafik",'Computergraphik - Vertiefung', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Multimedia Produktion 2: Interaktionsdesign" in lva_fach:
-			createMediaFachHelper(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Interdisziplinäres Praktikum: Interaktionsdesign" in lva_fach:
-			createMediaFachHelper(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Online Communities und E-Commerce" in lva_fach:
-			createWahlFachHelper(xml_root,"e-Business",None, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-		elif u"Knowledge Management" in lva_fach:
-			createWahlFachHelper(xml_root,"Knowledge Engineering",'oder aus Modul "Knowledge Management"', lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects)
-			
-		lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
-		lva.setLvaAndForgetLowerHierarchy(title=lva_title, type=lva_type, sws=lva_sws, ects=lva_ects, university=lva_university, key=lva_key, semester=lva_semester, url=lva_url, professor=lva_professor, info=lva_info, canceled=None)
-
-		addLva(xml_root, lva, createNonexistentNodes=False, searchMatchingFach=True)
-
-	f.close()
-
-def createWahlFachHelper(xml_root,lva_modul2,lva_modul3, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects):
-	createWahlFach(xml_root,lva_stpl=None,lva_stpl_version=None,lva_modul1=u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)",lva_modul2=lva_modul2,lva_modul3=lva_modul3, lva_fach=lva_fach,lva_fach_type=lva_fach_type,lva_fach_sws=lva_fach_sws,lva_fach_ects=lva_fach_ects)
-
-def createMediaFachHelper(xml_root, lva_fach,lva_fach_type,lva_fach_sws,lva_fach_ects):
-	createMediaLegacyModul(xml_root, lva_stpl=None,lva_stpl_version=None,lva_modul1=u"Pflichtmodulgruppe Informationstechnologien zur Wissensvermittlung",lva_modul2=u"Media Technologies - Eine der Varianten (1-4) ist zu wählen",lva_modul3=u"früheres Modul (2)")
-	createWahlFach(xml_root,lva_stpl=None,lva_stpl_version=None,lva_modul1=u"Pflichtmodulgruppe Informationstechnologien zur Wissensvermittlung",lva_modul2=u"Media Technologies - Eine der Varianten (1-4) ist zu wählen",lva_modul3=u"früheres Modul (2)", lva_fach=lva_fach,lva_fach_type=lva_fach_type,lva_fach_sws=lva_fach_sws,lva_fach_ects=lva_fach_ects)
-
 			
 """ program script """
 
@@ -1468,7 +1467,7 @@ if isFreshXml(xml_root):
 #getTU(xml_root, tiss, createNonexistentNodes=False, getLvas=False, reorderFach=True)
 
 #get legacy lvas before adding other lvas
-getFile(xml_root)
+tuLegacyScraper.scrape(xml_root)
 
 #get lvas from TU
 tuScraper.scrape(xml_root, tiss, createNonexistentNodes=False)
