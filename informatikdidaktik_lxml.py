@@ -28,8 +28,6 @@ import logging
 # LVA Wiki https://vowi.fsinf.at/wiki/Alle_LVAs_(TU_Wien)
 # import argparse http://docs.python.org/library/argparse.html
 # logging of Exceptions
-# restructure xml to allow lvas directly under modulgruppe
-# new structure with level 3 module
 # hover icon
 
 
@@ -176,6 +174,298 @@ class PathElementNotFoundException(Exception):
 		self.value = value
 	def __str__(self):
 		return repr(self.value)
+
+
+class Scraper():
+	def __init__(self):
+		raise Exception("Abstract Function")
+	def scrape(self):
+		raise Exception("Abstract Function")
+
+class TUScraper(Scraper):
+	def __init__(self):
+		pass
+	
+	def scrape(self):
+		raise Exception("Abstract Function")
+
+class TULegacyScraper(Scraper):
+	def __init__(self):
+		pass
+	
+	def scrape(self):
+		raise Exception("Abstract Function")
+
+class UniScraper(Scraper):
+	uniSemesterFrom_ = None
+	
+	def __init__(self, uniSemesterFrom):
+		self.uniSemesterFrom_ = uniSemesterFrom
+	
+	def scrape(self, xml_root, createNonexistentNodes=False):
+		#gets lvas from uni and writes to xml
+		#s_from = ("2011","S")
+		#s_to = ("2011","S")
+		#uniurls = self.getUniUrls_(s_from, s_to)
+		uniurls = self.getUniUrls_(self.uniSemesterFrom_,  self.currentSemester_())
+		
+		pruned_uniurls = self.pruneUni_(xml_root, uniurls)
+		
+		unicontenturls = self.fetchAllUrls_(pruned_uniurls,studyname)
+		for sem,(referring_url,url) in unicontenturls.items():
+			#print(sem[0] + sem[1] + "<>" + url + "<")
+			self.uniExtract_(xml_root, sem, url, referring_url, createNonexistentNodes=createNonexistentNodes)
+
+	def getUniUrls_(self, (from_year,from_semester), (to_year,to_semester)):
+		#builds urls of websites with all studies of the given semester range
+		uniurl = "http://online.univie.ac.at/vlvz?fakultaet=-1&semester=%s"
+		urls = OrderedDict([(sem,uniurl%(''.join(sem[::-1]))) for sem in self.srange_((from_year,from_semester),(to_year,to_semester))])
+		return urls
+
+	def srange_(self, (from_year,from_semester),(to_year,to_semester)):
+		#generates a list of the semesters in the range from-to, sorted chronologically, format ["W2009","S2010",..]
+		ws = ["S","W"]
+		try:
+			y_f = int(from_year)
+			y_t = int(to_year)
+			if not from_semester in ws or not to_semester in ws:
+				raise Exception()
+		except (TypeError, ValueError, OverflowError, Exception): #int conversion failed
+			return []
+
+		yy = range(y_f,y_t+1)
+
+		combin = [(str(y),s) for y in yy for s in ws]
+		
+		try:
+			if from_semester == ws[1]:
+				combin.pop(0)
+			if to_semester == ws[0]:
+				combin.pop()
+		except IndexError:
+			return []
+		
+		return combin
+
+	def pruneUni_(self, xml_root, uniurls):
+		#removes all urls which do not need to be scraped
+		uniurls2 = uniurls.copy()
+		current_sem = self.currentSemester_(True)
+		
+		for sem,referring_url in uniurls2.items():
+			if self.smallerSem_(sem, current_sem) and self.hasRecentDate_(xml_root, referring_url, sem):
+				del uniurls2[sem]
+		
+		return uniurls2
+
+	def currentSemester_(self, realCurrent=False):
+		#calculates the current semester - from january on, the following summer semester will be output, from july on, the following winter semester
+		year = datetime.datetime.now().year
+		month = datetime.datetime.now().month
+		current_year = str(year)
+		if realCurrent: #new semester only when it really has begun
+			current_sem = "S" if month < 10 and month > 2 else "W"
+		else:
+			current_sem = "S" if month < 7 else "W"
+			#TODO this gets the summer courses in january which might be a bit late
+		return (current_year,current_sem)
+
+	def smallerSem_(self, sem1, sem2):
+		#returns whether the first semester tuple is smaller than the second
+		(year1,sumwint1) = sem1
+		(year2,sumwint2) = sem2
+		if year1 < year2:
+			return True
+		elif year1 > year2:
+			return False
+		elif year1 == year2 and sumwint1 < sumwint2: #S<W
+			return True
+		else:
+			return False
+
+	def hasRecentDate_(self, xml_root, referring_url, sem):
+		#checks whether the given referring_url was checked after the semester was over
+		#TODO get rid of sem
+		#return False
+		sources = xml_root.findall("source")
+		for s in sources:
+			ref_url = s.find("referring_url")
+			if ref_url is not None and ref_url.text == referring_url:
+				query_dates = s.findall("query_date")
+				newestDate = None
+				for d in query_dates:
+					if newestDate == None or d.text > newestDate: #TODO make time stamp comparison more sophisticated FIXME
+						newestDate = d.text
+				return self.dateAfterSemester_(newestDate, sem)
+		return False
+
+	def dateAfterSemester_(self, date, semester):
+		#returns whether the given date is located in the given semester (or before the next one has started)
+		if date is None or semester is None:
+			return False
+		dateS = date.split('-')
+		year = dateS[0]
+		month = dateS[1]
+		if int(month) < 10 and int(month) > 2:
+			dateSumWint = "S"
+		else:
+			dateSumWint = "W"
+			year = str(int(year) - 1)
+		dateSem = (year,dateSumWint)
+		return self.smallerSem_(semester, dateSem)
+
+	def fetchAllUrls_(self, uniurls, studyname=studyname):
+		#resolves all urls in the dictionary with the function fetchUrl_
+		uniurls2 = uniurls.copy()
+		for semester, url in uniurls2.items():
+			uniurls2[semester] = (url,self.fetchUrl_(url,studyname))
+		return uniurls2
+
+	def fetchUrl_(self, url, studyname=studyname):
+		#gets the url in the <a> tag that is next to the studyname
+		
+		logger.info("Querying %s", url)
+		
+		doc = html.parse(url).getroot()
+		doc.make_links_absolute(url)
+		#<div class="vlvz_kurz"><a href="/vlvz?kapitel=510&amp;semester=S2011">5.10</a> Master Informatikdidaktik</div>
+		link = doc.xpath('//div[contains(@class,"vlvz_kurz") and contains(.,"%s")]/a'%studyname)[0].attrib.get("href") #lxml only is capable of XPath, thus no lower-case() function available for a case insensitive search
+		return link
+
+	def uniExtract_(self, xml_root, semester,url, referring_url, universityName=uni, createNonexistentNodes=False):
+		#extracts lvas from given url (uni) and writes to xml
+		logger.info("Scraping %s", url)
+		doc = html.parse(url).getroot()
+		#print(etree.tostring(doc))
+		lva = LVA()
+		lva_university = universityName
+		founds = doc.xpath('//h3[contains(@class,"chapter")] | //div[contains(@class,"vlvz_langtitel")]')
+
+		if len(founds) == 0:
+			raise Exception("No elements found in %s"%(url))
+
+		addSource(xml_root, url, datetime.datetime.now().isoformat(), referring_url)
+		lva_semester = semester[0] + semester[1]
+		
+		for f in founds:
+			#print(etree.tostring(f))
+			if "chapter2" in f.attrib.get("class"): #studium
+				lva_stpl = f.text.strip().partition(' ')[2].strip().partition(' ')[2]
+				lva_stpl_version = "2009U.0" #TODO
+				lva.setStplAndForgetLowerHierarchy(stpl=lva_stpl, stpl_version=lva_stpl_version, stpl_url=None)
+				getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
+				#print("2: " + lva.stpl + " " + lva.stpl_version + "<")
+			elif "chapter3" in f.attrib.get("class"): #modul1
+				#.strip().partition(' ')[2]
+				lva_modul1 = f.text.strip().partition(' ')[2].strip().partition('(')[0]
+				#remove unnecessary words
+				if "Modul" in lva_modul1:
+					lva_modul1 = lva_modul1.partition("Modul")[2]
+				lva.setModul1AndForgetLowerHierarchy(modul1=lva_modul1, modul1_iswahlmodulgruppe=False)
+				"""
+				#remove unnecessary words
+				if "Pflichtmodulgruppe" in lva.modul1:
+					lva.modul1 = lva.modul1.partition("Pflichtmodulgruppe")[2]
+				elif "Modulgruppe" in lva.modul1:
+					lva.modul1 = lva.modul1.partition("Modulgruppe")[2]
+				"""
+				#Vertiefung Informatik, Wahlmodule (2 sind zu wählen)
+				if "Vertiefung Informatik" not in lva.modul1: #TODO
+					getModul1(xml_root, lva, createNonexistentNodes)
+				#print("3: " + lva.modul1 + "<")
+			elif "chapter4" in f.attrib.get("class"): #modul2
+				lva_modul2 = f.text.strip().partition(' ')[2]
+				if "ECTS" in lva_modul2:
+					if "(" in lva_modul2:
+						lva_modul2 = lva_modul2.strip().partition('(')[0]
+					else:
+						lva_modul2 = lva_modul2.strip().rpartition(',')[0]
+				lva.setModul2AndForgetLowerHierarchy(modul2=lva_modul2)
+				lva_url = f.base + "#" + f.attrib.get("id")
+				#print(lva_url)
+				#http://online.univie.ac.at/vlvz?kapitel=510&semester=S2011#510_3
+				#<h3 class="chapter4" id="510_3">Modul...
+				lva.modul1_iswahlmodulgruppe = False
+				if "Pflichtmodul" not in lva.modul2 and "Wahlmodul" not in lva.modul2:
+					getModul2(xml_root, lva, createNonexistentNodes) #TODO
+				elif "Vertiefung Informatik" in lva.modul1:
+					if "Pflichtmodul" in lva.modul2:
+						lva.setModul1AndForgetLowerHierarchy(modul1=u"Modulgruppe Vertiefung Informatik, Pflichtmodul", modul1_iswahlmodulgruppe=False)
+					elif "Wahlmodul" in lva.modul2:
+						lva.setModul1AndForgetLowerHierarchy(modul1=u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)", modul1_iswahlmodulgruppe=True)
+					getModul1(xml_root, lva, createNonexistentNodes)
+				#print("4: " + lva.modul2 + "<")
+			elif "chapter5" in f.attrib.get("class"): #modul bei vertiefungs-modulgruppe
+				lva_modul2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0]
+				
+				if u"ICT-Infrastruktur für Bildungsaufgaben" in lva_modul2:
+					lva.setModul2AndForgetLowerHierarchy(modul2=None)
+				else:
+					lva.setModul2AndForgetLowerHierarchy(modul2=lva_modul2)
+					getModul2(xml_root, lva, createNonexistentNodes) #TODO
+				#print("5: " + lva.modul2 + "<")
+			elif "vlvz_langtitel" in f.attrib.get("class"):
+				lva_key = f.text
+				#print(lva.key)
+				
+				lva_type = f.xpath('abbr')[0].text
+				#print(lva.type)
+				
+				lva_title = f.xpath('span')[0].text
+				
+				#clean title from stuff like "PI.WI1.GK.VU"
+				if "." in lva_title.strip().partition(" ")[0]:
+					lva_title = lva_title.strip().partition(" ")[2]
+				#and "PAED - "
+				if "PAED -" in lva_title:
+					lva_title = lva_title.partition("PAED -")[2]
+				if "AMT" in lva_title:
+					lva_title = lva_title.partition("AMT")[2]
+				
+				lva_sws = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].text
+				#print(lva.sws)
+
+				lva_ects = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].getchildren()[0].tail.strip().partition(' ')[2]
+				#print(lva.ects)
+
+				lva_professors = map(lambda e: e.text, f.xpath('../div[contains(@class,"vlvz_vortragende")]/a'))
+				lva_professor = ', '.join([x.strip() for x in lva_professors])
+				#print(lva.professor)
+
+				lva_info = "" #FIXME
+				
+				#print(lva.title)
+				lva_fach = lva_title #TODO
+				lva_fach_type = lva_type #TODO
+				lva_fach_sws = lva_sws #TODO
+				lva_fach_ects = lva_ects #TODO
+				
+				if "Theorie und Praxis des Lehrens und Lernens" in lva_fach: #problem: non-matching type SE, replace it
+					lva_fach = u"Theorie und Praxis des Lehrens und Lernens"
+					lva_fach_type = "VU"
+				elif "Studieneingangsphase" in lva_fach:
+					lva_fach = u"Einführung in professionalisiertes pädagogisches Handeln"
+				elif u"Computerunterstütztes Lernen" in lva_fach or "Vernetztes Lernen" in lva_fach:
+					lva_fach_ects = "3.0"
+				elif "Unterrichtspraktikum Informatikdidaktik" in lva_fach: #at Uni, this course is split into two semesters
+					lva_fach_sws = ""
+					lva_fach_ects = ""
+				
+				lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
+				lva.setLvaAndForgetLowerHierarchy(title=lva_title, type=lva_type, sws=lva_sws, ects=lva_ects, university=lva_university, key=lva_key, semester=lva_semester, url=lva_url, professor=lva_professor, info=lva_info, canceled=None)
+				
+				if "Wahlmodul" in lva.modul1 or u"Freifächer" in lva.modul1:
+					getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+				elif u"Modulgruppe Vertiefung Informatik, Pflichtmodul" in lva.modul1:
+					getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
+				else:
+					getFach(xml_root, lva, createNonexistentNodes)
+				
+				addLva(xml_root, lva, createNonexistentNodes=False)
+				
+				#print("X: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva_url + "<")
+			else:
+				raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
 
 
 """ logging """
@@ -785,282 +1075,6 @@ def fuzzyEq(wantedStr, compStr, threshold=0.89, substringmatch=True): #FIXME thr
 	return False
 
 
-""" uni scrape """
-
-def srange((from_year,from_semester),(to_year,to_semester)):
-	#generates a list of the semesters in the range from-to, sorted chronologically, format ["W2009","S2010",..]
-	ws = ["S","W"]
-	try:
-		y_f = int(from_year)
-		y_t = int(to_year)
-		if not from_semester in ws or not to_semester in ws:
-			raise Exception()
-	except (TypeError, ValueError, OverflowError, Exception): #int conversion failed
-		return []
-
-	yy = range(y_f,y_t+1)
-
-	combin = [(str(y),s) for y in yy for s in ws]
-	
-	try:
-		if from_semester == ws[1]:
-			combin.pop(0)
-		if to_semester == ws[0]:
-			combin.pop()
-	except IndexError:
-		return []
-	
-	return combin
-
-def currentSemester(realCurrent=False):
-	#calculates the current semester - from january on, the following summer semester will be output, from july on, the following winter semester
-	year = datetime.datetime.now().year
-	month = datetime.datetime.now().month
-	current_year = str(year)
-	if realCurrent: #new semester only when it really has begun
-		current_sem = "S" if month < 10 and month > 2 else "W"
-	else:
-		current_sem = "S" if month < 7 else "W"
-		#TODO this gets the summer courses in january which might be a bit late
-	return (current_year,current_sem)
-
-def smallerSem(sem1, sem2):
-	#returns whether the first semester tuple is smaller than the second
-	(year1,sumwint1) = sem1
-	(year2,sumwint2) = sem2
-	if year1 < year2:
-		return True
-	elif year1 > year2:
-		return False
-	elif year1 == year2 and sumwint1 < sumwint2: #S<W
-		return True
-	else:
-		return False
-
-def dateAfterSemester(date, semester):
-	#returns whether the given date is located in the given semester (or before the next one has started)
-	if date is None or semester is None:
-		return False
-	dateS = date.split('-')
-	year = dateS[0]
-	month = dateS[1]
-	if int(month) < 10 and int(month) > 2:
-		dateSumWint = "S"
-	else:
-		dateSumWint = "W"
-		year = str(int(year) - 1)
-	dateSem = (year,dateSumWint)
-	return smallerSem(semester, dateSem)
-
-def hasRecentDate(xml_root, referring_url, sem):
-	#checks whether the given referring_url was checked after the semester was over
-	#TODO get rid of sem
-	#return False
-	sources = xml_root.findall("source")
-	for s in sources:
-		ref_url = s.find("referring_url")
-		if ref_url is not None and ref_url.text == referring_url:
-			query_dates = s.findall("query_date")
-			newestDate = None
-			for d in query_dates:
-				if newestDate == None or d.text > newestDate: #TODO make time stamp comparison more sophisticated FIXME
-					newestDate = d.text
-			return dateAfterSemester(newestDate, sem)
-	return False
-
-def pruneUni(xml_root, uniurls):
-	#removes all urls which do not need to be scraped
-	uniurls2 = uniurls.copy()
-	current_sem = currentSemester(True)
-	
-	for sem,referring_url in uniurls2.items():
-		if smallerSem(sem, current_sem) and hasRecentDate(xml_root, referring_url, sem):
-			del uniurls2[sem]
-	
-	return uniurls2
-
-def getUniUrls((from_year,from_semester)=uniSemesterFrom, (to_year,to_semester)=currentSemester()):
-	#builds urls of websites with all studies of the given semester range
-	uniurl = "http://online.univie.ac.at/vlvz?fakultaet=-1&semester=%s"
-	urls = OrderedDict([(sem,uniurl%(''.join(sem[::-1]))) for sem in srange((from_year,from_semester),(to_year,to_semester))])
-	return urls
-
-def fetchUrl(url, studyname=studyname):
-	#gets the url in the <a> tag that is next to the studyname
-	
-	logger.info("Querying %s", url)
-	
-	doc = html.parse(url).getroot()
-	doc.make_links_absolute(url)
-	#<div class="vlvz_kurz"><a href="/vlvz?kapitel=510&amp;semester=S2011">5.10</a> Master Informatikdidaktik</div>
-	link = doc.xpath('//div[contains(@class,"vlvz_kurz") and contains(.,"%s")]/a'%studyname)[0].attrib.get("href") #lxml only is capable of XPath, thus no lower-case() function available for a case insensitive search
-	return link
-
-def fetchAllUrls(uniurls, studyname=studyname):
-	#resolves all urls in the dictionary with the function fetchUrl
-	uniurls2 = uniurls.copy()
-	for semester, url in uniurls2.items():
-		uniurls2[semester] = (url,fetchUrl(url,studyname))
-	return uniurls2
-
-def uniExtract(xml_root, semester,url, referring_url, universityName=uni, createNonexistentNodes=False):
-	#extracts lvas from given url (uni) and writes to xml
-	
-	logger.info("Scraping %s", url)
-	
-	doc = html.parse(url).getroot()
-
-	#print(etree.tostring(doc))
-	
-	lva = LVA()
-	
-	lva_university = universityName
-	
-	founds = doc.xpath('//h3[contains(@class,"chapter")] | //div[contains(@class,"vlvz_langtitel")]')
-
-	if len(founds) == 0:
-		raise Exception("No elements found in %s"%(url))
-
-	addSource(xml_root, url, datetime.datetime.now().isoformat(), referring_url)
-
-	#print(founds)
-	
-	lva_semester = semester[0] + semester[1]
-	#print(lva.semester)
-	
-	for f in founds:
-		#print(etree.tostring(f))
-		if "chapter2" in f.attrib.get("class"): #studium
-			lva_stpl = f.text.strip().partition(' ')[2].strip().partition(' ')[2]
-			lva_stpl_version = "2009U.0" #TODO
-			lva.setStplAndForgetLowerHierarchy(stpl=lva_stpl, stpl_version=lva_stpl_version, stpl_url=None)
-			getStpl(xml_root, lva, createNonexistentNodes=createNonexistentNodes)
-			#print("2: " + lva.stpl + " " + lva.stpl_version + "<")
-		elif "chapter3" in f.attrib.get("class"): #modul1
-			#.strip().partition(' ')[2]
-			lva_modul1 = f.text.strip().partition(' ')[2].strip().partition('(')[0]
-			#remove unnecessary words
-			if "Modul" in lva_modul1:
-				lva_modul1 = lva_modul1.partition("Modul")[2]
-			lva.setModul1AndForgetLowerHierarchy(modul1=lva_modul1, modul1_iswahlmodulgruppe=False)
-			"""
-			#remove unnecessary words
-			if "Pflichtmodulgruppe" in lva.modul1:
-				lva.modul1 = lva.modul1.partition("Pflichtmodulgruppe")[2]
-			elif "Modulgruppe" in lva.modul1:
-				lva.modul1 = lva.modul1.partition("Modulgruppe")[2]
-			"""
-			#Vertiefung Informatik, Wahlmodule (2 sind zu wählen)
-			if "Vertiefung Informatik" not in lva.modul1: #TODO
-				getModul1(xml_root, lva, createNonexistentNodes)
-			#print("3: " + lva.modul1 + "<")
-		elif "chapter4" in f.attrib.get("class"): #modul2
-			lva_modul2 = f.text.strip().partition(' ')[2]
-			if "ECTS" in lva_modul2:
-				if "(" in lva_modul2:
-					lva_modul2 = lva_modul2.strip().partition('(')[0]
-				else:
-					lva_modul2 = lva_modul2.strip().rpartition(',')[0]
-			lva.setModul2AndForgetLowerHierarchy(modul2=lva_modul2)
-			lva_url = f.base + "#" + f.attrib.get("id")
-			#print(lva_url)
-			#http://online.univie.ac.at/vlvz?kapitel=510&semester=S2011#510_3
-			#<h3 class="chapter4" id="510_3">Modul...
-			lva.modul1_iswahlmodulgruppe = False
-			if "Pflichtmodul" not in lva.modul2 and "Wahlmodul" not in lva.modul2:
-				getModul2(xml_root, lva, createNonexistentNodes) #TODO
-			elif "Vertiefung Informatik" in lva.modul1:
-				if "Pflichtmodul" in lva.modul2:
-					lva.setModul1AndForgetLowerHierarchy(modul1=u"Modulgruppe Vertiefung Informatik, Pflichtmodul", modul1_iswahlmodulgruppe=False)
-				elif "Wahlmodul" in lva.modul2:
-					lva.setModul1AndForgetLowerHierarchy(modul1=u"Modulgruppe Vertiefung Informatik, Wahlmodule (2 sind zu wählen)", modul1_iswahlmodulgruppe=True)
-				getModul1(xml_root, lva, createNonexistentNodes)
-			#print("4: " + lva.modul2 + "<")
-		elif "chapter5" in f.attrib.get("class"): #modul bei vertiefungs-modulgruppe
-			lva_modul2 = f.text.strip().partition(' ')[2].strip().partition('(')[0].strip().partition(',')[0]
-			
-			if u"ICT-Infrastruktur für Bildungsaufgaben" in lva_modul2:
-				lva.setModul2AndForgetLowerHierarchy(modul2=None)
-			else:
-				lva.setModul2AndForgetLowerHierarchy(modul2=lva_modul2)
-				getModul2(xml_root, lva, createNonexistentNodes) #TODO
-			#print("5: " + lva.modul2 + "<")
-		elif "vlvz_langtitel" in f.attrib.get("class"):
-			lva_key = f.text
-			#print(lva.key)
-			
-			lva_type = f.xpath('abbr')[0].text
-			#print(lva.type)
-			
-			lva_title = f.xpath('span')[0].text
-			
-			#clean title from stuff like "PI.WI1.GK.VU"
-			if "." in lva_title.strip().partition(" ")[0]:
-				lva_title = lva_title.strip().partition(" ")[2]
-			#and "PAED - "
-			if "PAED -" in lva_title:
-				lva_title = lva_title.partition("PAED -")[2]
-			if "AMT" in lva_title:
-				lva_title = lva_title.partition("AMT")[2]
-			
-			lva_sws = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].text
-			#print(lva.sws)
-
-			lva_ects = f.xpath('../div[contains(@class,"vlvz_wochenstunden")]')[0].getchildren()[0].tail.strip().partition(' ')[2]
-			#print(lva.ects)
-
-			lva_professors = map(lambda e: e.text, f.xpath('../div[contains(@class,"vlvz_vortragende")]/a'))
-			lva_professor = ', '.join([x.strip() for x in lva_professors])
-			#print(lva.professor)
-
-			lva_info = "" #FIXME
-			
-			#print(lva.title)
-			lva_fach = lva_title #TODO
-			lva_fach_type = lva_type #TODO
-			lva_fach_sws = lva_sws #TODO
-			lva_fach_ects = lva_ects #TODO
-			
-			if "Theorie und Praxis des Lehrens und Lernens" in lva_fach: #problem: non-matching type SE, replace it
-				lva_fach = u"Theorie und Praxis des Lehrens und Lernens"
-				lva_fach_type = "VU"
-			elif "Studieneingangsphase" in lva_fach:
-				lva_fach = u"Einführung in professionalisiertes pädagogisches Handeln"
-			elif u"Computerunterstütztes Lernen" in lva_fach or "Vernetztes Lernen" in lva_fach:
-				lva_fach_ects = "3.0"
-			elif "Unterrichtspraktikum Informatikdidaktik" in lva_fach: #at Uni, this course is split into two semesters
-				lva_fach_sws = ""
-				lva_fach_ects = ""
-			
-			lva.setFachAndForgetLowerHierarchy(fach=lva_fach, fach_type=lva_fach_type, fach_sws=lva_fach_sws, fach_ects=lva_fach_ects)
-			lva.setLvaAndForgetLowerHierarchy(title=lva_title, type=lva_type, sws=lva_sws, ects=lva_ects, university=lva_university, key=lva_key, semester=lva_semester, url=lva_url, professor=lva_professor, info=lva_info, canceled=None)
-			
-			if "Wahlmodul" in lva.modul1 or u"Freifächer" in lva.modul1:
-				getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
-			elif u"Modulgruppe Vertiefung Informatik, Pflichtmodul" in lva.modul1:
-				getFach(xml_root, lva, createNonexistentNodes=True) #Vertiefungs Wahlmodule, is ok as an exception would have been thrown already by creating the modul if something was not found there
-			else:
-				getFach(xml_root, lva, createNonexistentNodes)
-			
-			addLva(xml_root, lva, createNonexistentNodes=False)
-			
-			#print("X: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva_url + "<")
-		else:
-			raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
-
-def getUni(xml_root, createNonexistentNodes=False):
-	#gets lvas from uni and writes to xml
-	#s_from = ("2011","S")
-	#s_to = ("2011","S")
-	#uniurls = getUniUrls(s_from, s_to)
-	uniurls = getUniUrls()
-	
-	pruned_uniurls = pruneUni(xml_root, uniurls)
-	
-	unicontenturls = fetchAllUrls(pruned_uniurls,studyname)
-	for sem,(referring_url,url) in unicontenturls.items():
-		#print(sem[0] + sem[1] + "<>" + url + "<")
-		uniExtract(xml_root, sem, url, referring_url, createNonexistentNodes=createNonexistentNodes)
 
 
 """ TU scraping """
@@ -1442,6 +1456,10 @@ raise Exception(x) #FIXME no unicode exception messages
 
 logger.info("*** Informatikdidaktik Scraping started ***")
 
+uniScraper = UniScraper(uniSemesterFrom)
+tuScraper = TUScraper()
+tuLegacyScraper = TULegacyScraper()
+
 #open existing file if it exists or create new xml
 xml_root = loadXml(xmlfilename, loadExisting=True, checkXmlSchema=True) #TODO loadExisting=True
 
@@ -1455,11 +1473,11 @@ if isFreshXml(xml_root):
 getFile(xml_root)
 
 #get lvas from TU
-getTU(xml_root, tiss, createNonexistentNodes=False)
-getTU(xml_root, tiss_next, createNonexistentNodes=False)
+#getTU(xml_root, tiss, createNonexistentNodes=False)
+#getTU(xml_root, tiss_next, createNonexistentNodes=False)
 
 #get lvas from Uni
-getUni(xml_root, createNonexistentNodes=False)
+uniScraper.scrape(xml_root, createNonexistentNodes=False)
 
 """
 #check if generated xml is correct regarding rng
