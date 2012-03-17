@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2012-03-16
+# Fabian Ehrentraud, 2012-03-17
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -55,6 +55,24 @@ tu = "TU"
 legacyFile = "http://www.unet.univie.ac.at/~a0725639/informatikdidaktik/informatikdidaktik_tuwel_legacy_2010-09-02.txt"
 
 newstuff = False
+
+
+""" logging """
+
+logger = logging.getLogger('informatikdidaktik')
+logger.setLevel(logging.DEBUG)
+#logging.basicConfig(filename='informatikdidaktik.log', level=logging.INFO) # level=logging.DEBUG # format='%(levelname)s:%(message)s'
+consoleloghandler = logging.StreamHandler()
+consoleloghandler.setLevel(logging.INFO)
+fileloghandler = logging.FileHandler('informatikdidaktik.log')
+fileloghandler.setLevel(logging.DEBUG)
+#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(levelname)s: %(message)s')
+consoleloghandler.setFormatter(formatter)
+fileloghandler.setFormatter(formatter)
+logger.addHandler(consoleloghandler)
+logger.addHandler(fileloghandler)
+
 
 
 """ Classes """
@@ -197,10 +215,16 @@ class TULegacyScraper(Scraper):
 		raise Exception("Abstract Function")
 
 class UniScraper(Scraper):
+	logger_ = None
 	uniSemesterFrom_ = None
+	studyname_ = None
+	universityName_ = None
 	
-	def __init__(self, uniSemesterFrom):
+	def __init__(self, logger=logger, uniSemesterFrom=uniSemesterFrom, studyname=studyname, universityName=uni):
+		self.logger_ = logger
 		self.uniSemesterFrom_ = uniSemesterFrom
+		self.studyname_ = studyname
+		self.universityName_ = universityName
 	
 	def scrape(self, xml_root, createNonexistentNodes=False):
 		#gets lvas from uni and writes to xml
@@ -211,10 +235,10 @@ class UniScraper(Scraper):
 		
 		pruned_uniurls = self.pruneUni_(xml_root, uniurls)
 		
-		unicontenturls = self.fetchAllUrls_(pruned_uniurls,studyname)
+		unicontenturls = self.fetchAllUrls_(pruned_uniurls,self.studyname_)
 		for sem,(referring_url,url) in unicontenturls.items():
 			#print(sem[0] + sem[1] + "<>" + url + "<")
-			self.uniExtract_(xml_root, sem, url, referring_url, createNonexistentNodes=createNonexistentNodes)
+			self.uniExtract_(xml_root, sem, url, referring_url, self.universityName_, createNonexistentNodes=createNonexistentNodes)
 
 	def getUniUrls_(self, (from_year,from_semester), (to_year,to_semester)):
 		#builds urls of websites with all studies of the given semester range
@@ -314,17 +338,17 @@ class UniScraper(Scraper):
 		dateSem = (year,dateSumWint)
 		return self.smallerSem_(semester, dateSem)
 
-	def fetchAllUrls_(self, uniurls, studyname=studyname):
+	def fetchAllUrls_(self, uniurls, studyname):
 		#resolves all urls in the dictionary with the function fetchUrl_
 		uniurls2 = uniurls.copy()
 		for semester, url in uniurls2.items():
 			uniurls2[semester] = (url,self.fetchUrl_(url,studyname))
 		return uniurls2
 
-	def fetchUrl_(self, url, studyname=studyname):
+	def fetchUrl_(self, url, studyname):
 		#gets the url in the <a> tag that is next to the studyname
 		
-		logger.info("Querying %s", url)
+		self.logger_.info("Querying %s", url)
 		
 		doc = html.parse(url).getroot()
 		doc.make_links_absolute(url)
@@ -332,9 +356,9 @@ class UniScraper(Scraper):
 		link = doc.xpath('//div[contains(@class,"vlvz_kurz") and contains(.,"%s")]/a'%studyname)[0].attrib.get("href") #lxml only is capable of XPath, thus no lower-case() function available for a case insensitive search
 		return link
 
-	def uniExtract_(self, xml_root, semester,url, referring_url, universityName=uni, createNonexistentNodes=False):
+	def uniExtract_(self, xml_root, semester,url, referring_url, universityName, createNonexistentNodes=False):
 		#extracts lvas from given url (uni) and writes to xml
-		logger.info("Scraping %s", url)
+		self.logger_.info("Scraping %s", url)
 		doc = html.parse(url).getroot()
 		#print(etree.tostring(doc))
 		lva = LVA()
@@ -466,23 +490,6 @@ class UniScraper(Scraper):
 				#print("X: " + lva.key + "," + lva.type + "," + lva.semester + "<:>" + lva.title + " - " + lva_url + "<")
 			else:
 				raise Exception("Unexpected element in url %s: %s"%(url,etree.tostring(f)))
-
-
-""" logging """
-
-logger = logging.getLogger('informatikdidaktik')
-logger.setLevel(logging.DEBUG)
-#logging.basicConfig(filename='informatikdidaktik.log', level=logging.INFO) # level=logging.DEBUG # format='%(levelname)s:%(message)s'
-consoleloghandler = logging.StreamHandler()
-consoleloghandler.setLevel(logging.INFO)
-fileloghandler = logging.FileHandler('informatikdidaktik.log')
-fileloghandler.setLevel(logging.DEBUG)
-#formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-formatter = logging.Formatter('%(levelname)s: %(message)s')
-consoleloghandler.setFormatter(formatter)
-fileloghandler.setFormatter(formatter)
-logger.addHandler(consoleloghandler)
-logger.addHandler(fileloghandler)
 
 
 """ global notification """
@@ -1456,7 +1463,7 @@ raise Exception(x) #FIXME no unicode exception messages
 
 logger.info("*** Informatikdidaktik Scraping started ***")
 
-uniScraper = UniScraper(uniSemesterFrom)
+uniScraper = UniScraper()
 tuScraper = TUScraper()
 tuLegacyScraper = TULegacyScraper()
 
