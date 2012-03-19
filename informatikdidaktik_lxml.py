@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Fabian Ehrentraud, 2012-03-18
+# Fabian Ehrentraud, 2012-03-19
 # e0725639@mail.student.tuwien.ac.at
 # https://github.com/fabb/Informatikdidaktik-Studienplan-Scraping
 # Licensed under the Open Software License (OSL 3.0)
@@ -1422,8 +1422,27 @@ class STPLXML():
 		if (wantedStr == "vo" and compStr == "vu") or (wantedStr == "vu" and compStr == "vo"):
 			return True # VO and VU are equivalent
 		
+		#numbers must be preserved except in Unterrichtspraktikum
+		if "unterrichtspraktikum" not in wantedStr and "unterrichtspraktikum" not in compStr \
+				and u"präsentationsstrategien 2" not in wantedStr and u"präsentationsstrategien 2" not in compStr:
+			for s in wantedStr.split():
+				try:
+					i = int(s)
+					if s not in compStr:
+						return False
+				except ValueError:
+					pass
+
+			for s in compStr.split():
+				try:
+					i = int(s)
+					if s not in wantedStr:
+						return False
+				except ValueError:
+					pass
+		
 		#warning: lvas "Unterrichtspraktikum Informatikdidaktik 1" and "Unterrichtspraktikum Informatikdidaktik 2" are both for fach "Unterrichtspraktikum Informatikdidaktik"
-		fixes_wanted = ["(1)","(2)","(3)","(4)","seminar 1","seminar 2","logik","systeme 1","systeme 2"] #(1)-(4) could lead to problems if those lvas were provided by Uni which does not categorize into fach
+		fixes_wanted = ["(1)","(2)","(3)","(4)"] #(1)-(4) could lead to problems if those lvas were provided by Uni which does not categorize into fach
 		for f in fixes_wanted:
 			if f in wantedStr and f not in compStr: #but NOT the other way around
 				return False
